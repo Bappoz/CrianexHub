@@ -33,7 +33,7 @@ flowchart TD
     style I fill:#fff8e1,stroke:#f57f17
 ```
 
-### Regras invioláveis do fluxo
+### Regras do fluxo
 
 | Regra | Descrição |
 |-------|-----------|
@@ -51,13 +51,13 @@ O quadro abaixo apresenta os ciclos de trabalho planejados, organizados por **Va
 
 > **Nota:** O planejamento é orientado ao Índice de Prioridade (IP = VB / PT). A ordem das CPs dentro de cada iteração pode ser reordenada conforme feedback do cliente.
 
-| Iteração | Período | Valor de Negócio | Características de Produto | Superficial Iteration Goal | Validação |
-|----------|---------|------------------|---------------------------|----------------|-----------|
-| **IT1** | até 26/04/2026 | Documentação Inicial e Setup | — | Levantar escopo, documentar Visão de Produto, configurar ambiente e definir arquitetura macro. | Reunião inicial com Otavio: validação de escopo, domínio e priorização do MVP. |
-| **IT2** | 27/04 à 17/05 | **Vitrine Pública** | CP2 · CP5 · CP7 · CP15 | "Qualquer visitante acessa a vitrine pública da Crianex, vê o portfólio de produtos SaaS com página institucional em PT/EN, em layout responsivo." | Partial Validation contínua. Formal Validation com demo focada em conversão e navegação. |
-| **IT3** | 18/05 a 07/06 | **Núcleo Admin** | CP1 · CP3 · CP4 | "A equipe interna acessa o CRM Kanban, o Dashboard Executivo e o painel de logs unificados a partir de um único ponto de autenticação." | Validação do cruzamento de logs e tickets; métricas operacionais com os sócios. |
-| **IT4** | 08/06 a 24/06 | **Operação Digital** | CP6 · CP8 · CP9 | "A equipe de suporte opera o sistema de atendimento e gerencia produtos SaaS com autonomia, sem depender de acesso direto ao banco." | Feedback focado na usabilidade da equipe de suporte e fluxos administrativos. |
-| **IT5** | 25/06 07/07 | **Confiança e Consolidação** | CP10 · CP11 · CP12 · CP13 · CP14 | "O MVP passa por auditoria OWASP, testes end-to-end completos e está pronto para homologação em produção." | Homologação final em ambiente de produção; aprovação formal do MVP pelo cliente. |
+| Iteração | Status | Período | Valor de Negócio | CPs | OEs | Iteration Goal | Validação |
+|----------|--------|---------|------------------|-----|-----|----------------|-----------|
+| **IT1** | ✅ Concluída | até 26/04/2026 | Documentação Inicial e Setup | — | — | Levantar escopo, documentar Visão de Produto, configurar ambiente e definir arquitetura macro. | Reunião inicial com Otavio: validação de escopo, domínio e priorização do MVP. |
+| **IT2** | 🔄 Em andamento | 27/04 a 17/05 | **Vitrine Pública** | CP2 · CP5 · CP7 · CP15 | [OE2](solucao.md#objetivos-estrategicos-oe) · [OE5](solucao.md#objetivos-estrategicos-oe) | "Qualquer visitante acessa a vitrine pública da Crianex, vê o portfólio de produtos SaaS com página institucional em PT/EN, em layout responsivo." | Partial Validation contínua. Formal Validation com demo focada em conversão e navegação. |
+| **IT3** | ⏳ Planejada | 18/05 a 07/06 | **Núcleo Admin** | CP1 · CP3 · CP4 | [OE1](solucao.md#objetivos-estrategicos-oe) | "A equipe interna acessa o CRM Kanban, o Dashboard Executivo e o painel de logs unificados a partir de um único ponto de autenticação." | Validação do cruzamento de logs e tickets; métricas operacionais com os sócios. |
+| **IT4** | ⏳ Planejada | 08/06 a 24/06 | **Operação Digital** | CP6 · CP8 · CP9 | [OE2](solucao.md#objetivos-estrategicos-oe) · [OE3](solucao.md#objetivos-estrategicos-oe) | "A equipe de suporte opera o sistema de atendimento e gerencia produtos SaaS com autonomia, sem depender de acesso direto ao banco." | Feedback focado na usabilidade da equipe de suporte e fluxos administrativos. |
+| **IT5** | ⏳ Planejada | 25/06 a 07/07 | **Confiança e Consolidação** | CP10 · CP11 · CP12 · CP13 · CP14 | [OE3](solucao.md#objetivos-estrategicos-oe) · [OE4](solucao.md#objetivos-estrategicos-oe) · [OE5](solucao.md#objetivos-estrategicos-oe) | "O MVP passa por auditoria OWASP, testes end-to-end completos e está pronto para homologação em produção." | Homologação final em ambiente de produção; aprovação formal do MVP pelo cliente. |
 
 ---
 
