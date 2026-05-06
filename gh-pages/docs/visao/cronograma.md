@@ -9,6 +9,9 @@
 | 1.2 | 04/05/2026 | Atualização do cronograma para Processo Híbrido (Iterações) | Heitor |
 | 1.3 | 05/05/2026 | Reestruturação completa: ciclo de vida, cadência semanal e marcos de validação | Lucas A. Zanetti |
 | 1.4 | 05/05/2026 | Seções 5.1 e 5.4 convertidas para fluxogramas Mermaid | Lucas A. Zanetti |
+| 1.5 | 06/05/2026 | Remoção da coluna OEs e rastreabilidade de CPs na tabela 5.2 | Equipe Crianex |
+| 1.6 | 06/05/2026 | Renumeração de CPs (remoção de CP10/CP12 como RNFs) e renomeação IT5 para Pós-venda | Lucas A. Zanetti |
+| 1.7 | 06/05/2026 | Adição de CP14 (Portal do Cliente) na iteração Pós-venda | Lucas A. Zanetti |
 
 ---
 
@@ -51,13 +54,13 @@ O quadro abaixo apresenta os ciclos de trabalho planejados, organizados por **Va
 
 > **Nota:** O planejamento é orientado ao Índice de Prioridade (IP = VB / PT). A ordem das CPs dentro de cada iteração pode ser reordenada conforme feedback do cliente.
 
-| Iteração | Status | Período | Valor de Negócio | CPs | OEs | Iteration Goal | Validação |
-|----------|--------|---------|------------------|-----|-----|----------------|-----------|
-| **IT1** | ✅ | até 26/04/2026 | Documentação Inicial e Setup | — | — | Levantar escopo, documentar Visão de Produto, configurar ambiente e definir arquitetura macro. | Reunião inicial com Otavio: validação de escopo, domínio e priorização do MVP. |
-| **IT2** | 🔄 | 27/04 a 17/05 | **Vitrine Pública** | CP2 · CP5 · CP7 · CP15 | [OE2](solucao.md#objetivos-estrategicos-oe) · [OE5](solucao.md#objetivos-estrategicos-oe) | "Qualquer visitante acessa a vitrine pública da Crianex, vê o portfólio de produtos SaaS com página institucional em PT/EN, em layout responsivo." | Partial Validation contínua. Formal Validation com demo focada em conversão e navegação. |
-| **IT3** | ⏳ | 18/05 a 07/06 | **Núcleo Admin** | CP1 · CP3 · CP4 | [OE1](solucao.md#objetivos-estrategicos-oe) | "A equipe interna acessa o CRM Kanban, o Dashboard Executivo e o painel de logs unificados a partir de um único ponto de autenticação." | Validação do cruzamento de logs e tickets; métricas operacionais com os sócios. |
-| **IT4** | ⏳ | 08/06 a 24/06 | **Operação Digital** | CP6 · CP8 · CP9 | [OE2](solucao.md#objetivos-estrategicos-oe) · [OE3](solucao.md#objetivos-estrategicos-oe) | "A equipe de suporte opera o sistema de atendimento e gerencia produtos SaaS com autonomia, sem depender de acesso direto ao banco." | Feedback focado na usabilidade da equipe de suporte e fluxos administrativos. |
-| **IT5** | ⏳  | 25/06 a 07/07 | **Confiança e Consolidação** | CP10 · CP11 · CP12 · CP13 · CP14 | [OE3](solucao.md#objetivos-estrategicos-oe) · [OE4](solucao.md#objetivos-estrategicos-oe) · [OE5](solucao.md#objetivos-estrategicos-oe) | "O MVP passa por auditoria OWASP, testes end-to-end completos e está pronto para homologação em produção." | Homologação final em ambiente de produção; aprovação formal do MVP pelo cliente. |
+| Iteração | Status | Período | Valor de Negócio | CPs | Iteration Goal | Validação |
+|----------|--------|---------|------------------|-----|----------------|-----------|
+| **IT1** | ✅ | até 26/04/2026 | Documentação Inicial e Setup | — | Levantar escopo, documentar Visão de Produto, configurar ambiente e definir arquitetura macro. | Reunião inicial com Otavio: validação de escopo, domínio e priorização do MVP. |
+| **IT2** | 🔄 | 27/04 a 17/05 | **Vitrine Pública** | [CP4](solucao.md#características-do-produto-cp) · [CP5](solucao.md#características-do-produto-cp) · [CP7](solucao.md#características-do-produto-cp) | "Qualquer visitante acessa a vitrine pública da Crianex, vê o portfólio de produtos SaaS com página institucional em PT/EN, em layout responsivo." | Partial Validation contínua. Formal Validation com demo focada em conversão e navegação. |
+| **IT3** | ⏳ | 18/05 a 07/06 | **Núcleo Admin** | [CP1](solucao.md#características-do-produto-cp) · [CP2](solucao.md#características-do-produto-cp) · [CP3](solucao.md#características-do-produto-cp) | "A equipe interna acessa o CRM Kanban, o Dashboard Executivo e o painel de logs unificados a partir de um único ponto de autenticação." | Validação do cruzamento de logs e tickets; métricas operacionais com os sócios. |
+| **IT4** | ⏳ | 08/06 a 24/06 | **Operação Digital** | [CP6](solucao.md#características-do-produto-cp) · [CP8](solucao.md#características-do-produto-cp) · [CP9](solucao.md#características-do-produto-cp) | "A equipe de suporte opera o sistema de atendimento e gerencia produtos SaaS com autonomia, sem depender de acesso direto ao banco." | Feedback focado na usabilidade da equipe de suporte e fluxos administrativos. |
+| **Pós-venda** | ⏳ | 25/06 a 07/07 | **Pós-venda** | [CP10](solucao.md#características-do-produto-cp) · [CP11](solucao.md#características-do-produto-cp) · [CP12](solucao.md#características-do-produto-cp) · [CP13](solucao.md#características-do-produto-cp) | "O cliente contratante acessa seu portal exclusivo, abre e acompanha tickets, recebe notificações automáticas e a Crianex centraliza faturamento por produto." | Validação com a equipe de suporte e financeiro da Crianex e com ao menos um cliente real; aprovação formal do MVP pelo cliente. |
 
 ---
 
