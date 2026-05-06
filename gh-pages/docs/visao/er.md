@@ -7,59 +7,70 @@
 | 1.0 | 12/04/2026 | Criação das seções 4.1 a 4.4 | Heitor e Lucas |
 | 1.1 | 13/04/2026 | Revisão da seção 4 | Equipe Crianex |
 | 1.2 | 04/05/2026 | Ajustes da seção 4.1  | Heitor |
+| 1.3 | 06/05/2026 | Revisão dos ajustes da seção 4.1 e reajustes | Philipe |
 
 ---
 
 ## 4.1 Abordagem de Engenharia de Requisitos
 
-O projeto Crianex adota um Processo Híbrido (FDD + Kanban), focado em equilibrar a previsibilidade de valor para o cliente com a previsibilidade de fluxo para a equipe. Nesta abordagem, o FDD (Feature-Driven Development) estrutura o planejamento orientado a valor (o que construir), enquanto o Kanban fornece o controle visual da execução (quando puxar o trabalho e quando parar) através da limitação de Work in Progress (WIP).
+O projeto Crianex adota um Processo Híbrido (FDD + Kanban). Nesta abordagem, o FDD (Feature-Driven Development) estrutura o planejamento orientado a valor (o que construir), enquanto o Kanban fornece o controle visual da execução (quando puxar o trabalho e quando parar) através da limitação de Work in Progress (WIP).
 
-A seguir, detalhamos as atividades da Engenharia de Requisitos e explicamos como cada técnica será estritamente aplicada no contexto da Crianex para orientar o desenvolvimento:
+A seguir, detalhamos as atividades da Engenharia de Requisitos e explicamos como cada técnica será aplicada no desenvolviemnto de requisitos:
 
-### Atividades e Técnicas de Requisitos
+### Atividades, Técnicas e Artefatos do Processo Híbrido
 
-1. **Elicitação e Descoberta**: Levantamento das necessidades reais do cliente e dos usuários.
-> **Feature Discovery Session**: Reuniões estruturadas com o Domain Expert (CTO da Crianex) para capturar o contexto, as regras de negócio e os exemplos concretos das funcionalidades desejadas, transformando necessidades puras em intenções de desenvolvimento.
+#### 1. Domain Modeling Workshop
+O *Domain Modeling Workshop* é a cerimônia em que a equipe e o *Domain Expert* constroem ou refinam o modelo de domínio que sustenta as *features* da iteração. Seu objetivo é alinhar o entendimento sobre entidades, relacionamentos e regras de negócio antes do detalhamento funcional.
 
-2. **Análise e Consenso**: Resolução de conflitos, refinamento e negociação das prioridades do escopo.
-> **Iteration Replenishment**: Sessões de alinhamento nas quais as intenções capturadas são priorizadas e a equipe firma um compromisso (Iteration Commitment) sobre qual escopo será puxado para a iteração corrente, garantindo que haja um entendimento viável entre a capacidade técnica e a expectativa de negócio.
+**Técnica:** *Color Modeling*. Essa técnica organiza visualmente os elementos do domínio, ajudando a identificar classes, papéis, eventos e agregados relevantes para o sistema.  
+**Artefatos gerados:** diagrama de domínio atualizado e glossário de termos.
 
-3. **Declaração**: Escrita formal e estruturada das intenções e requisitos.
-> **Feature Card Specification (Padrão FDD)**: Os requisitos são declarados usando o template normativo do FDD no formato `<ação> <resultado> <de/para/no/com> <objeto>` (ex: "Listar produtos SaaS com filtro por categoria na vitrine pública"), garantindo foco total no valor da entrega.
-> **Feature Slicing e Critérios de Aceitação**: Decomposição (vertical slicing) das Features em fatias atômicas executáveis que sigam o padrão INVEST. Para cada fatia, são declarados critérios de aceitação objetivos, frequentemente no formato Given/When/Then, estipulando as condições exatas de satisfação.
+#### 2. Feature Discovery Session
+A *Feature Discovery Session* é a cerimônia dedicada à descoberta e ao refinamento de funcionalidades com o *Domain Expert*. Nela, a equipe transforma necessidades de negócio em *features* claras, compreensíveis e orientadas a valor.
 
-4. **Representação**: Comunicação visual das relações, fluxos e domínio do sistema.
-> **Domain Modeling Workshop**: Técnica de modelagem aplicada (como o Color Modeling do FDD) para construir diagramas de classe e identificar os agregados de negócio com o Domain Expert. Isso representa visualmente as entidades do sistema antes da escrita das Features.
-> **Technical Design Review**: Representação de soluções através de diagramas de sequência leves para ilustrar integrações e validar o design estrutural das Features com o Chief Programmer antes do início da codificação.
+**Técnicas:** *Feature Card Specification*, *Vertical Slicing* e critérios *INVEST*. O *Feature Card Specification* padroniza a escrita da *feature* em uma formulação objetiva; o *Vertical Slicing* orienta a decomposição funcional em partes menores com valor demonstrável; e o INVEST ajuda a garantir que cada fatia seja independente, negociável, valiosa, estimável, pequena e testável.  
+**Artefatos gerados:** *Feature Cards* novas ou revisadas e ata da sessão.
 
-5. **Verificação e Validação**: Confirmação da qualidade interna dos requisitos e do alinhamento com a necessidade externa.
-> **Revisão de Design e Regras (Verificação)**: Inspeções conduzidas na etapa de Technical Design Review (FDD Etapa 4) para checar a completude do requisito, analisando pontos de extensão, riscos técnicos e garantindo que o requisito atende ao Definition of Ready (DoR).
-> **Formal Client Validation (Validação)**: Sessões de demonstração contínua ao Domain Expert para atestar que a funcionalidade construída resolve efetivamente a dor operacional da Crianex (fechando o ciclo de aceitação).
+#### 3. Iteration Replenishment
+A *Iteration Replenishment* é a cerimônia em que as *features* candidatas são analisadas e selecionadas para a iteração corrente. O foco é montar um escopo viável, compatível com a capacidade da equipe e com o valor de negócio esperado.
 
-6. **Organização e Atualização**: Manutenção do conjunto de requisitos de forma rastreável ao longo do ciclo de vida.
-> **Gestão de Fluxo Visual (Kanban)**: O estado dos requisitos é gerenciado e atualizado continuamente através de um quadro visual com políticas explícitas, controlando o fluxo de trabalho de Discovery até Done e evitando gargalos pela limitação de tarefas simultâneas (WIP).
-> **Rastreabilidade Bidirecional**: Técnica utilizada para garantir que o fatiamento (slicing) técnico executado pela equipe esteja obrigatoriamente ligado (linkado) ao Feature Card pai de negócio e ao Objetivo Estratégico de origem, permitindo auditar o impacto de qualquer mudança de escopo.
+**Técnicas:** matriz Valor × Esforço e *Priorização IP*. Essas técnicas apoiam a ordenação das *features* conforme valor, esforço e viabilidade de execução.  
+**Artefatos gerados:** backlog priorizado da iteração e lista de *features* comprometidas.
 
-### Priorização — Índice de Prioridade (IP)
+#### 4. Iteration Commitment
+A *Iteration Commitment* é a cerimônia em que a equipe formaliza o compromisso com o escopo e com o objetivo principal da iteração. Ela garante que todos compartilhem o mesmo entendimento sobre a entrega esperada.
 
-Para o sequenciamento das entregas e organização do fluxo macro, o projeto abandonou técnicas de categorização qualitativa e adotou o cálculo do Índice de Prioridade (IP).
+**Técnica:** *Iteration Goal Statement*. Essa técnica consiste em formular uma frase clara, única e demonstrável que sintetize o valor de negócio a ser entregue ao final da iteração.  
+**Artefatos gerados:** *Iteration Goal* documentado e ata do compromisso.
 
-Essa técnica quantitativa matemática é aplicada na fase de Discovery para ordenar o backlog. O IP é calculado a partir da relação direta entre a importância para a Crianex e o custo da implementação técnica, utilizando a seguinte fórmula estabelecida pela equipe técnica:
+#### 5. Technical Design Review
+O *Technical Design Review* é a cerimônia em que a solução técnica da *feature* é analisada antes da implementação. Seu objetivo é validar a abordagem estrutural da solução e reduzir riscos antes da codificação.
 
-`IP = Valor de Negócio / Média(CX, ES, PT)`
+**Técnica:** diagrama de sequência leve. Essa técnica representa as interações e integrações relevantes da solução, ajudando a equipe a antecipar dependências e pontos de extensão.  
+**Artefatos gerados:** notas de design e especificação técnica da *feature*.
 
-Onde o Valor de Negócio é a nota de impacto definida em conjunto com o Domain Expert e as variáveis do divisor representam os custos de execução (Complexidade, Esforço, e Risco/Pesquisa Técnica). Isso permite que a equipe puxe (via Kanban) primeiramente as Features que entregam o maior valor com o menor custo/risco relativo, formando o escopo principal do Produto Mínimo Viável (MVP) do Crianex Hub de forma estruturada e objetiva.
+#### 6. Revisão de Design e Regras / Formal Client Validation
+A *Revisão de Design e Regras* é a cerimônia de verificação interna da consistência da solução, enquanto a *Formal Client Validation* confirma com o cliente real se o valor de negócio foi de fato entregue. Juntas, elas fecham a etapa de verificação e validação.
+
+**Técnicas:** inspeção formal de design e código e rastreabilidade bidirecional. Essas técnicas ajudam a verificar completude, coerência e ligação entre objetivo estratégico, *feature*, issue e validação.  
+**Artefatos gerados:** matriz de rastreabilidade e evidências de validação.
+
+#### 7. Midweek Sync / Kanban Pull Execution
+O *Midweek Sync* é a cerimônia de alinhamento rápido da equipe, enquanto o *Kanban Pull Execution* regula o fluxo de execução das issues ao longo da iteração. Em conjunto, essas cerimônias promovem visibilidade do trabalho e controle do andamento das entregas.
+
+**Técnicas:** *Kanban*, *Pull System* e *WIP limits*. Essas técnicas organizam o fluxo visual, limitam o trabalho simultâneo e garantem que novas atividades só sejam puxadas conforme a capacidade disponível.  
+**Artefatos gerados:** board atualizado, comentários de bloqueio, commits, branches e Pull Requests.
+
+### Tabela de Cerimônias e Técnicas do Processo Híbrido FDD + Kanban
+
+| Processo de Desenvolvimento | Descrição do Processo | Cerimônia | Técnicas de Apoio | Artefatos | Critérios / Políticas |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. Desenvolvimento de Domínio** | Modelagem colaborativa para criar uma visão compartilhada do sistema e identificar o domínio do problema. | **Domain Modeling Workshop** | *Color Modeling*. | Diagrama de domínio; glossário de termos. | — |
+| **2. Decomposição Funcional** | Divisão do sistema em áreas de funcionalidade, conjuntos de *features* e *features* específicas orientadas ao cliente. | **Feature Discovery Session** | *Feature Card Specification*;*Vertical Slicing*; *INVEST*. | *Feature Cards*; ata da sessão. | — |
+| **3. Planejamento e Priorização** | Organização das *features* em conjuntos relacionais e priorização com base em valor, dependências e complexidade. | **Iteration Replenishment** | *Matriz Valor × Esforço*; *Priorização IP*. | Backlog priorizado; lista de *features* comprometidas. | — |
+| **4. Compromisso da Iteração** | Formalização do escopo da iteração e do objetivo principal a ser entregue. | **Iteration Commitment** | *Iteration Goal Statement*. | *Iteration Goal* documentado; ata do compromisso. | *Definition of Ready*; *Definition of Done*. |
+| **5. Documentação e Design** | Produção de documentação prática e objetiva, incluindo especificação funcional e decisões de design. | **Technical Design Review** |  Diagrama de sequência leve. | Notas de design; especificação da *feature*. | — |
+| **6. Verificação e Rastreabilidade** | Acompanhamento do progresso das *features* com base em marcos, inspeções e mecanismos de rastreabilidade. | **Revisão de Design e Regras**; **Formal Client Validation** | *Inspeção formal de design e código*; *Rastreabilidade Bidirecional*. | Matriz de rastreabilidade; evidências de validação. | — |
+| **7. Gestão de Fluxo** | Controle contínuo do estado das *features* ao longo do ciclo de vida de desenvolvimento. | **Midweek Sync**; **Kanban Pull Execution** | *Kanban*; *Pull System*; *WIP limits*. | Board atualizado; comentários de bloqueio; PRs. | — |
 
 ---
-
-## 4.2 Alinhamento FDD – Engenharia de Requisitos
-
-O FDD (Feature Driven Development) possui etapas que mapeiam diretamente para as atividades de ER. A tabela abaixo mostra como as práticas se complementam:
-
-| Etapa do FDD | Atividade de ER Correspondente | Artefato Gerado |
-|--------------|-------------------------------|-----------------|
-| 1 — Desenvolver Modelo Geral | Elicitação + Representação | Rich Picture, Ishikawa, Mapa de Stakeholders |
-| 2 — Construir Lista de Funcionalidades | Declaração + Análise | Backlog inicial com CPs (CP01–CP15), user stories no GitHub Issues |
-| 3 — Planejar por Funcionalidade | Organização + Priorização | Roadmap de sprints, MoSCoW aplicado ao backlog |
-| 4 — Projetar por Funcionalidade | Representação + Verificação | Mockups, protótipos, critérios de aceite detalhados |
-| 5 — Construir por Funcionalidade | Verificação + Validação | Pull Requests, testes de aceite, Sprint Review |
