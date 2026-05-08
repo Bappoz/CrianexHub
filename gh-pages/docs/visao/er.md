@@ -69,8 +69,14 @@ O *Partial Client Validation* é uma cerimônia que valida entregas intermediár
 
 **Artefatos gerados**: Comentário de validação na issue; checklist marcado; organização de feedback.
 
+#### 9. Iteration Artifact Closure
+O *Iteration Artifact Closure* é uma cerimônia para empacotar tudo que o cliente acadêmico (professor) precisa receber na unidade correspondente.
 
-#### 9. Midweek Sync / Kanban Pull Execution
+**Técnicas**: Checklist de empacontamento e revisão cruzada.
+
+**Artefatos gerados**: Documento de visão e GitHub pages atualizado; Backlog congelado da iteração; Reuniões e atas entrengues; Matriz de rastreabilidade; Evidências de validação da metodologia.
+
+#### 10. Midweek Sync / Kanban Pull Execution
 O *Midweek Sync* é a cerimônia de alinhamento rápido da equipe, enquanto o *Kanban Pull Execution* regula o fluxo de execução das issues ao longo da iteração. Em conjunto, essas cerimônias promovem visibilidade do trabalho e controle do andamento das entregas.
 
 **Técnicas:** *Kanban*, *Pull System* e *WIP limits*. Essas técnicas organizam o fluxo visual, limitam o trabalho simultâneo e garantem que novas atividades só sejam puxadas conforme a capacidade disponível.  
@@ -85,7 +91,7 @@ O *Midweek Sync* é a cerimônia de alinhamento rápido da equipe, enquanto o *K
 | **3. Planejamento e Priorização** | Organização das *features* em conjuntos relacionais e priorização com base em valor, dependências e complexidade. | **Iteration Replenishment** | *Matriz Valor × Esforço*; *Priorização IP*. | Backlog priorizado; lista de *features* comprometidas. | — |
 | **4. Compromisso da Iteração** | Formalização do escopo da iteração e do objetivo principal a ser entregue. | **Iteration Commitment** | *Iteration Goal Statement*. | *Iteration Goal* documentado; ata do compromisso. | *Definition of Ready*; *Definition of Done*. |
 | **5. Documentação e Design** | Produção de documentação prática e objetiva, incluindo especificação funcional e decisões de design. | **Technical Design Review** |  Diagrama de sequência leve; Prototipagem; Análise de impacto; Identiifcação de pontos de extensão | Notas de design; especificação da *feature*. | — |
-| **6. Verificação e Rastreabilidade** | Acompanhamento do progresso das *features* com base em marcos, inspeções e mecanismos de rastreabilidade. | **Feature Build Consolidation**; **Partial Client Validation**; **Formal Client Validation** | *Inspeção formal de design e código*; *Rastreabilidade Bidirecional*; *Backlog Reorganization Session*. | Matriz de rastreabilidade; evidências de validação. | — |
+| **6. Verificação e Rastreabilidade** | Acompanhamento do progresso das *features* com base em marcos, inspeções e mecanismos de rastreabilidade. | **Feature Build Consolidation**; **Partial Client Validation**; **Formal Client Validation**; **Iteration Artifact Closure**. | *Inspeção formal de design e código*; *Rastreabilidade Bidirecional*; *Backlog Reorganization Session*; *Checklist de empacontamento e revisão cruzada*. | Matriz de rastreabilidade; evidências de validação; Documento de visão e GitHub pages atualizado; Backlog congelado da iteração; Reuniões e atas entrengues; Matriz de rastreabilidade; Evidências de validação da metodologia. | — |
 | **7. Gestão de Fluxo** | Controle contínuo do estado das *features* ao longo do ciclo de vida de desenvolvimento. | **Midweek Sync**; **Kanban Pull Execution** | *Kanban*; *Pull System*; *WIP limits*. | Board atualizado; comentários de bloqueio; PRs. | — |
 
 ---
