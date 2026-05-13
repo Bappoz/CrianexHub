@@ -10,9 +10,7 @@
 
 | CP | Característica | OE | Prioridade |
 |----|---------------|-----|------------|
-| CP4 | Vitrine pública de produtos SaaS (portfólio) | OE2 | Alta |
-| CP5 | Página Institucional da empresa | OE2 | Alta |
-| CP7 | Suporte multilíngue PT/EN | OE2 | Alta |
+
 
 ---
 

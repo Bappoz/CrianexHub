@@ -99,9 +99,9 @@ IP < 1,00 → Baixa prioridade (Q3/Q4)
 
 | FS | Feature Set | OE | CPs | Iteração |
 |----|-------------|-----|-----|----------|
-| FS-01 | Vitrine Pública | OE2 | CP4, CP5, CP6, CP8 | IT2 |
-| FS-02 | Lead Capture | OE3 / OE1 | CP1, CP10, CP11 | IT3 |
-| FS-03 | Núcleo Operacional | OE1 / OE2 | CP2, CP7, CP9 | IT4 |
+| FS-01 | Vitrine Pública | OE2 | CP4, CP5, CP7 | IT2 |
+| FS-02 | Lead Capture | OE3 / OE1 | CP1, CP9, CP10 | IT3 |
+| FS-03 | Núcleo Operacional | OE1 / OE2 | CP2, CP3, CP6, CP8 | IT4 |
 
 ---
 
