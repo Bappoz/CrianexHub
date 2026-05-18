@@ -56,9 +56,9 @@ nav:
       - "Ata Refinamento Requisitos — 14/05/2026": iteracoes/iteracao-1/atas/2026-05-14.md
       - "Ata Technical Design Review — 17/05/2026": iteracoes/iteracao-1/atas/2026-05-17.md
     - "IT2 — Lead Capture":
-      - "Resumo": iteracoes/iteracao-2/index.md
+      - "Resumo — Evidências": iteracoes/iteracao-2/index.md
     - "IT3 — Núcleo Operacional":
-      - "Resumo": iteracoes/iteracao-3/index.md
+      - "Resumo — Evidências": iteracoes/iteracao-3/index.md
   - Backlog: 
     - "Rastreabilidade": backlog/rastreabilidade.md
     - "Priorização": backlog/priorizacao.md
