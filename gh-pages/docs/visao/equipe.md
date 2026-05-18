@@ -138,24 +138,30 @@ flowchart TD
 
 ### Definition of Ready (DoR)
 
-Uma issue está **pronta para entrar em execução** quando:
+!!! info "Uma issue está pronta para entrar em execução quando:"
 
-- [ ] Título no padrão FDD: `<ação> <resultado> <de/para/no/com> <objeto>`
-- [ ] Critérios de aceite escritos e verificáveis (Given/When/Then ou checklist)
-- [ ] Dependências identificadas e resolvidas
-- [ ] Class Owner designado e estimativa relativa registrada (CX, ES)
-- [ ] Linkada à Feature parent no Miro e à CP de origem
+    - [ ] Título no padrão FDD: `<ação> <resultado> <de/para/no/com> <objeto>`
+    - [ ] Critérios de aceite escritos e verificáveis (Given/When/Then)
+    - [ ] Estimativa registrada: VB, CX, ES e IP calculado
+    - [ ] Dependências identificadas; bloqueantes resolvidos
+    - [ ] Class Owner designado e linkada à Feature parent e à CP de origem
+    - [ ] Protótipo revisado pelo cliente (se houver interface envolvida)
+    - [ ] Ao menos um critério de segurança identificado (RLS, validação de input, autenticação)
 
 ### Definition of Done (DoD)
 
-Uma issue está **concluída** quando:
+!!! tip "Uma issue está concluída quando:"
 
-- [ ] Código mergeado em `main` via PR aprovado por Chief Programmer
-- [ ] CI verde
-- [ ] Testes automatizados cobrindo os critérios de aceite (quando aplicável)
-- [ ] Validação parcial de Otavio registrada na issue (checklist marcado)
-- [ ] Documentação atualizada se houve mudança de contrato ou comportamento
-- [ ] Issue movida para Done no GitHub Projects
+    - [ ] Critérios de aceite todos validados (Given/When/Then cobertos)
+    - [ ] Testes automatizados passando — unitários + integração onde há lógica de negócio
+    - [ ] Lint sem erros e formatação OK (ESLint + Prettier)
+    - [ ] CI verde (build + testes + lint)
+    - [ ] PR aprovado por Chief Programmer
+    - [ ] Migration de banco aplicada em staging sem erros (se existir)
+    - [ ] Sem vulnerabilidades críticas no SAST/linting de segurança
+    - [ ] Validação parcial registrada pelo cliente na issue (ou agendada para próxima validação formal)
+    - [ ] Documentação atualizada se houve mudança de contrato, comportamento ou arquitetura
+    - [ ] Issue movida para Done no GitHub Projects
 
 ---
 
