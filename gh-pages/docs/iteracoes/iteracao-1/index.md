@@ -38,7 +38,7 @@ Durante esta iteração, aplicamos a **Formalização Seletiva**, criando diagra
 <div align="center">
   <p><strong>Figura 1</strong> — Exemplo de Diagrama Leve</p>
   <img src="./images/diagramaleveex.png" alt="Exemplo de Diagrama Leve" width="800">
-  <p><em>Fonte: Elaborado pelos autores.</em></p>
+  <p><em>Fonte: Wondershare, 2026.</em></p>
 </div>
 
 <div align="center">
@@ -60,7 +60,7 @@ O Feature Card é um elemento visual utilizado na fase de planejamento (geralmen
 Abaixo estão registradas as evidências das entregas realizadas durante a iteração.
 
 <div align="center">
-  <p><strong>Figura 3</strong> — Diagrama Leve Desenvolvido</p>
+  <p><strong>Figura 3</strong> — Diagrama Leve Desenvolvida para a Feature F12 </p>
   <img src="./images/diagramalevefeito.png" alt="Diagrama Leve Desenvolvido" width="800">
   <p><em>Fonte: Elaborado pelos autores.</em></p>
 </div>
@@ -68,14 +68,65 @@ Abaixo estão registradas as evidências das entregas realizadas durante a itera
 Este diagrama detalha o fluxo arquitetural final acordado e validado, ilustrando a comunicação entre os componentes da Vitrine Pública.
 
 <div align="center">
-  <p><strong>Figura 4</strong> — Feature Card Desenvolvido</p>
+  <p><strong>Figura 4</strong> — Feature Card Desenvolvida para a Feature F12 </p>
   <img src="./images/feturecardfeito.png" alt="Feature Card Desenvolvido" width="800">
   <p><em>Fonte: Elaborado pelos autores.</em></p>
 </div>
 
 O feature card consolidado documenta atômicamente os requisitos da funcionalidade, incluindo critérios de aceite formatados em BDD para orientar o desenvolvimento e os testes.
 
+### Rastreabilidade e Priorização do Backlog
 
+Como parte da preparação para esta iteração, o backlog foi estruturado com rastreabilidade completa entre OEs, CPs, Features, RFs e RNFs, e priorizado objetivamente pelo método Valor × Esforço (IP = VB / ES).
+
+- [Rastreabilidade de Requisitos](../../backlog/rastreabilidade.md) — mapeamento completo OEs → CPs → Features → RFs/RNFs com vínculos bidirecionais.
+- [Priorização do Backlog](../../backlog/priorizacao.md) — método IP = VB/ES com diagramas de Valor × Esforço e tabelas de prioridade por Feature e RNF.
+
+---
+
+## Protótipo de Alta Fidelidade
+
+> Protótipo desenvolvido em HTML com base nas features priorizadas para a iteração.
+
+<div style="margin-bottom: 8px; text-align: right;">
+  <button onclick="document.getElementById('proto-modal').style.display='flex'"
+          style="padding: 6px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;">
+    ⛶ &nbsp;Abrir em tela cheia
+  </button>
+</div>
+<iframe
+  src="./prototipo/Crianex_prototipo_alta_fidelidade/Crianex%20Hub.html"
+  width="100%"
+  height="540px"
+  style="border: 1px solid #ddd; border-radius: 4px; display: block;"
+  allowfullscreen>
+</iframe>
+
+<div id="proto-modal"
+     onclick="if(event.target===this)this.style.display='none'"
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.80); z-index:9999; align-items:center; justify-content:center;">
+  <div style="position:relative; width:88%; height:88%;">
+    <button onclick="document.getElementById('proto-modal').style.display='none'"
+            style="position:absolute; top:-38px; right:0; padding:6px 16px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-size:13px; font-weight:500;">
+      ✕ &nbsp;Fechar
+    </button>
+    <iframe
+      src="./prototipo/Crianex_prototipo_alta_fidelidade/Crianex%20Hub.html"
+      width="100%"
+      height="100%"
+      style="border: none; border-radius: 4px; display: block;"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+<script>
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('proto-modal').style.display = 'none';
+});
+</script>
+
+---
 
 ## Critérios de Aceitação Validados (BDD)
 
@@ -142,6 +193,10 @@ Durante as reuniões com o Domain Expert, colhemos feedbacks essenciais para o a
 </div>
 
 Esta evidência demonstra a participação ativa do cliente no processo de validação contínua e a transparência na comunicação para as tomadas de decisão.
+
+### Validação do Protótipo e Priorização
+
+<!-- Adicione aqui a evidência de validação do cliente sobre o protótipo de alta fidelidade e a priorização do backlog (prints, transcrição de reunião, comentários, etc.) -->
 
 ---
 
