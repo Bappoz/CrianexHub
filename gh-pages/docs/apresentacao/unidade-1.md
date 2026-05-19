@@ -4,7 +4,7 @@
 
 | Versão | Data | Descrição | Autor(es) |
 |--------|------|-----------|-----------|
-| 1.0 | 18/05/2026 | Criação da página com vídeo de apresentação da Unidade 1 | Lucas A. Zanetti |
+| 1.0 | 28/04/2026 | Criação da página com vídeo de apresentação da Unidade 1 | Todos |
 
 ---
 
