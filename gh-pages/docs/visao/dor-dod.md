@@ -42,7 +42,7 @@ flowchart TD
 
     - [ ] Título no padrão FDD: `<ação> <resultado> <de/para/no/com> <objeto>`
     - [ ] Critérios de aceite escritos e verificáveis (Given/When/Then)
-    - [ ] Estimativa registrada: VB, CX, ES e IP calculado
+    - [ ] Estimativa registrada: VB, CX e IP calculados
     - [ ] Dependências identificadas; bloqueantes resolvidos
     - [ ] Class Owner designado e linkada à Feature parent e à CP de origem
     - [ ] Protótipo revisado pelo cliente (se houver interface envolvida)
