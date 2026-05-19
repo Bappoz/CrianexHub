@@ -6,7 +6,7 @@ const { marked } = require('marked');
 (async () => {
 
   // Caminho da pasta com os arquivos markdown
-  const docsPath = 'docs/visao';
+  const docsPath = 'doc_visao';
 
   // Verifica se a pasta existe
   if (!fs.existsSync(docsPath)) {
