@@ -1,10 +1,11 @@
-# Arquitetura do Sistema — Crianex Hub
-
 ## Histórico de Revisão
 
 | Versão | Data | Descrição | Autor |
 |--------|------|-----------|-------|
 | v1.0 | 20/05/2026 | Documentação inicial da arquitetura | Equipe Crianex |
+
+# Arquitetura do Sistema — Crianex Hub
+Visão técnica da plataforma Crianex Hub — diagramas, decisões de arquitetura (ADRs) e descrição dos componentes.
 
 ---
 
@@ -14,7 +15,7 @@ O Crianex Hub é uma plataforma SaaS composta por duas áreas funcionais distint
 
 A arquitetura adotada é **Monolito Modular** — uma aplicação Express.js com separação lógica por módulos internos, servida por um frontend SvelteKit com SSR. Essa decisão foi guiada por quatro critérios principais:
 
-1. **Prazo:** ~10 semanas de desenvolvimento ativo, 3 iterações de entrega, 6 desenvolvedores com WIP limit de 2 por Class Owner — overhead de orquestração de microsserviços é incompatível com essa cadência.
+1. **Prazo:** ~2,5 semanas de desenvolvimento ativo, 3 iterações de entrega, 6 desenvolvedores com WIP limit de 2 por Class Owner — overhead de orquestração de microsserviços é incompatível com essa cadência.
 2. **Latência:** RNF02 e RNF03 exigem resposta ≤ 2s em 95% das requisições; a comunicação intra-processo do monolito elimina a latência de rede entre serviços.
 3. **Integridade ACID:** RNF06 exige consistência transacional na captação de leads; transações distribuídas (padrão Saga) adicionariam complexidade sem benefício no escopo atual.
 4. **Superfície de segurança:** RNF07 (OWASP Top 10) é mais simples de cumprir com um único ponto de entrada e RLS centralizado no banco, em vez de múltiplos endpoints independentes.
@@ -365,7 +366,33 @@ Durante as iterações IT1–IT3, o pipeline para após o `build` — o deploy e
 !!! warning "Proteção da branch main"
     Todo merge em `main` requer ao menos 1 aprovação de revisor via Pull Request. Commits diretos na `main` são bloqueados por regra de branch protection no GitHub. Essa regra está alinhada com o DoD da metodologia FDD + Scrumban Enxuto do projeto.
 
----
+### ADR-001 — SvelteKit em vez de React/Next.js
+
+**Contexto:** necessidade de SSR para SEO (OE2) e bundle pequeno para vitrine pública.
+
+| Critério | SvelteKit | React / Next.js |
+|----------|-----------|-----------------|
+| Bundle size | Sem runtime virtual DOM | Runtime React incluído |
+| SSR + SEO | Nativo, simples | Configuração extra |
+| Curva de aprendizado | HTML/CSS/JS puro | JSX + hooks |
+| Bilinguismo | paraglide-js nativo SvelteKit | next-intl ou react-i18next |
+
+**Decisão:** SvelteKit com `adapter-node` para SSR em produção.
+
+### ADR-002 — paraglide-js para i18n
+
+**Contexto:** vitrine bilíngue PT/EN com troca em 1 clique (RNF13), SSR obrigatório.
+
+**Decisão:** `@inlang/paraglide-sveltekit` — integração nativa com SvelteKit, mensagens tree-shakeable (só o que é usado vai para o bundle), sem overhead de runtime no cliente.
+
+### ADR-003 — Argon2id / bcrypt para senhas
+
+Supabase Auth gerencia o hash. Fator mínimo 12 (RNF08).
+
+### ADR-004 — RLS como primeira linha de defesa
+
+Row Level Security no PostgreSQL garante isolamento de dados mesmo em acessos diretos do frontend via Supabase JS client — não depender apenas de validações da camada de aplicação.
+
 
 ## 10. Rastreabilidade Arquitetural → RNFs
 
