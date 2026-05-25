@@ -22,10 +22,12 @@ const ACCESS_TOKEN_COOKIE = 'access_token';
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: 'lax' as const,
+  sameSite: 'strict' as const,
   secure: process.env['NODE_ENV'] === 'production',
   path: '/',
 };
+
+const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function setAuthCookies(
   response: Response,
@@ -38,7 +40,10 @@ function setAuthCookies(
     maxAge: Math.max(expiresIn, 1) * 1000,
   });
 
-  response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, COOKIE_OPTIONS);
+  response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+  });
 }
 
 function clearAuthCookies(response: Response): void {
@@ -88,7 +93,8 @@ authRouter.post('/login', async (request, response) => {
       refreshToken: session.refresh_token,
       user,
     });
-  } catch {
+  } catch (err) {
+    console.error('[auth] login error:', err);
     response.status(401).json({ message: 'Credenciais inválidas' });
   }
 });
@@ -117,24 +123,21 @@ authRouter.post('/refresh', async (request, response) => {
       refreshToken: session.refresh_token,
       user,
     });
-  } catch {
+  } catch (err) {
+    console.error('[auth] refresh error:', err);
     response.status(401).json({ message: 'Sessão inválida' });
   }
 });
 
-authRouter.post('/logout', validateJWT, async (request, response) => {
-  const authContext = (response.locals as { auth?: { accessToken: string } }).auth;
-
-  if (!authContext) {
-    response.status(401).json({ message: 'Token ausente ou inválido' });
-    return;
-  }
+authRouter.post('/logout', validateJWT, async (_request, response) => {
+  const authContext = (response.locals as { auth: { accessToken: string } }).auth;
 
   try {
     await revokeSession(getSupabaseClient(), authContext.accessToken);
     clearAuthCookies(response);
     response.status(204).send();
-  } catch {
+  } catch (err) {
+    console.error('[auth] logout error:', err);
     response.status(500).json({ message: 'Falha ao encerrar a sessão' });
   }
 });

@@ -59,6 +59,8 @@ export function normalizeRole(role: string | null | undefined): string {
   return role?.trim() || 'member';
 }
 
+const ADMIN_ROLES = new Set(['admin', 'owner']);
+
 export function parseBearerToken(authorizationHeader: string | null | undefined): string | null {
   if (!authorizationHeader) {
     return null;
@@ -124,13 +126,12 @@ async function requestAuthSession(
   path: string,
   body: Record<string, string>
 ): Promise<AuthSessionResponse> {
-  const { url, serviceRoleKey } = getSupabaseConfig();
+  const { url, anonKey } = getSupabaseConfig();
   const response = await fetch(`${url}/auth/v1/${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
+      apikey: anonKey,
     },
     body: JSON.stringify(body),
   });
@@ -180,10 +181,16 @@ export async function loadAdminProfile(
     throw createAuthError(error.message, 500);
   }
 
+  const role = normalizeRole(data?.role ?? null);
+
+  if (!ADMIN_ROLES.has(role)) {
+    throw createAuthError('Acesso restrito a administradores', 403);
+  }
+
   return {
     id: userId,
     name: normalizeDisplayName(data?.name ?? null, data?.email ?? email, userMetadata),
-    role: normalizeRole(data?.role ?? null),
+    role,
   };
 }
 
