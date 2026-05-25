@@ -13,6 +13,8 @@
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@internationalized/date": "^3.12.1",
+    "@lucide/svelte": "^1.16.0",
     "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/kit": "^2.21.3",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
@@ -20,7 +22,7 @@
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",
     "autoprefixer": "^10.5.0",
-    "bits-ui": "^0.22.0",
+    "bits-ui": "^2.18.1",
     "clsx": "^2.1.1",
     "eslint": "^9.28.0",
     "eslint-plugin-svelte": "^2.46.1",
