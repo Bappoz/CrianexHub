@@ -2,15 +2,22 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 let supabaseClient: SupabaseClient | null = null;
 
-function readSupabaseConfig() {
+export type SupabaseConfig = {
+  url: string;
+  serviceRoleKey: string;
+  anonKey: string;
+};
+
+export function getSupabaseConfig(): SupabaseConfig {
   const url = process.env['SUPABASE_URL'] ?? '';
   const serviceRoleKey = process.env['SUPABASE_SECRET_KEY'] ?? '';
+  const anonKey = process.env['PUBLIC_SUPABASE_PUBLISHABLE_KEY'] ?? '';
 
-  if (!url || !serviceRoleKey) {
+  if (!url || !serviceRoleKey || !anonKey) {
     throw new Error('Supabase environment variables are not configured');
   }
 
-  return { url, serviceRoleKey };
+  return { url, serviceRoleKey, anonKey };
 }
 
 export function getSupabaseClient(): SupabaseClient {
@@ -18,7 +25,7 @@ export function getSupabaseClient(): SupabaseClient {
     return supabaseClient;
   }
 
-  const { url, serviceRoleKey } = readSupabaseConfig();
+  const { url, serviceRoleKey } = getSupabaseConfig();
 
   supabaseClient = createClient(url, serviceRoleKey, {
     auth: {
