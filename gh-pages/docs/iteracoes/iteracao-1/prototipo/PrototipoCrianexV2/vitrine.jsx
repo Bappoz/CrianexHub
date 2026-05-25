@@ -308,10 +308,10 @@ const HomePage = ({ lang, setPage }) => {
             <div className="hero-art">
               <div className="hero-illustration">
                 <img
-                  src="assets/hero-illustration.png"
+                  src="assets/crianexImagemSemFundo.png"
                   alt="Crianex — plataformas, integrações e API"
                   loading="eager"
-                  style={{ width: '550px', height: '410px' }}
+                  style={{ width: '580px', height: '430px' }}
                 />
               </div>
             </div>
