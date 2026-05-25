@@ -29,11 +29,6 @@
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedEmail.endsWith('@crianex.com.br')) {
-      errorMessage = 'Use um e-mail corporativo @crianex.com.br.';
-      return;
-    }
-
     loading = true;
 
     try {
@@ -95,10 +90,7 @@
       <div class="login-form">
         <div class="login-header">
           <h2 id="form-title">Entrar no painel</h2>
-          <p>
-            Use sua conta corporativa Crianex. Apenas e-mails do domínio
-            <strong>@crianex.com.br</strong> são aceitos.
-          </p>
+          <p>Entre com as suas credenciais de acesso ao painel administrativo.</p>
         </div>
 
         <Button
@@ -125,7 +117,7 @@
               class="login-input"
               id="admin-email"
               type="email"
-              placeholder="voce@crianex.com.br"
+              placeholder="voce@gmail.com.br"
               autocomplete="email"
               bind:value={email}
               disabled={loading}
@@ -361,11 +353,6 @@
     color: rgba(252, 252, 252, 0.62);
     font-size: 14px;
     line-height: 1.55;
-  }
-
-  .login-header strong {
-    color: rgba(252, 252, 252, 0.62);
-    font-weight: 700;
   }
 
   :global(.workspace-button),
