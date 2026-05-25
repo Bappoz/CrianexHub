@@ -23,7 +23,11 @@ function getAccessTokenFromRequest(request: Request): string | null {
   return cookies['access_token'] ?? null;
 }
 
-export async function validateJWT(request: Request, response: Response, next: NextFunction): Promise<void> {
+export async function validateJWT(
+  request: Request,
+  response: Response,
+  next: NextFunction
+): Promise<void> {
   const accessToken = getAccessTokenFromRequest(request);
 
   if (!accessToken) {

@@ -1,7 +1,13 @@
 import { Router, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { getSupabaseClient } from '../config/supabase.js';
-import { loginWithEmailAndPassword, loadAdminProfile, parseCookieHeader, refreshWithRefreshToken, revokeSession } from './auth.service.js';
+import {
+  loginWithEmailAndPassword,
+  loadAdminProfile,
+  parseCookieHeader,
+  refreshWithRefreshToken,
+  revokeSession,
+} from './auth.service.js';
 import { validateJWT } from '../middleware/validate-jwt.js';
 
 const authRateLimiter = rateLimit({
@@ -21,7 +27,12 @@ const COOKIE_OPTIONS = {
   path: '/',
 };
 
-function setAuthCookies(response: Response, accessToken: string, refreshToken: string, expiresIn: number): void {
+function setAuthCookies(
+  response: Response,
+  accessToken: string,
+  refreshToken: string,
+  expiresIn: number
+): void {
   response.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
     ...COOKIE_OPTIONS,
     maxAge: Math.max(expiresIn, 1) * 1000,
@@ -36,7 +47,8 @@ function clearAuthCookies(response: Response): void {
 }
 
 function getRefreshTokenFromRequest(request: Request): string | null {
-  const bodyRefreshToken = typeof request.body?.['refreshToken'] === 'string' ? request.body['refreshToken'] : '';
+  const bodyRefreshToken =
+    typeof request.body?.['refreshToken'] === 'string' ? request.body['refreshToken'] : '';
 
   if (bodyRefreshToken) {
     return bodyRefreshToken;

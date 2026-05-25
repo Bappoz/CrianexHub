@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeDisplayName, normalizeRole, parseBearerToken, parseCookieHeader } from './auth.service.js';
+import {
+  normalizeDisplayName,
+  normalizeRole,
+  parseBearerToken,
+  parseCookieHeader,
+} from './auth.service.js';
 
 describe('auth service helpers', () => {
   it('parses bearer tokens from authorization headers', () => {
@@ -18,7 +23,9 @@ describe('auth service helpers', () => {
 
   it('falls back to metadata and email when building the display name', () => {
     expect(normalizeDisplayName('  Hugo  ', 'hugo@example.com', null)).toBe('Hugo');
-    expect(normalizeDisplayName(null, 'hugo@example.com', { name: '  Hugo Metadata  ' })).toBe('Hugo Metadata');
+    expect(normalizeDisplayName(null, 'hugo@example.com', { name: '  Hugo Metadata  ' })).toBe(
+      'Hugo Metadata'
+    );
     expect(normalizeDisplayName(null, null, null)).toBe('Administrador');
   });
 

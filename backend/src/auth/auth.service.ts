@@ -48,7 +48,8 @@ export function normalizeDisplayName(
   email: string | null | undefined,
   userMetadata: Record<string, unknown> | null | undefined
 ): string {
-  const metadataName = userMetadata && typeof userMetadata['name'] === 'string' ? userMetadata['name'] : '';
+  const metadataName =
+    userMetadata && typeof userMetadata['name'] === 'string' ? userMetadata['name'] : '';
   const fallbackEmail = email?.split('@')[0] ?? '';
 
   return (name?.trim() || metadataName.trim() || fallbackEmail.trim() || 'Administrador').trim();
@@ -119,7 +120,10 @@ function toAuthSessionResponse(payload: unknown): AuthSessionResponse {
   };
 }
 
-async function requestAuthSession(path: string, body: Record<string, string>): Promise<AuthSessionResponse> {
+async function requestAuthSession(
+  path: string,
+  body: Record<string, string>
+): Promise<AuthSessionResponse> {
   const { url, serviceRoleKey } = getSupabaseConfig();
   const response = await fetch(`${url}/auth/v1/${path}`, {
     method: 'POST',
@@ -134,14 +138,20 @@ async function requestAuthSession(path: string, body: Record<string, string>): P
   const payload: unknown = await response.json();
 
   if (!response.ok) {
-    const message = isRecord(payload) && typeof payload['msg'] === 'string' ? payload['msg'] : 'Supabase Auth request failed';
+    const message =
+      isRecord(payload) && typeof payload['msg'] === 'string'
+        ? payload['msg']
+        : 'Supabase Auth request failed';
     throw createAuthError(message, response.status);
   }
 
   return toAuthSessionResponse(payload);
 }
 
-export async function loginWithEmailAndPassword(email: string, password: string): Promise<AuthSessionResponse> {
+export async function loginWithEmailAndPassword(
+  email: string,
+  password: string
+): Promise<AuthSessionResponse> {
   return requestAuthSession('token?grant_type=password', {
     email,
     password,
@@ -160,7 +170,11 @@ export async function loadAdminProfile(
   email: string | null,
   userMetadata: Record<string, unknown> | null | undefined
 ): Promise<AuthenticatedAdminUser> {
-  const { data, error } = await supabase.from('profiles').select('id,name,role,email').eq('id', userId).maybeSingle<ProfileRow>();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id,name,role,email')
+    .eq('id', userId)
+    .maybeSingle<ProfileRow>();
 
   if (error) {
     throw createAuthError(error.message, 500);
@@ -173,7 +187,10 @@ export async function loadAdminProfile(
   };
 }
 
-export async function validateAccessToken(supabase: SupabaseClient, accessToken: string): Promise<AuthenticatedAdminUser> {
+export async function validateAccessToken(
+  supabase: SupabaseClient,
+  accessToken: string
+): Promise<AuthenticatedAdminUser> {
   const { data, error } = await supabase.auth.getUser(accessToken);
 
   if (error || !data.user) {

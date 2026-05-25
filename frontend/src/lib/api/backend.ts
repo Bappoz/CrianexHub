@@ -30,7 +30,10 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const payload = (await res.json().catch(() => null)) as { message?: string } | null;
-    throw new ApiError(payload?.message ?? `[backend] ${res.status} ${res.statusText} — ${path}`, res.status);
+    throw new ApiError(
+      payload?.message ?? `[backend] ${res.status} ${res.statusText} — ${path}`,
+      res.status
+    );
   }
 
   return res.json() as Promise<T>;
