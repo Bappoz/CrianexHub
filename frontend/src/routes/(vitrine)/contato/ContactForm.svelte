@@ -1,63 +1,55 @@
 <script lang="ts">
   import { env } from '$env/dynamic/public';
   import { lang } from '$lib/stores/lang';
+  import { PRODUCTS, buildPayload, resolveStatus, defaultForm } from './contact';
 
   const API_BASE = env.PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
-  const products = [
-    { id: 'avali',   name: 'Avali',   cat: { pt: 'Gestão Educacional',        en: 'Education Management' } },
-    { id: 'pontua',  name: 'Pontua',  cat: { pt: 'Engajamento & Recompensas', en: 'Engagement & Rewards' } },
-    { id: 'notifly', name: 'Notifly', cat: { pt: 'Notificações & Mensageria', en: 'Notifications & Messaging' } },
-    { id: 'trilho',  name: 'Trilho',  cat: { pt: 'Onboarding & Treinamento',  en: 'Onboarding & Training' } },
-    { id: 'atende',  name: 'Atende',  cat: { pt: 'Suporte ao Cliente',        en: 'Customer Support' } },
-    { id: 'ledger',  name: 'Ledger',  cat: { pt: 'Faturamento Recorrente',    en: 'Recurring Billing' } },
-  ];
-
   const t = {
     fields: {
-      name:    { pt: 'Nome completo',        en: 'Full name' },
-      email:   { pt: 'E-mail corporativo',   en: 'Work email' },
-      company: { pt: 'Empresa',              en: 'Company' },
+      name: { pt: 'Nome completo', en: 'Full name' },
+      email: { pt: 'E-mail corporativo', en: 'Work email' },
+      company: { pt: 'Empresa', en: 'Company' },
       product: { pt: 'Produto de interesse', en: 'Product of interest' },
-      message: { pt: 'Mensagem',             en: 'Message' },
+      message: { pt: 'Mensagem', en: 'Message' },
     },
     placeholders: {
-      name:    { pt: 'ex. Marina Pereira', en: 'e.g. Marina Pereira' },
-      email:   { pt: 'voce@empresa.com',   en: 'you@company.com' },
-      company: { pt: 'Nome da empresa',    en: 'Company name' },
+      name: { pt: 'ex. Marina Pereira', en: 'e.g. Marina Pereira' },
+      email: { pt: 'voce@empresa.com', en: 'you@company.com' },
+      company: { pt: 'Nome da empresa', en: 'Company name' },
       message: { pt: 'Como podemos ajudar?', en: 'How can we help?' },
     },
     productOther: { pt: 'Outro / não tenho certeza', en: 'Other / not sure' },
-    hint:         { pt: 'Resposta em até 24h úteis', en: 'Reply within 24h biz.' },
-    submit:       { pt: 'Enviar mensagem',            en: 'Send message' },
+    hint: { pt: 'Resposta em até 24h úteis', en: 'Reply within 24h biz.' },
+    submit: { pt: 'Enviar mensagem', en: 'Send message' },
     lgpd: {
       pt: 'Ao enviar, você concorda com nossa Política de Privacidade.',
       en: 'By submitting, you agree to our Privacy Policy.',
     },
-    successTitle: { pt: 'Recebemos sua mensagem!',    en: 'Message received!' },
-    successBody:  { pt: 'Retornaremos em até 24 horas.', en: "We'll get back to you within 24 hours." },
-    sendAnother:  { pt: 'Enviar outra',               en: 'Send another' },
-    errorGeneric: { pt: 'Erro ao enviar. Tente novamente.',      en: 'Failed to send. Please try again.' },
-    errorRate:    { pt: 'Muitas tentativas. Aguarde alguns minutos.', en: 'Too many attempts. Please wait a few minutes.' },
+    successTitle: { pt: 'Recebemos sua mensagem!', en: 'Message received!' },
+    successBody: {
+      pt: 'Retornaremos em até 24 horas.',
+      en: "We'll get back to you within 24 hours.",
+    },
+    sendAnother: { pt: 'Enviar outra', en: 'Send another' },
+    errorGeneric: {
+      pt: 'Erro ao enviar. Tente novamente.',
+      en: 'Failed to send. Please try again.',
+    },
+    errorRate: {
+      pt: 'Muitas tentativas. Aguarde alguns minutos.',
+      en: 'Too many attempts. Please wait a few minutes.',
+    },
   };
 
-  type Status = 'idle' | 'loading' | 'success' | 'error';
+  import type { SubmitStatus } from './contact';
 
-  let status: Status = 'idle';
+  let status: SubmitStatus = 'idle';
   let errorMsg = '';
-
-  let form = {
-    name: '',
-    email: '',
-    company: '',
-    product: 'avali',
-    message: '',
-    consent: false,
-    website: '',
-  };
+  let form = defaultForm();
 
   function reset() {
-    form = { name: '', email: '', company: '', product: 'avali', message: '', consent: false, website: '' };
+    form = defaultForm();
     status = 'idle';
     errorMsg = '';
   }
@@ -71,25 +63,13 @@
       const res = await fetch(`${API_BASE}/api/public/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          company: form.company || undefined,
-          product_interest: form.product !== 'other' ? form.product : undefined,
-          message: form.message,
-          website: form.website,
-        }),
+        body: JSON.stringify(buildPayload(form)),
       });
 
-      if (res.status === 201 || res.status === 200) {
-        status = 'success';
-      } else if (res.status === 429) {
-        status = 'error';
-        errorMsg = t.errorRate[$lang];
-      } else {
-        status = 'error';
-        errorMsg = t.errorGeneric[$lang];
-      }
+      const resolved = resolveStatus(res.status);
+      status = resolved.status;
+      if (resolved.errorKey === 'rate') errorMsg = t.errorRate[$lang];
+      if (resolved.errorKey === 'generic') errorMsg = t.errorGeneric[$lang];
     } catch {
       status = 'error';
       errorMsg = t.errorGeneric[$lang];
@@ -101,8 +81,18 @@
   {#if status === 'success'}
     <div class="form-success">
       <div class="check">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 6 9 17l-5-5"/>
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6 9 17l-5-5" />
         </svg>
       </div>
       <h3>{t.successTitle[$lang]}</h3>
@@ -113,32 +103,59 @@
     <form onsubmit={handleSubmit} novalidate>
       <div style="display:none" aria-hidden="true">
         <label for="website">Website</label>
-        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" bind:value={form.website} />
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+          bind:value={form.website}
+        />
       </div>
 
       <div class="field">
         <label for="name">{t.fields.name[$lang]}</label>
-        <input id="name" name="name" type="text" required autocomplete="name"
-          placeholder={t.placeholders.name[$lang]} bind:value={form.name} />
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          placeholder={t.placeholders.name[$lang]}
+          bind:value={form.name}
+        />
       </div>
 
       <div class="field-row">
         <div class="field">
           <label for="email">{t.fields.email[$lang]}</label>
-          <input id="email" name="email" type="email" required autocomplete="email"
-            placeholder={t.placeholders.email[$lang]} bind:value={form.email} />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder={t.placeholders.email[$lang]}
+            bind:value={form.email}
+          />
         </div>
         <div class="field">
           <label for="company">{t.fields.company[$lang]}</label>
-          <input id="company" name="company" type="text" autocomplete="organization"
-            placeholder={t.placeholders.company[$lang]} bind:value={form.company} />
+          <input
+            id="company"
+            name="company"
+            type="text"
+            autocomplete="organization"
+            placeholder={t.placeholders.company[$lang]}
+            bind:value={form.company}
+          />
         </div>
       </div>
 
       <div class="field">
         <label for="product">{t.fields.product[$lang]}</label>
         <select id="product" name="product" bind:value={form.product}>
-          {#each products as p}
+          {#each PRODUCTS as p}
             <option value={p.id}>{p.name} — {p.cat[$lang]}</option>
           {/each}
           <option value="other">{t.productOther[$lang]}</option>
@@ -147,8 +164,13 @@
 
       <div class="field">
         <label for="message">{t.fields.message[$lang]}</label>
-        <textarea id="message" name="message" required
-          placeholder={t.placeholders.message[$lang]} bind:value={form.message}></textarea>
+        <textarea
+          id="message"
+          name="message"
+          required
+          placeholder={t.placeholders.message[$lang]}
+          bind:value={form.message}
+        ></textarea>
       </div>
 
       {#if status === 'error'}
@@ -162,8 +184,19 @@
             <span class="spinner" aria-label="Enviando…"></span>
           {:else}
             {t.submit[$lang]}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="arrow"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           {/if}
         </button>
@@ -211,7 +244,9 @@
     font-size: 14px;
     color: #060606;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
 
   .field input:focus,
@@ -277,8 +312,13 @@
     text-decoration: none;
   }
 
-  .btn:hover { opacity: 0.88; }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn:hover {
+    opacity: 0.88;
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 
   .btn.ghost {
     background: transparent;
@@ -291,10 +331,17 @@
     opacity: 1;
   }
 
-  .btn.sm { padding: 7px 14px; font-size: 13px; }
+  .btn.sm {
+    padding: 7px 14px;
+    font-size: 13px;
+  }
 
-  .arrow { transition: transform 0.15s; }
-  .btn:hover .arrow { transform: translateX(3px); }
+  .arrow {
+    transition: transform 0.15s;
+  }
+  .btn:hover .arrow {
+    transform: translateX(3px);
+  }
 
   .consent-row {
     display: flex;
@@ -330,7 +377,9 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .form-success {

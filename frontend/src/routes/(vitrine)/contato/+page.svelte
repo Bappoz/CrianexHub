@@ -5,7 +5,10 @@
 
 <svelte:head>
   <title>Contato — Crianex Hub</title>
-  <meta name="description" content="Entre em contato com a equipe Crianex. Respondemos em até 24 horas úteis." />
+  <meta
+    name="description"
+    content="Entre em contato com a equipe Crianex. Respondemos em até 24 horas úteis."
+  />
 </svelte:head>
 
 <div class="contact-layout">
