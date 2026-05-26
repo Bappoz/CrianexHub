@@ -2,6 +2,8 @@ import { Router, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { getSupabaseClient } from '../config/supabase.js';
 import {
+  challengeAndVerifyTotp,
+  getVerifiedTotpFactorId,
   loginWithEmailAndPassword,
   loadAdminProfile,
   parseCookieHeader,
@@ -64,6 +66,14 @@ function getRefreshTokenFromRequest(request: Request): string | null {
   return cookies[REFRESH_TOKEN_COOKIE] ?? null;
 }
 
+function getAccessTokenFromBody(request: Request): string {
+  return typeof request.body?.['accessToken'] === 'string' ? request.body['accessToken'].trim() : '';
+}
+
+function getCodeFromBody(request: Request): string {
+  return typeof request.body?.['code'] === 'string' ? request.body['code'].trim() : '';
+}
+
 export const authRouter = Router();
 
 authRouter.use(authRateLimiter);
@@ -87,10 +97,26 @@ authRouter.post('/login', async (request, response) => {
       session.user.user_metadata
     );
 
+    const factorId = await getVerifiedTotpFactorId(session.access_token);
+
+    if (factorId) {
+      response.status(200).json({
+        mfa_required: true,
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token,
+        expiresIn: session.expires_in,
+        factorId,
+        user,
+      });
+      return;
+    }
+
     setAuthCookies(response, session.access_token, session.refresh_token, session.expires_in);
     response.status(200).json({
+      mfa_required: false,
       accessToken: session.access_token,
       refreshToken: session.refresh_token,
+      expiresIn: session.expires_in,
       user,
     });
   } catch (err) {
@@ -126,6 +152,30 @@ authRouter.post('/refresh', async (request, response) => {
   } catch (err) {
     console.error('[auth] refresh error:', err);
     response.status(401).json({ message: 'Sessão inválida' });
+  }
+});
+
+authRouter.post('/mfa/verify', async (request, response) => {
+  const accessToken = getAccessTokenFromBody(request);
+  const code = getCodeFromBody(request);
+
+  if (!accessToken || !code) {
+    response.status(400).json({ message: 'Código TOTP e token temporário são obrigatórios' });
+    return;
+  }
+
+  try {
+    const session = await challengeAndVerifyTotp(accessToken, code);
+
+    setAuthCookies(response, session.accessToken, session.refreshToken, session.expiresIn);
+    response.status(200).json({
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+      user: session.user,
+    });
+  } catch (err) {
+    console.error('[auth] mfa verify error:', err);
+    response.status(400).json({ message: 'Código TOTP inválido ou expirado' });
   }
 });
 
