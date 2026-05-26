@@ -1,60 +1,274 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount, tick } from 'svelte';
+  import { ApiError, apiFetch } from '$lib/api/backend';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
 
+  type LoginStage = 'credentials' | 'mfa';
+
+  type LoginResponse = {
+    mfa_required: boolean;
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+    user: {
+      id: string;
+      name: string;
+      role: string;
+    };
+    factorId?: string | null;
+  };
+
+  type VerifyResponse = {
+    accessToken: string;
+    refreshToken: string;
+    user: {
+      id: string;
+      name: string;
+      role: string;
+    };
+  };
+
+  const MFA_DIGITS = 6;
+
+  let stage = $state<LoginStage>('credentials');
   let email = $state('');
   let password = $state('');
   let loading = $state(false);
+  let verifyingMfa = $state(false);
   let errorMessage = $state('');
   let submitHovered = $state(false);
+  let mfaDigits = $state<string[]>(Array.from({ length: MFA_DIGITS }, () => ''));
+  let mfaCountdown = $state(30);
+  let showCountdown = $state(false);
+  let mfaAccessToken = $state('');
+  let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
-  onMount(async () => {
-    try {
-      const { supabase } = await import('$lib/api/supabase');
-      const { data } = await supabase.auth.getSession();
-
-      if (data.session) {
-        await goto('/admin');
-      }
-    } catch {
-      // A tela deve renderizar mesmo quando o Supabase ainda nao estiver configurado localmente.
+  function clearCountdownTimer() {
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
     }
-  });
+  }
 
-  async function handleSubmit() {
+  function resetMfaState() {
+    clearCountdownTimer();
+    showCountdown = false;
+    mfaCountdown = 30;
+    mfaDigits = Array.from({ length: MFA_DIGITS }, () => '');
+    mfaAccessToken = '';
+  }
+
+  function focusCodeInput(index: number) {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('.code-input input'));
+    const target = inputs[index];
+
+    target?.focus();
+    target?.select();
+  }
+
+  function startCountdown() {
+    clearCountdownTimer();
+    showCountdown = true;
+    mfaCountdown = 30;
+
+    countdownTimer = setInterval(() => {
+      if (mfaCountdown <= 1) {
+        clearCountdownTimer();
+        mfaCountdown = 0;
+        return;
+      }
+
+      mfaCountdown -= 1;
+    }, 1000);
+  }
+
+  async function returnToCredentials() {
+    stage = 'credentials';
     errorMessage = '';
+    resetMfaState();
+    await tick();
+  }
 
-    const normalizedEmail = email.trim().toLowerCase();
+  async function handleLoginSubmit(event: SubmitEvent) {
+    event.preventDefault();
 
+    if (loading || stage !== 'credentials') {
+      return;
+    }
+
+    errorMessage = '';
     loading = true;
 
     try {
-      const { supabase } = await import('$lib/api/supabase');
-      const { error } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password,
+      const response = await apiFetch<LoginResponse>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       });
 
-      if (error) {
-        if (error.status === 401 || error.status === 400) {
-          errorMessage = 'E-mail ou senha inválidos.';
-        } else {
-          errorMessage = 'Não foi possível entrar no painel agora. Tente novamente.';
-        }
+      if (response.mfa_required) {
+        stage = 'mfa';
+        mfaAccessToken = response.accessToken;
+        resetMfaState();
+        mfaAccessToken = response.accessToken;
 
+        await tick();
+        focusCodeInput(0);
         return;
       }
 
       await goto('/admin');
-    } catch {
-      errorMessage = 'Não foi possível conectar ao serviço de autenticação agora.';
+    } catch (error) {
+      if (error instanceof ApiError) {
+        errorMessage = error.status === 401 ? 'E-mail ou senha inválidos.' : error.message;
+      } else {
+        errorMessage = 'Não foi possível conectar ao serviço de autenticação agora.';
+      }
     } finally {
       loading = false;
     }
   }
+
+  async function submitMfaCode(codeOverride?: string) {
+    if (verifyingMfa || stage !== 'mfa') {
+      return;
+    }
+
+    const code = (codeOverride ?? mfaDigits.join('')).trim();
+
+    if (code.length !== MFA_DIGITS) {
+      return;
+    }
+
+    verifyingMfa = true;
+    errorMessage = '';
+
+    try {
+      await apiFetch<VerifyResponse>('/api/auth/mfa/verify', {
+        method: 'POST',
+        body: JSON.stringify({
+          accessToken: mfaAccessToken,
+          code,
+        }),
+      });
+
+      await goto('/admin');
+    } catch (error) {
+      mfaDigits = Array.from({ length: MFA_DIGITS }, () => '');
+      showCountdown = true;
+      startCountdown();
+      errorMessage =
+        error instanceof ApiError
+          ? error.message
+          : 'Não foi possível validar o código. Tente novamente.';
+
+      await tick();
+      focusCodeInput(0);
+    } finally {
+      verifyingMfa = false;
+    }
+  }
+
+  function updateMfaDigit(index: number, rawValue: string) {
+    const digit = rawValue.replace(/\D/g, '').slice(-1);
+    const nextDigits = [...mfaDigits];
+
+    nextDigits[index] = digit;
+    mfaDigits = nextDigits;
+    errorMessage = '';
+
+    if (digit && index < MFA_DIGITS - 1) {
+      void tick().then(() => focusCodeInput(index + 1));
+    }
+
+    if (nextDigits.every((value) => value.length === 1)) {
+      void submitMfaCode(nextDigits.join(''));
+    }
+  }
+
+  function handleMfaKeydown(index: number, event: KeyboardEvent) {
+    if (event.key === 'Backspace') {
+      if (mfaDigits[index]) {
+        const nextDigits = [...mfaDigits];
+        nextDigits[index] = '';
+        mfaDigits = nextDigits;
+        return;
+      }
+
+      if (index > 0) {
+        event.preventDefault();
+        const nextDigits = [...mfaDigits];
+        nextDigits[index - 1] = '';
+        mfaDigits = nextDigits;
+        focusCodeInput(index - 1);
+      }
+
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      focusCodeInput(index - 1);
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && index < MFA_DIGITS - 1) {
+      event.preventDefault();
+      focusCodeInput(index + 1);
+    }
+  }
+
+  function handleMfaPaste(index: number, event: ClipboardEvent) {
+    const pasted = event.clipboardData?.getData('text') ?? '';
+    const digits = pasted.replace(/\D/g, '').slice(0, MFA_DIGITS - index).split('');
+
+    if (!digits.length) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const nextDigits = [...mfaDigits];
+
+    digits.forEach((digit, offset) => {
+      nextDigits[index + offset] = digit;
+    });
+
+    mfaDigits = nextDigits;
+
+    const nextIndex = Math.min(index + digits.length, MFA_DIGITS - 1);
+
+    void tick().then(() => focusCodeInput(nextIndex));
+
+    if (nextDigits.every((value) => value.length === 1)) {
+      void submitMfaCode(nextDigits.join(''));
+    }
+  }
+
+  onMount(async () => {
+    try {
+      await apiFetch('/api/auth/refresh', {
+        method: 'POST',
+      });
+
+      await goto('/admin');
+    } catch {
+      // A tela deve renderizar mesmo quando ainda nao ha uma sessao ativa.
+    }
+  });
+
+  onDestroy(() => {
+    clearCountdownTimer();
+  });
 </script>
 
 <div class="admin-root">
@@ -89,80 +303,137 @@
     <section class="login-form-wrap" aria-labelledby="form-title">
       <div class="login-form">
         <div class="login-header">
-          <h2 id="form-title">Entrar no painel</h2>
-          <p>Entre com as suas credenciais de acesso ao painel administrativo.</p>
-        </div>
-
-        <Button
-          class="workspace-button"
-          variant="outline"
-          type="button"
-          disabled={loading}
-          style="background-color: transparent; color: #ffffff; border-color: #ffffff; box-shadow: none;"
-        >
-          <img class="google-logo" src="/assets/logo-google.png" alt="" aria-hidden="true" />
-          Entrar com Google Workspace
-        </Button>
-
-        <div class="divider" aria-hidden="true">
-          <span></span>
-          <p>ou com senha</p>
-          <span></span>
-        </div>
-
-        <form class="form-fields" onsubmit={handleSubmit}>
-          <div class="field">
-            <Label for="admin-email">E-mail corporativo</Label>
-            <Input
-              class="login-input"
-              id="admin-email"
-              type="email"
-              placeholder="voce@gmail.com.br"
-              autocomplete="email"
-              bind:value={email}
-              disabled={loading}
-              required
-            />
-          </div>
-
-          <div class="field">
-            <div class="label-row">
-              <Label for="admin-password">Senha</Label>
-              <a href="/admin/login" aria-label="Recuperar senha">Esqueci</a>
-            </div>
-            <Input
-              class="login-input"
-              id="admin-password"
-              type="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              bind:value={password}
-              disabled={loading}
-              required
-            />
-          </div>
-
-          <button
-            class="submit-button"
-            style={`background-color: ${submitHovered ? '#7f3fe5' : '#ffffff'}; color: ${submitHovered ? '#ffffff' : '#101010'}; border: none;`}
-            type="submit"
-            disabled={loading}
-            onmouseenter={() => (submitHovered = true)}
-            onmouseleave={() => (submitHovered = false)}
-          >
-            {#if loading}
-              <span class="spinner" aria-hidden="true"></span>
-              Entrando
-            {:else}
-              Continuar
-              <span aria-hidden="true">→</span>
-            {/if}
-          </button>
-
-          {#if errorMessage}
-            <p class="error-message" role="alert">{errorMessage}</p>
+          {#if stage === 'credentials'}
+            <h2 id="form-title">Entrar no painel</h2>
+            <p>Entre com as suas credenciais de acesso ao painel administrativo.</p>
+          {:else}
+            <h2 id="form-title">Verificação em duas etapas</h2>
+            <p>Digite o código TOTP de 6 dígitos gerado no seu aplicativo autenticador.</p>
           {/if}
-        </form>
+        </div>
+
+        {#if stage === 'credentials'}
+          <Button
+            class="workspace-button"
+            variant="outline"
+            type="button"
+            disabled={loading}
+            style="background-color: transparent; color: #ffffff; border-color: #ffffff; box-shadow: none;"
+          >
+            <img class="google-logo" src="/assets/logo-google.png" alt="" aria-hidden="true" />
+            Entrar com Google Workspace
+          </Button>
+
+          <div class="divider" aria-hidden="true">
+            <span></span>
+            <p>ou com senha</p>
+            <span></span>
+          </div>
+
+          <form class="form-fields" onsubmit={handleLoginSubmit}>
+            <div class="field">
+              <Label for="admin-email">E-mail corporativo</Label>
+              <Input
+                class="login-input"
+                id="admin-email"
+                type="email"
+                placeholder="voce@gmail.com.br"
+                autocomplete="email"
+                bind:value={email}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <Label for="admin-password">Senha</Label>
+                <a href="/admin/login" aria-label="Recuperar senha">Esqueci</a>
+              </div>
+              <Input
+                class="login-input"
+                id="admin-password"
+                type="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                bind:value={password}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <button
+              class="submit-button"
+              style={`background-color: ${submitHovered ? '#7f3fe5' : '#ffffff'}; color: ${submitHovered ? '#ffffff' : '#101010'}; border: none;`}
+              type="submit"
+              disabled={loading}
+              onmouseenter={() => (submitHovered = true)}
+              onmouseleave={() => (submitHovered = false)}
+            >
+              {#if loading}
+                <span class="spinner" aria-hidden="true"></span>
+                Entrando
+              {:else}
+                Continuar
+                <span aria-hidden="true">→</span>
+              {/if}
+            </button>
+          </form>
+        {:else}
+          <div class="mfa-step" aria-live="polite">
+            <div class="code-inputs" role="group" aria-label="Código de autenticação de seis dígitos">
+              {#each mfaDigits as digit, index}
+                <div class="code-input">
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete={index === 0 ? 'one-time-code' : 'off'}
+                    maxlength="1"
+                    value={digit}
+                    disabled={verifyingMfa}
+                    oninput={(event) => updateMfaDigit(index, (event.currentTarget as HTMLInputElement).value)}
+                    onkeydown={(event) => handleMfaKeydown(index, event)}
+                    onpaste={(event) => handleMfaPaste(index, event)}
+                  />
+                </div>
+              {/each}
+            </div>
+
+            <p class="mfa-hint">Os códigos mudam a cada 30 segundos.</p>
+
+            {#if showCountdown}
+              <p class="mfa-countdown" role="status">Novo código em {mfaCountdown}s</p>
+            {/if}
+
+            <div class="mfa-actions">
+              <button
+                class="submit-button"
+                style={`background-color: ${submitHovered ? '#7f3fe5' : '#ffffff'}; color: ${submitHovered ? '#ffffff' : '#101010'}; border: none;`}
+                type="button"
+                disabled={verifyingMfa}
+                onmouseenter={() => (submitHovered = true)}
+                onmouseleave={() => (submitHovered = false)}
+                onclick={() => submitMfaCode()}
+              >
+                {#if verifyingMfa}
+                  <span class="spinner" aria-hidden="true"></span>
+                  Validando
+                {:else}
+                  Verificar código
+                  <span aria-hidden="true">→</span>
+                {/if}
+              </button>
+
+              <button class="mfa-back" type="button" onclick={returnToCredentials} disabled={verifyingMfa}>
+                Voltar para senha
+              </button>
+            </div>
+          </div>
+        {/if}
+
+        {#if errorMessage}
+          <p class="error-message" role="alert">{errorMessage}</p>
+        {/if}
 
         <div class="security-note">
           <span aria-hidden="true">▢</span>
@@ -338,6 +609,73 @@
     gap: 22px;
   }
 
+  .mfa-step {
+    display: grid;
+    gap: 18px;
+  }
+
+  .code-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  :global(.code-input input) {
+    height: 48px;
+    border-radius: 10px;
+    border: 1px solid rgba(252, 252, 252, 0.22);
+    background: rgba(252, 252, 252, 0.04);
+    color: #fcfcfc;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-align: center;
+    outline: none;
+    caret-color: #fcfcfc;
+  }
+
+  :global(.code-input input::placeholder) {
+    color: rgba(252, 252, 252, 0.28);
+  }
+
+  :global(.code-input input:focus-visible) {
+    border-color: #7f3fe5;
+    box-shadow: 0 0 0 4px rgba(127, 63, 229, 0.18);
+  }
+
+  .mfa-hint,
+  .mfa-countdown {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .mfa-hint {
+    color: rgba(252, 252, 252, 0.58);
+  }
+
+  .mfa-countdown {
+    color: #7f3fe5;
+    font-weight: 700;
+  }
+
+  .mfa-actions {
+    display: grid;
+    gap: 10px;
+  }
+
+  .mfa-back {
+    background: transparent;
+    border: 0;
+    color: rgba(252, 252, 252, 0.72);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
   .login-header {
     display: grid;
     gap: 10px;
@@ -470,16 +808,6 @@
     transition: background-color 9999s ease-out 0s;
   }
 
-  :global(.code-input input) {
-    height: 52px;
-    border-radius: 10px;
-    font-family: var(--font-mono);
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-align: center;
-  }
-
   :global(.submit-button) {
     margin-top: 2px;
     border: none !important;
@@ -575,6 +903,14 @@
 
     .login-form {
       gap: 18px;
+    }
+
+    .code-inputs {
+      gap: 8px;
+    }
+
+    :global(.code-input input) {
+      font-size: 18px;
     }
   }
 </style>
