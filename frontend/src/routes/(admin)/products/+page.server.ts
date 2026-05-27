@@ -5,15 +5,15 @@ export const load: PageServerLoad = async () => {
   try {
     // Carrega produtos (o endpoint atual retorna todos, incluindo rascunhos)
     const produtosDoBanco = await apiFetch<any[]>('/products');
-    
+
     return {
-      produtos: produtosDoBanco
+      produtos: produtosDoBanco,
     };
   } catch (error) {
     console.error('[FRONTEND LOAD ERROR]:', error);
     return {
       produtos: [],
-      error: 'Não foi possível carregar os produtos em tempo real.'
+      error: 'Não foi possível carregar os produtos em tempo real.',
     };
   }
 };

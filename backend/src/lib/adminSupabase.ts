@@ -15,7 +15,9 @@ export function getAdminSupabase(): SupabaseClient {
     '';
 
   if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Variáveis de ambiente do Supabase ausentes. Verifique PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY.');
+    throw new Error(
+      'Variáveis de ambiente do Supabase ausentes. Verifique PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY.'
+    );
   }
 
   adminSupabaseClient = createClient(supabaseUrl, supabaseKey);
