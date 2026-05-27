@@ -59,7 +59,7 @@ export function normalizeRole(role: string | null | undefined): string {
   return role?.trim() || 'member';
 }
 
-const ADMIN_ROLES = new Set(['admin', 'owner']);
+const ADMIN_ROLES = new Set(['admin', 'owner', 'member']);
 
 export function parseBearerToken(authorizationHeader: string | null | undefined): string | null {
   if (!authorizationHeader) {
