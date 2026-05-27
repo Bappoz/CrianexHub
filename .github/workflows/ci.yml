@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, developer]
   pull_request:
-    branches: [main]
+    branches: [main, developer]
 
 permissions:
   contents: read
@@ -40,6 +40,10 @@ jobs:
       - name: ESLint — backend
         run: npm run lint
         working-directory: backend
+
+      - name: SvelteKit sync (gera .svelte-kit/tsconfig.json)
+        run: npx svelte-kit sync
+        working-directory: frontend
 
       - name: ESLint — frontend
         run: npm run lint
@@ -78,6 +82,10 @@ jobs:
 
       - name: SvelteKit sync (gera .svelte-kit/types)
         run: npx svelte-kit sync
+        working-directory: frontend
+
+      - name: Paraglide compile (gera src/lib/paraglide/)
+        run: npx paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide
         working-directory: frontend
 
       - name: TypeScript — frontend
