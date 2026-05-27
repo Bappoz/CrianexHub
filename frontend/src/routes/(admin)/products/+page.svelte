@@ -1,29 +1,30 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import { Badge } from '$lib/components/ui/badge';
-  import * as Card from '$lib/components/ui/card';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu'; // 1. Importado o Dropdown do Shadcn
-  import type { PageData } from './$types';
   import {
     Search,
     Bell,
     EllipsisVertical,
-    Plus,
     GripVertical,
     Pencil,
     EyeOff,
-    Trash2,
     Eye,
+    X,
   } from 'lucide-svelte';
   import { apiFetch } from '$lib/api/backend';
   import { invalidateAll } from '$app/navigation';
+  import type { PageData } from './$types';
 
   export let data: PageData;
 
   type Produto = NonNullable<PageData['produtos']>[number];
 
+  // ── List state ───────────────────────────────────────────────────────────
+  let search = '';
+  let menuOpen: string | null = null;
+  let dragId: string | null = null;
+  let dropTarget: { id: string; after: boolean } | null = null;
+  let originalOrder: Produto[] = [];
   let listaProdutos: Produto[] = [];
+  let deleting: Produto | null = null;
 
   $: if (data.produtos) {
     listaProdutos = [...data.produtos].sort(
@@ -31,53 +32,85 @@
     );
   }
 
-  $: publicados = listaProdutos.filter((p) => p.published);
-  $: rascunhos = listaProdutos.filter((p) => !p.published);
+  $: publicados = listaProdutos.filter((p) => p.published).filter(filterFn);
+  $: rascunhos = listaProdutos.filter((p) => !p.published).filter(filterFn);
 
-  let draggingIndex: number | null = null;
-  let originalOrder: typeof listaProdutos = [];
+  function filterFn(p: Produto) {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      p.name_pt.toLowerCase().includes(q) ||
+      (p.category_pt ?? '').toLowerCase().includes(q) ||
+      (p.tagline_pt ?? '').toLowerCase().includes(q)
+    );
+  }
 
-  function handleDragStart(index: number) {
-    draggingIndex = index;
+  // ── Drag-and-drop ─────────────────────────────────────────────────────────
+  function handleDragStart(id: string) {
+    dragId = id;
     originalOrder = [...listaProdutos];
   }
 
-  function handleDragOver(index: number) {
-    if (draggingIndex === null || draggingIndex === index) return;
-
-    const updatedPublicados = [...publicados];
-    const [itemArrastado] = updatedPublicados.splice(draggingIndex, 1);
-    updatedPublicados.splice(index, 0, itemArrastado);
-
-    draggingIndex = index;
-    listaProdutos = [...updatedPublicados, ...rascunhos];
+  function handleDragOver(e: DragEvent, targetId: string) {
+    if (!dragId || dragId === targetId) return;
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    dropTarget = { id: targetId, after: e.clientY > rect.top + rect.height / 2 };
   }
 
-  async function handleDrop() {
-    draggingIndex = null;
+  function handleDragLeave() {
+    dropTarget = null;
+  }
+  function handleDragEnd() {
+    dragId = null;
+    dropTarget = null;
+  }
 
-    const newOrder = publicados.map((produto, index) => ({
-      id: produto.id,
-      display_order: index + 1,
-    }));
+  async function handleDrop(e: DragEvent, targetId: string) {
+    e.preventDefault();
+    if (!dragId || dragId === targetId) {
+      dragId = null;
+      dropTarget = null;
+      return;
+    }
+    const after = dropTarget?.after;
+    const next = [...listaProdutos];
+    const fromIdx = next.findIndex((p) => p.id === dragId);
+    if (fromIdx >= 0) {
+      const [moved] = next.splice(fromIdx, 1);
+      const toIdx = next.findIndex((p) => p.id === targetId);
+      next.splice(toIdx + (after ? 1 : 0), 0, moved);
+    }
+
+    const newOrder = next
+      .filter((p) => p.published)
+      .map((p, i) => ({ id: p.id, display_order: i + 1 }));
+
+    listaProdutos = next;
+    dragId = null;
+    dropTarget = null;
 
     try {
       await apiFetch('/products/reorder', {
         method: 'PATCH',
         body: JSON.stringify({ orders: newOrder }),
       });
-      console.log('Nova ordem da vitrine salva com sucesso!');
       await invalidateAll();
-    } catch (error) {
-      console.error('Erro ao salvar ordenação:', error);
+    } catch {
       listaProdutos = [...originalOrder];
+    }
+  }
 
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('401')) {
-        alert('Você precisa estar autenticado como administrador para reordenar a vitrine.');
-        return;
-      }
-      alert('Erro ao salvar a nova ordenação no banco de dados. Retornando ao estado original.');
+  // ── Actions ───────────────────────────────────────────────────────────────
+  async function handleTogglePublicacao(id: string, current: boolean) {
+    try {
+      await apiFetch(`/products/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ published: !current }),
+      });
+      await invalidateAll();
+    } catch (err) {
+      console.error('Erro ao alterar publicação:', err);
     }
   }
 
@@ -90,296 +123,277 @@
       .slice(0, 2);
   }
 
-  // Lógica das Ações do Menu
-  function handleEditar(id: string) {
-    console.log('Editar produto id:', id);
-    // Aqui você pode redirecionar ex: goto(`/admin/produtos/${id}`)
-  }
-
-  async function handleTogglePublicacao(id: string, currentStatus: boolean) {
-    console.log('Mudar status do id:', id, 'para:', !currentStatus);
-    try {
-      console.debug('[client] about to call apiFetch for', id, '->', !currentStatus);
-      const res = await apiFetch(`/products/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: !currentStatus }),
-      });
-      console.debug('[client] apiFetch returned', res);
-
-      await invalidateAll();
-    } catch (error) {
-      console.error('Erro ao altera status de publicação:', error);
-    }
-  }
-
-  async function handleExcluir(id: string) {
-    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
-    console.log('Deletar produto id:', id);
-    // Disparar o DELETE /admin/products/:id
+  function formatDate(iso: string | null | undefined) {
+    if (!iso) return '—';
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+    if (diff === 0) return 'hoje';
+    if (diff === 1) return 'há 1 dia';
+    return `há ${diff} dias`;
   }
 </script>
 
-<div class="min-h-screen bg-[#0a0a0b] text-zinc-100 p-8 font-sans">
-  <header class="flex justify-between items-center mb-8">
-    <div>
-      <h1 class="text-lg font-semibold flex items-center gap-2 tracking-tight">
-        Produtos da vitrine
-        <span class="text-zinc-500 text-xs font-normal">/ vitrine / produtos</span>
-      </h1>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <div class="relative w-80">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-        <Input
-          type="text"
-          placeholder="Buscar clientes, tickets, produtos...   ⌘K"
-          class="pl-9 h-9 bg-[#121214] border-zinc-800 text-zinc-300 placeholder:text-zinc-500 focus-visible:ring-zinc-700 text-xs rounded-lg"
-        />
-      </div>
-
-      <Button
-        variant="outline"
-        size="icon"
-        class="h-9 w-9 bg-transparent border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-full relative"
-      >
-        <Bell class="h-4 w-4" />
-        <span class="absolute top-2 right-2.5 h-1.5 w-1.5 bg-white rounded-full"></span>
-      </Button>
-
-      <Button class="h-9 bg-white text-black hover:bg-zinc-200 font-medium text-xs rounded-lg px-4">
-        <Plus class="h-4 w-4 mr-1.5" /> Novo produto
-      </Button>
-    </div>
-  </header>
-
-  <Card.Root class="bg-[#121214] border-zinc-800/80 text-zinc-100 rounded-xl overflow-hidden">
-    <Card.Header
-      class="flex flex-row justify-between items-center border-b border-zinc-800/60 px-6 py-4"
+<!-- ── Topbar ─────────────────────────────────────────────────────────────── -->
+<div class="admin-topbar">
+  <h2>Produtos da vitrine</h2>
+  <span class="crumbs">/ vitrine / produtos</span>
+  <span class="grow"></span>
+  <div class="admin-search">
+    <Search size={14} />
+    <input placeholder="Buscar clientes, tickets, produtos…" aria-label="Busca global" />
+    <span
+      style="font-family: var(--font-mono); font-size: 10px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px"
+      >⌘K</span
     >
-      <Card.Title class="text-xs font-medium text-zinc-300">
-        {listaProdutos.length} produtos •
-        <span class="text-zinc-400">{publicados.length} publicados</span>
-      </Card.Title>
-
-      <div class="flex items-center gap-3">
-        <Badge
-          variant="secondary"
-          class="bg-[#1a1a1e] text-zinc-400 border border-zinc-800 font-mono text-[10px] tracking-wider px-2 py-0.5 rounded"
-        >
-          VITRINE.CRIANEX.COM
-        </Badge>
-        <Input
-          type="text"
-          placeholder="Buscar produto..."
-          class="h-8 w-44 bg-[#1a1a1e] border-zinc-800 text-xs text-zinc-300 placeholder:text-zinc-500"
-        />
-      </div>
-    </Card.Header>
-
-    <Card.Content class="p-0">
-      {#if data.error}
-        <div class="p-4 text-center text-sm text-red-400 bg-red-950/20 border-b border-red-900/30">
-          {data.error}
-        </div>
-      {/if}
-
-      <div
-        class="text-[10px] font-bold text-zinc-500 tracking-wider px-6 py-2 bg-[#161619]/40 border-b border-zinc-800/40 flex justify-between items-center"
-      >
-        <span>A PUBLICADOS · ARRASTE PARA REORDENAR A VITRINE</span>
-        <span class="font-mono text-zinc-600">{publicados.length}</span>
-      </div>
-
-      {#each publicados as produto, index (produto.id)}
-        <div
-          class="flex items-center justify-between px-6 py-4 border-b border-zinc-800/40 hover:bg-zinc-900/30 transition-all duration-150 select-none"
-          class:opacity-20={draggingIndex === index}
-          role="listitem"
-          draggable="true"
-          on:dragstart={() => handleDragStart(index)}
-          on:dragover|preventDefault={() => handleDragOver(index)}
-          on:drop={handleDrop}
-        >
-          <div class="flex items-center gap-4 w-7/12">
-            <GripVertical
-              class="h-4 w-4 text-zinc-600 cursor-grab active:cursor-grabbing hover:text-zinc-400 transition-colors"
-            />
-
-            <div
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white shadow-inner"
-              style="background-color: {produto.color || '#6366f1'}"
-            >
-              {produto.icon_text || getInitials(produto.name_pt)}
-            </div>
-            <div class="min-w-0">
-              <h3 class="font-medium text-zinc-200 text-sm tracking-tight">{produto.name_pt}</h3>
-              <p class="text-xs text-zinc-500 truncate max-w-md mt-0.5">
-                {produto.description_pt || 'Sem descrição em português.'}
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-6 w-5/12 justify-end text-xs">
-            <span class="text-zinc-400 font-medium text-right min-w-[120px] truncate"
-              >{produto.category_pt || 'Geral'}</span
-            >
-
-            <span
-              class="bg-[#12221a] text-[#4ade80] px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border border-[#163524] shadow-sm"
-            >
-              PUBLICADO
-            </span>
-
-            <div class="flex items-center gap-4 text-zinc-500 text-xs whitespace-nowrap">
-              <span>edit. há {produto.days_ago || '2 dias'}</span>
-              <span class="text-zinc-600 font-mono text-[10px]">PT · EN</span>
-            </div>
-
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-8 w-8 text-zinc-500 hover:text-zinc-300 rounded-lg"
-                >
-                  <EllipsisVertical class="h-4 w-4" />
-                </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content
-                align="end"
-                class="w-44 bg-[#161619] border-zinc-800 text-zinc-300 rounded-lg shadow-xl p-1"
-              >
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleEditar(produto.id)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
-                  >
-                    <Pencil class="h-3.5 w-3.5 text-zinc-400" />
-                    <span>Editar produto</span>
-                  </button>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleTogglePublicacao(produto.id, produto.published)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
-                  >
-                    <EyeOff class="h-3.5 w-3.5 text-zinc-400" />
-                    <span>Despublicar</span>
-                  </button>
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator class="bg-zinc-800/60 my-1" />
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleExcluir(produto.id)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded text-[#f43f5e] hover:bg-rose-950/20 cursor-pointer focus:bg-rose-950/20 focus:text-[#f43f5e] font-medium text-left"
-                  >
-                    <Trash2 class="h-3.5 w-3.5" />
-                    <span>Excluir</span>
-                  </button>
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
-          </div>
-        </div>
-      {/each}
-
-      <div
-        class="text-[10px] font-bold text-zinc-500 tracking-wider px-6 py-2 bg-[#161619]/40 border-b border-zinc-800/40 flex justify-between items-center mt-2"
-      >
-        <span>○ NÃO PUBLICADOS · NÃO APARECEM NA VITRINE PÚBLICA</span>
-        <span class="font-mono text-zinc-600">{rascunhos.length}</span>
-      </div>
-
-      {#each rascunhos as produto (produto.id)}
-        <div
-          class="flex items-center justify-between px-6 py-4 border-b border-zinc-800/30 hover:bg-zinc-900/20 transition-all duration-150 opacity-75"
-        >
-          <div class="flex items-center gap-4 w-7/12 pl-8">
-            <div
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white/90"
-              style="background-color: {produto.color || '#4b5563'}"
-            >
-              {produto.icon_text || getInitials(produto.name_pt)}
-            </div>
-            <div class="min-w-0">
-              <h3 class="font-medium text-zinc-300 text-sm tracking-tight">{produto.name_pt}</h3>
-              <p class="text-xs text-zinc-550 truncate max-w-md mt-0.5">
-                {produto.description_pt || 'Sem descrição disponível.'}
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-6 w-5/12 justify-end text-xs">
-            <span class="text-zinc-500 text-right min-w-[120px] truncate"
-              >{produto.category_pt || 'Geral'}</span
-            >
-
-            <span
-              class="bg-[#27272a] text-zinc-400 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border border-zinc-700/60 shadow-sm"
-            >
-              RASCUNHO
-            </span>
-
-            <div class="flex items-center gap-4 text-zinc-500 text-xs whitespace-nowrap">
-              <span>edit. há {produto.days_ago || '5 dias'}</span>
-              <span class="text-zinc-600 font-mono text-[10px]">PT · EN</span>
-            </div>
-
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-8 w-8 text-zinc-500 hover:text-zinc-300 rounded-lg"
-                >
-                  <EllipsisVertical class="h-4 w-4" />
-                </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content
-                align="end"
-                class="w-44 bg-[#161619] border-zinc-800 text-zinc-300 rounded-lg shadow-xl p-1"
-              >
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleEditar(produto.id)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
-                  >
-                    <Pencil class="h-3.5 w-3.5 text-zinc-400" />
-                    <span>Editar produto</span>
-                  </button>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleTogglePublicacao(produto.id, produto.published)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
-                  >
-                    <Eye class="h-3.5 w-3.5 text-zinc-400" />
-                    <span>Publicar</span>
-                  </button>
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator class="bg-zinc-800/60 my-1" />
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleExcluir(produto.id)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded text-[#f43f5e] hover:bg-rose-950/20 cursor-pointer focus:bg-rose-950/20 focus:text-[#f43f5e] font-medium text-left"
-                  >
-                    <Trash2 class="h-3.5 w-3.5" />
-                    <span>Excluir</span>
-                  </button>
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
-          </div>
-        </div>
-      {/each}
-    </Card.Content>
-  </Card.Root>
+  </div>
+  <span class="bell-wrap">
+    <button class="btn sm ghost" type="button" aria-label="Notificações" style="padding: 6px 10px">
+      <Bell size={14} />
+    </button>
+    <span class="badge-dot"></span>
+  </span>
+  <button class="btn sm" type="button">+ Novo produto</button>
 </div>
+
+<!-- ── Content ────────────────────────────────────────────────────────────── -->
+<div class="admin-content">
+  <div class="panel" style="padding: 14px">
+    <div class="panel-head" style="margin-bottom: 4px">
+      <h3>{listaProdutos.length} produtos · {publicados.length} publicados</h3>
+      <span class="grow"></span>
+      <span class="pill">vitrine.crianex.com</span>
+      <div class="admin-search" style="width: 220px">
+        <Search size={13} />
+        <input placeholder="Buscar produto…" bind:value={search} aria-label="Filtrar produtos" />
+      </div>
+    </div>
+
+    {#if data.error}
+      <p style="color: var(--pink); font-size: 13px; padding: 8px 0">{data.error}</p>
+    {/if}
+
+    <!-- Publicados -->
+    <div class="list-divider">
+      <span>✓ Publicados</span>
+      <span class="ct">arraste para reordenar a vitrine</span>
+      <span class="ln"></span>
+      <span class="ct">{publicados.length}</span>
+    </div>
+
+    {#if publicados.length === 0}
+      <div class="empty">Nenhum produto publicado.</div>
+    {/if}
+
+    {#each publicados as p (p.id)}
+      <div
+        role="listitem"
+        draggable="true"
+        on:dragstart={() => handleDragStart(p.id)}
+        on:dragover|preventDefault={(e) => handleDragOver(e, p.id)}
+        on:dragleave={handleDragLeave}
+        on:drop={(e) => handleDrop(e, p.id)}
+        on:dragend={handleDragEnd}
+        class="product-row dnd-row"
+        class:dragging={dragId === p.id}
+        class:drop-after={dropTarget?.id === p.id && !!dropTarget?.after}
+        class:drop-before={dropTarget?.id === p.id && !dropTarget?.after}
+      >
+        <button class="dnd-handle" type="button" aria-label="Arrastar para reordenar">
+          <GripVertical size={12} />
+        </button>
+
+        <span
+          class="pico"
+          style:background={(p as any).color || '#7f3fe5'}
+          style:background-image={p.image_url ? `url(${p.image_url})` : 'none'}
+          style:background-size="cover"
+          style:background-position="center"
+        >
+          {#if !p.image_url}{p.icon_text || getInitials(p.name_pt)}{/if}
+        </span>
+
+        <div>
+          <div class="pname">{p.name_pt}</div>
+          <div class="psub">{p.tagline_pt || p.description_pt || ''}</div>
+        </div>
+
+        <span class="pcat">{p.category_pt || ''}</span>
+
+        <span>
+          <span class="status-pill paid"><span class="dt"></span>publicado</span>
+        </span>
+
+        <span class="pdate">edit. {formatDate(p.updated_at)}</span>
+
+        <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint)">
+          PT · EN
+        </span>
+
+        <div style="position: relative">
+          <button
+            class="menu-btn"
+            type="button"
+            aria-label="Ações do produto"
+            on:click={() => (menuOpen = menuOpen === p.id ? null : p.id)}
+          >
+            <EllipsisVertical size={14} />
+          </button>
+          {#if menuOpen === p.id}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div
+              style="position: fixed; inset: 0; z-index: 30"
+              on:click={() => (menuOpen = null)}
+            ></div>
+            <div class="row-menu-pop">
+              <button type="button" on:click={() => (menuOpen = null)}>
+                <Pencil size={13} /> Editar produto
+              </button>
+              <button
+                type="button"
+                on:click={() => {
+                  handleTogglePublicacao(p.id, p.published);
+                  menuOpen = null;
+                }}
+              >
+                <EyeOff size={13} /> Despublicar
+              </button>
+              <div class="sep"></div>
+              <button
+                type="button"
+                class="danger"
+                on:click={() => {
+                  deleting = p;
+                  menuOpen = null;
+                }}
+              >
+                <X size={13} /> Excluir
+              </button>
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/each}
+
+    <!-- Não publicados -->
+    <div class="list-divider">
+      <span>○ Não publicados</span>
+      <span class="ct">não aparecem na vitrine pública</span>
+      <span class="ln"></span>
+      <span class="ct">{rascunhos.length}</span>
+    </div>
+
+    {#if rascunhos.length === 0}
+      <div class="empty">Todos os produtos estão publicados.</div>
+    {/if}
+
+    {#each rascunhos as p (p.id)}
+      <div class="product-row unpub">
+        <span></span>
+
+        <span
+          class="pico"
+          style:background={(p as any).color || '#7f3fe5'}
+          style:background-image={p.image_url ? `url(${p.image_url})` : 'none'}
+          style:background-size="cover"
+          style:background-position="center"
+        >
+          {#if !p.image_url}{p.icon_text || getInitials(p.name_pt)}{/if}
+        </span>
+
+        <div>
+          <div class="pname">{p.name_pt}</div>
+          <div class="psub">{p.tagline_pt || p.description_pt || ''}</div>
+        </div>
+
+        <span class="pcat">{p.category_pt || ''}</span>
+
+        <span>
+          <span class="status-pill inactive"><span class="dt"></span>rascunho</span>
+        </span>
+
+        <span class="pdate">edit. {formatDate(p.updated_at)}</span>
+
+        <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint)">
+          PT · EN
+        </span>
+
+        <div style="position: relative">
+          <button
+            class="menu-btn"
+            type="button"
+            aria-label="Ações do produto"
+            on:click={() => (menuOpen = menuOpen === p.id ? null : p.id)}
+          >
+            <EllipsisVertical size={14} />
+          </button>
+          {#if menuOpen === p.id}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div
+              style="position: fixed; inset: 0; z-index: 30"
+              on:click={() => (menuOpen = null)}
+            ></div>
+            <div class="row-menu-pop">
+              <button type="button" on:click={() => (menuOpen = null)}>
+                <Pencil size={13} /> Editar produto
+              </button>
+              <button
+                type="button"
+                on:click={() => {
+                  handleTogglePublicacao(p.id, p.published);
+                  menuOpen = null;
+                }}
+              >
+                <Eye size={13} /> Publicar agora
+              </button>
+              <div class="sep"></div>
+              <button
+                type="button"
+                class="danger"
+                on:click={() => {
+                  deleting = p;
+                  menuOpen = null;
+                }}
+              >
+                <X size={13} /> Excluir
+              </button>
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/each}
+  </div>
+</div>
+
+<!-- ── DeleteConfirm Modal ─────────────────────────────────────────────────── -->
+{#if deleting}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="admin-overlay" on:click={() => (deleting = null)}>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="admin-modal" style="max-width: 460px" on:click|stopPropagation tabindex="-1">
+      <div class="admin-modal-body danger-modal">
+        <div class="danger-icon"><X size={24} /></div>
+        <h4>Excluir produto?</h4>
+        <p>
+          Esta ação remove o produto da vitrine pública imediatamente e exclui suas informações
+          localizadas (PT/EN). Não pode ser desfeita.
+        </p>
+        <div class="name-confirm">
+          <span class="lbl">Item:</span>
+          <span class="val">{deleting.name_pt}</span>
+        </div>
+      </div>
+
+      <div class="admin-modal-foot">
+        <button class="btn ghost sm" type="button" on:click={() => (deleting = null)}
+          >Cancelar</button
+        >
+        <button class="btn-danger" type="button">
+          <X size={13} /> Excluir definitivamente
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
