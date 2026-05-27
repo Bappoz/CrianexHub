@@ -15,7 +15,7 @@
     h1: { pt: 'Política de Privacidade.', en: 'Privacy Policy.' },
     lede: {
       pt: 'Este documento descreve como a Crianex Hub trata os dados pessoais coletados por meio do formulário de contato, em conformidade com a Lei Geral de Proteção de Dados (Lei 13.709/2018 — LGPD).',
-      en: 'This document describes how Crianex Hub handles personal data collected through the contact form, in accordance with Brazil\'s General Data Protection Law (Lei 13.709/2018 — LGPD).',
+      en: "This document describes how Crianex Hub handles personal data collected through the contact form, in accordance with Brazil's General Data Protection Law (Lei 13.709/2018 — LGPD).",
     },
     updated: { pt: 'Última atualização', en: 'Last updated' },
     sections: [
@@ -87,7 +87,18 @@
 <div class="privacy-page">
   <section class="privacy-hero">
     <a href="/contato" class="back-link">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(180deg)">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        style="transform: rotate(180deg)"
+      >
         <path d="M5 12h14M12 5l7 7-7 7" />
       </svg>
       {$lang === 'pt' ? 'Voltar ao contato' : 'Back to contact'}
@@ -107,7 +118,10 @@
   <section class="privacy-body">
     <div class="sections-grid">
       {#each t.sections as s, i}
-        <div class="policy-section" class:full={i === t.sections.length - 1 && t.sections.length % 2 !== 0}>
+        <div
+          class="policy-section"
+          class:full={i === t.sections.length - 1 && t.sections.length % 2 !== 0}
+        >
           <div class="section-n mono">{s.n}</div>
           <h3>{s.title[$lang]}</h3>
           <p>{s.body[$lang]}</p>
@@ -117,14 +131,30 @@
 
     <div class="contact-card">
       <div class="card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
           <rect width="20" height="16" x="2" y="4" rx="2" />
           <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
         </svg>
       </div>
       <div>
-        <p class="card-title">{$lang === 'pt' ? 'Dúvidas sobre esta política?' : 'Questions about this policy?'}</p>
-        <p class="card-body">{$lang === 'pt' ? 'Entre em contato com nosso encarregado de dados.' : 'Contact our data protection officer.'}</p>
+        <p class="card-title">
+          {$lang === 'pt' ? 'Dúvidas sobre esta política?' : 'Questions about this policy?'}
+        </p>
+        <p class="card-body">
+          {$lang === 'pt'
+            ? 'Entre em contato com nosso encarregado de dados.'
+            : 'Contact our data protection officer.'}
+        </p>
       </div>
       <a href="mailto:privacidade@crianex.com.br" class="btn ghost sm">
         privacidade@crianex.com.br

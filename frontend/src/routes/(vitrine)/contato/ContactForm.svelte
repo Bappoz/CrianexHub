@@ -182,11 +182,9 @@
       <label class="consent-row">
         <input type="checkbox" bind:checked={form.consent} required />
         <span>
-          {t.lgpdPrefix[$lang]}<a
-            href="/privacidade"
-            target="_blank"
-            rel="noopener noreferrer"
-          >{t.lgpdLink[$lang]}</a>{t.lgpdSuffix[$lang]}
+          {t.lgpdPrefix[$lang]}<a href="/privacidade" target="_blank" rel="noopener noreferrer"
+            >{t.lgpdLink[$lang]}</a
+          >{t.lgpdSuffix[$lang]}
         </span>
       </label>
 
