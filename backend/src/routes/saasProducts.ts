@@ -108,7 +108,7 @@ productRouter.patch('/reorder', async (req, res) => {
     const { orders } = req.body;
  
     if(!Array.isArray(orders)){
-        return res.status(400).json({error: 'O corpo da requsição deve conter um array "orders".'});
+        return res.status(400).json({error: 'O corpo da requisição deve conter um array "orders".'});
     }
     
     const {error} = await supabase.rpc('reorder_products', {
@@ -160,7 +160,7 @@ productRouter.delete('/:id', async (req, res) => {
     }
 
     if(product.published){
-        return res.status(409).json({message: 'Não é possivel deletar um porduto publicado. Despublique-o primeiro'});
+        return res.status(409).json({message: 'Não é possivel deletar um porduto publicado. Despublique-o primeiro!'});
     }
 
     if(product.image_url){
