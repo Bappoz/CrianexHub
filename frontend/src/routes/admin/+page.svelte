@@ -6,8 +6,8 @@
   <p class="eyebrow">Área autenticada</p>
   <h1>Painel administrativo disponível</h1>
   <p>
-    O acesso foi validado. Esta página serve como ponto de chegada do fluxo de autenticação para
-    testar o login e, quando aplicável, o segundo fator TOTP.
+    O acesso foi validado. Use esta área para navegar pelas rotinas administrativas após concluir
+    o login.
   </p>
 </section>
 
@@ -15,9 +15,9 @@
   .admin-home {
     min-height: calc(100vh - 0px);
     display: grid;
+    max-width: 720px;
     align-content: center;
     gap: 14px;
-    max-width: 720px;
     padding: clamp(32px, 6vw, 72px);
   }
 
