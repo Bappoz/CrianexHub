@@ -6,7 +6,25 @@
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
 
-  type LoginStage = 'credentials' | 'mfa';
+  type LoginStage = 'credentials' | 'setup' | 'mfa';
+
+  type MfaStatus = {
+    hasAnyFactor: boolean;
+    hasVerifiedFactor: boolean;
+    pendingFactorId: string | null;
+    verifiedFactorId: string | null;
+  };
+
+  type MfaEnrollment = {
+    id: string;
+    type: 'totp';
+    friendly_name?: string;
+    totp: {
+      qr_code: string;
+      secret: string;
+      uri: string;
+    };
+  };
 
   type LoginResponse = {
     mfa_required: boolean;
@@ -32,18 +50,24 @@
   };
 
   const MFA_DIGITS = 6;
+  const ENROLLMENT_STORAGE_KEY = 'crianex-admin-login-mfa-enrollment';
 
   let stage = $state<LoginStage>('credentials');
   let email = $state('');
   let password = $state('');
   let loading = $state(false);
   let verifyingMfa = $state(false);
+  let setupLoading = $state(false);
   let errorMessage = $state('');
   let submitHovered = $state(false);
   let mfaDigits = $state<string[]>(Array.from({ length: MFA_DIGITS }, () => ''));
   let mfaCountdown = $state(30);
   let showCountdown = $state(false);
   let mfaAccessToken = $state('');
+  let mfaEnrollFactorId = $state('');
+  let mfaQrCode = $state('');
+  let mfaSecret = $state('');
+  let mfaUri = $state('');
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
   function clearCountdownTimer() {
@@ -59,6 +83,89 @@
     mfaCountdown = 30;
     mfaDigits = Array.from({ length: MFA_DIGITS }, () => '');
     mfaAccessToken = '';
+    mfaEnrollFactorId = '';
+    mfaQrCode = '';
+    mfaSecret = '';
+    mfaUri = '';
+  }
+
+  function persistEnrollment(enrollment: MfaEnrollment) {
+    if (typeof sessionStorage === 'undefined') {
+      return;
+    }
+
+    sessionStorage.setItem(ENROLLMENT_STORAGE_KEY, JSON.stringify(enrollment));
+  }
+
+  function restoreEnrollment(): boolean {
+    if (typeof sessionStorage === 'undefined') {
+      return false;
+    }
+
+    const rawValue = sessionStorage.getItem(ENROLLMENT_STORAGE_KEY);
+
+    if (!rawValue) {
+      return false;
+    }
+
+    try {
+      const enrollment = JSON.parse(rawValue) as MfaEnrollment;
+
+      if (!enrollment?.id || enrollment.type !== 'totp' || !enrollment.totp?.qr_code) {
+        sessionStorage.removeItem(ENROLLMENT_STORAGE_KEY);
+        return false;
+      }
+
+      stage = 'setup';
+      mfaEnrollFactorId = enrollment.id;
+      mfaQrCode = enrollment.totp.qr_code;
+      mfaSecret = enrollment.totp.secret;
+      mfaUri = enrollment.totp.uri;
+      return true;
+    } catch {
+      sessionStorage.removeItem(ENROLLMENT_STORAGE_KEY);
+      return false;
+    }
+  }
+
+  function clearEnrollmentStorage() {
+    if (typeof sessionStorage === 'undefined') {
+      return;
+    }
+
+    sessionStorage.removeItem(ENROLLMENT_STORAGE_KEY);
+  }
+
+  function applyEnrollment(enrollment: MfaEnrollment) {
+    stage = 'setup';
+    mfaEnrollFactorId = enrollment.id;
+    mfaQrCode = enrollment.totp.qr_code;
+    mfaSecret = enrollment.totp.secret;
+    mfaUri = enrollment.totp.uri;
+    persistEnrollment(enrollment);
+  }
+
+  async function startEnrollment(friendlyName: string) {
+    if (setupLoading) {
+      return;
+    }
+
+    setupLoading = true;
+    errorMessage = '';
+
+    try {
+      const enrollment = await apiFetch<MfaEnrollment>('/api/auth/mfa/enroll', {
+        method: 'POST',
+        body: JSON.stringify({ friendlyName: friendlyName || 'Crianex Admin' }),
+      });
+
+      applyEnrollment(enrollment);
+      await tick();
+    } catch (error) {
+      errorMessage = error instanceof ApiError ? error.message : 'Não foi possível gerar o QR code.';
+    } finally {
+      setupLoading = false;
+    }
   }
 
   function focusCodeInput(index: number) {
@@ -126,7 +233,17 @@
         return;
       }
 
-      await goto('/admin');
+      const status = await apiFetch<MfaStatus>('/api/auth/mfa/status');
+
+      if (status.hasVerifiedFactor) {
+        clearEnrollmentStorage();
+        await goto('/admin');
+        return;
+      }
+
+      if (!restoreEnrollment()) {
+        await startEnrollment(response.user.name);
+      }
     } catch (error) {
       if (error instanceof ApiError) {
         errorMessage = error.status === 401 ? 'E-mail ou senha inválidos.' : error.message;
@@ -153,19 +270,34 @@
     errorMessage = '';
 
     try {
-      await apiFetch<VerifyResponse>('/api/auth/mfa/verify', {
+      const endpoint = mfaEnrollFactorId ? '/api/auth/mfa/enroll/verify' : '/api/auth/mfa/verify';
+
+      await apiFetch<VerifyResponse>(endpoint, {
         method: 'POST',
-        body: JSON.stringify({
-          accessToken: mfaAccessToken,
-          code,
-        }),
+        body: JSON.stringify(
+          mfaEnrollFactorId
+            ? {
+                factorId: mfaEnrollFactorId,
+                code,
+              }
+            : {
+                accessToken: mfaAccessToken,
+                code,
+              }
+        ),
       });
 
+      clearEnrollmentStorage();
       await goto('/admin');
     } catch (error) {
       mfaDigits = Array.from({ length: MFA_DIGITS }, () => '');
-      showCountdown = true;
-      startCountdown();
+      if (error instanceof ApiError && error.reason === 'expired') {
+        startCountdown();
+      } else {
+        clearCountdownTimer();
+        showCountdown = false;
+        mfaCountdown = 30;
+      }
       errorMessage =
         error instanceof ApiError
           ? error.message
@@ -255,6 +387,10 @@
   }
 
   onMount(async () => {
+    if (restoreEnrollment()) {
+      return;
+    }
+
     try {
       await apiFetch('/api/auth/refresh', {
         method: 'POST',
@@ -306,6 +442,9 @@
           {#if stage === 'credentials'}
             <h2 id="form-title">Entrar no painel</h2>
             <p>Entre com as suas credenciais de acesso ao painel administrativo.</p>
+          {:else if stage === 'setup'}
+            <h2 id="form-title">Ativar autenticador</h2>
+            <p>Escaneie o QR code abaixo com qualquer app compatível com TOTP antes de seguir.</p>
           {:else}
             <h2 id="form-title">Verificação em duas etapas</h2>
             <p>Digite o código TOTP de 6 dígitos gerado no seu aplicativo autenticador.</p>
@@ -380,6 +519,43 @@
             </button>
           </form>
         {:else}
+          {#if stage === 'setup'}
+            <div class="mfa-setup" aria-live="polite">
+              <div class="mfa-setup-copy">
+                <p class="mfa-setup-lead">
+                  Abra o app autenticador de sua preferência, escaneie o QR code e depois avance para
+                  digitar o código gerado.
+                </p>
+
+                <div class="mfa-setup-qr" aria-label="QR code para vincular o aplicativo autenticador">
+                  <img src={mfaQrCode} alt={mfaUri} />
+                </div>
+
+                <div class="mfa-secret">
+                  <span>Secret</span>
+                  <code>{mfaSecret}</code>
+                </div>
+
+                <button class="submit-button" type="button" onclick={async () => {
+                  stage = 'mfa';
+                  await tick();
+                  focusCodeInput(0);
+                }}>
+                  Já escaneei, continuar
+                  <span aria-hidden="true">→</span>
+                </button>
+
+                <button class="mfa-back" type="button" onclick={() => {
+                  stage = 'credentials';
+                  errorMessage = '';
+                  resetMfaState();
+                  clearEnrollmentStorage();
+                }}>
+                  Voltar para as credenciais
+                </button>
+              </div>
+            </div>
+          {:else}
           <div class="mfa-step" aria-live="polite">
             <div class="code-inputs" role="group" aria-label="Código de autenticação de seis dígitos">
               {#each mfaDigits as digit, index}
@@ -429,6 +605,7 @@
               </button>
             </div>
           </div>
+          {/if}
         {/if}
 
         {#if errorMessage}
@@ -614,13 +791,72 @@
     gap: 18px;
   }
 
+  .mfa-setup {
+    display: grid;
+    gap: 18px;
+  }
+
+  .mfa-setup-copy {
+    display: grid;
+    gap: 14px;
+  }
+
+  .mfa-setup-lead {
+    color: rgba(252, 252, 252, 0.72);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .mfa-setup-qr {
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    border-radius: 18px;
+    background: #ffffff;
+  }
+
+  .mfa-setup-qr img {
+    width: min(100%, 220px);
+    display: block;
+  }
+
+  .mfa-secret {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mfa-secret span {
+    color: rgba(252, 252, 252, 0.52);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .mfa-secret code {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(252, 252, 252, 0.1);
+    background: rgba(252, 252, 252, 0.04);
+    color: #fcfcfc;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    word-break: break-all;
+  }
+
   .code-inputs {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
   }
 
+  .code-input {
+    min-width: 0;
+  }
+
   :global(.code-input input) {
+    width: 100%;
+    min-width: 0;
     height: 48px;
     border-radius: 10px;
     border: 1px solid rgba(252, 252, 252, 0.22);
@@ -640,7 +876,7 @@
   }
 
   :global(.code-input input:focus-visible) {
-    border-color: #7f3fe5;
+    border-color: #7f3fe5 !important;
     box-shadow: 0 0 0 4px rgba(127, 63, 229, 0.18);
   }
 
