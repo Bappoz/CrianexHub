@@ -119,22 +119,38 @@ jobs:
       - name: Install Supabase CLI
         run: npm install -g supabase
 
-      - name: Start Supabase local
+      - name: Start Supabase local and wait for keys
         run: |
+          set -e
+          # Start Supabase in background
           supabase start --no-telemetry &
-          # wait until Supabase reports healthy (timeout ~60s)
-          for i in $(seq 1 60); do
-            supabase status >/dev/null 2>&1 && break || sleep 1
+          # Wait until supabase status exposes env variables with keys (timeout ~120s)
+          for i in $(seq 1 120); do
+            supabase status --output env > supabase.env 2>/dev/null || true
+            if [ -s supabase.env ] && grep -q '^PUBLISHABLE_KEY=' supabase.env && grep -q '^SERVICE_ROLE_KEY=' supabase.env; then
+              echo "Supabase started and keys are available"
+              break
+            fi
+            sleep 1
           done
+          if ! [ -s supabase.env ] || ! grep -q '^PUBLISHABLE_KEY=' supabase.env || ! grep -q '^SERVICE_ROLE_KEY=' supabase.env; then
+            echo "Supabase did not start correctly or keys are missing. Dumping status for debug:" >&2
+            supabase status --output pretty || true
+            cat supabase.env || true
+            exit 1
+          fi
 
-      - name: Extract Supabase keys and export env
+      - name: Export Supabase keys to Actions env
         run: |
-          # Export machine-parsable env file from supabase status
-          supabase status --output env | tee supabase.env
-          # Read exact variable names from env file and export to GitHub Actions env
+          set -e
+          # Read variable values from supabase.env and export to GitHub Actions env
           PUBLISHABLE=$(grep '^PUBLISHABLE_KEY=' supabase.env | cut -d'=' -f2-)
           SERVICE_ROLE=$(grep '^SERVICE_ROLE_KEY=' supabase.env | cut -d'=' -f2-)
           API_URL=$(grep '^API_URL=' supabase.env | cut -d'=' -f2- || echo 'http://127.0.0.1:54321')
+          if [ -z "$PUBLISHABLE" ] || [ -z "$SERVICE_ROLE" ]; then
+            echo "Required Supabase keys are empty; aborting" >&2
+            exit 1
+          fi
           echo "PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE" >> $GITHUB_ENV
           echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE" >> $GITHUB_ENV
           echo "SUPABASE_URL=$API_URL" >> $GITHUB_ENV
