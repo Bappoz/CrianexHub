@@ -6,8 +6,8 @@
   <p class="eyebrow">Área autenticada</p>
   <h1>Painel administrativo disponível</h1>
   <p>
-    O acesso foi validado. Use esta área para navegar pelas rotinas administrativas após concluir
-    o login.
+    O acesso foi validado. Use esta área para navegar pelas rotinas administrativas após concluir o
+    login.
   </p>
 </section>
 

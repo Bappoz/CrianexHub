@@ -116,6 +116,32 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Start Supabase local
+        run: |
+          supabase start --no-telemetry &
+          # wait until Supabase reports healthy (timeout ~60s)
+          for i in $(seq 1 60); do
+            supabase status >/dev/null 2>&1 && break || sleep 1
+          done
+
+      - name: Extract Supabase keys and export env
+        run: |
+          # Export machine-parsable env file from supabase status
+          supabase status --output env | tee supabase.env
+          # Read exact variable names from env file and export to GitHub Actions env
+          PUBLISHABLE=$(grep '^PUBLISHABLE_KEY=' supabase.env | cut -d'=' -f2-)
+          SERVICE_ROLE=$(grep '^SERVICE_ROLE_KEY=' supabase.env | cut -d'=' -f2-)
+          API_URL=$(grep '^API_URL=' supabase.env | cut -d'=' -f2- || echo 'http://127.0.0.1:54321')
+          echo "PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE" >> $GITHUB_ENV
+          echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE" >> $GITHUB_ENV
+          echo "SUPABASE_URL=$API_URL" >> $GITHUB_ENV
+
+      - name: Apply Supabase migrations
+        run: supabase db reset --confirm
+
       - name: Test — backend
         run: npm test
         working-directory: backend

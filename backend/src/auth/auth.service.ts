@@ -55,7 +55,8 @@ type MfaVerificationResult = {
 type MfaEnrollResult = {
   id: string;
   type: 'totp';
-  friendly_name?: string;
+  // explicit union with undefined to satisfy exactOptionalPropertyTypes checks
+  friendly_name: string | undefined;
   totp: {
     qr_code: string;
     secret: string;
@@ -322,9 +323,9 @@ export async function getTotpFactorStatus(accessToken: string): Promise<TotpFact
   }
 
   const verifiedFactor = data.totp?.[0] ?? null;
-  const pendingFactor = data.all.find(
-    (factor) => factor.factor_type === 'totp' && factor.status === 'unverified'
-  ) ?? null;
+  const pendingFactor =
+    data.all.find((factor) => factor.factor_type === 'totp' && factor.status === 'unverified') ??
+    null;
 
   return {
     hasAnyFactor: data.all.some((factor) => factor.factor_type === 'totp'),

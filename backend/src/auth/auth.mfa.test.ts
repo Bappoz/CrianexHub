@@ -15,9 +15,13 @@ describe('challengeAndVerifyTotp error mapping', () => {
     const mockClient = {
       auth: {
         mfa: {
-          listFactors: vi.fn().mockResolvedValue({ data: { totp: [{ id: 'f1' }], all: [] }, error: null }),
+          listFactors: vi
+            .fn()
+            .mockResolvedValue({ data: { totp: [{ id: 'f1' }], all: [] }, error: null }),
           challenge: vi.fn().mockResolvedValue({ data: { id: 'c1' }, error: null }),
-          verify: vi.fn().mockResolvedValue({ data: null, error: { message: 'challenge expired' } }),
+          verify: vi
+            .fn()
+            .mockResolvedValue({ data: null, error: { message: 'challenge expired' } }),
         },
       },
     } as unknown as ReturnType<typeof createClient>;
@@ -33,7 +37,9 @@ describe('challengeAndVerifyTotp error mapping', () => {
     const mockClient = {
       auth: {
         mfa: {
-          listFactors: vi.fn().mockResolvedValue({ data: { totp: [{ id: 'f1' }], all: [] }, error: null }),
+          listFactors: vi
+            .fn()
+            .mockResolvedValue({ data: { totp: [{ id: 'f1' }], all: [] }, error: null }),
           challenge: vi.fn().mockResolvedValue({ data: { id: 'c1' }, error: null }),
           verify: vi.fn().mockResolvedValue({ data: null, error: { message: 'invalid code' } }),
         },

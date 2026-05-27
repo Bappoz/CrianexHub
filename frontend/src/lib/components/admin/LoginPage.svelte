@@ -162,7 +162,8 @@
       applyEnrollment(enrollment);
       await tick();
     } catch (error) {
-      errorMessage = error instanceof ApiError ? error.message : 'Não foi possível gerar o QR code.';
+      errorMessage =
+        error instanceof ApiError ? error.message : 'Não foi possível gerar o QR code.';
     } finally {
       setupLoading = false;
     }
@@ -361,7 +362,10 @@
 
   function handleMfaPaste(index: number, event: ClipboardEvent) {
     const pasted = event.clipboardData?.getData('text') ?? '';
-    const digits = pasted.replace(/\D/g, '').slice(0, MFA_DIGITS - index).split('');
+    const digits = pasted
+      .replace(/\D/g, '')
+      .slice(0, MFA_DIGITS - index)
+      .split('');
 
     if (!digits.length) {
       return;
@@ -518,46 +522,60 @@
               {/if}
             </button>
           </form>
-        {:else}
-          {#if stage === 'setup'}
-            <div class="mfa-setup" aria-live="polite">
-              <div class="mfa-setup-copy">
-                <p class="mfa-setup-lead">
-                  Abra o app autenticador de sua preferência, escaneie o QR code e depois avance para
-                  digitar o código gerado.
-                </p>
+        {:else if stage === 'setup'}
+          <div class="mfa-setup" aria-live="polite">
+            <div class="mfa-setup-copy">
+              <p class="mfa-setup-lead">
+                Abra o app autenticador de sua preferência, escaneie o QR code e depois avance para
+                digitar o código gerado.
+              </p>
 
-                <div class="mfa-setup-qr" aria-label="QR code para vincular o aplicativo autenticador">
-                  <img src={mfaQrCode} alt={mfaUri} />
-                </div>
+              <div
+                class="mfa-setup-qr"
+                aria-label="QR code para vincular o aplicativo autenticador"
+              >
+                <img src={mfaQrCode} alt={mfaUri} />
+              </div>
 
-                <div class="mfa-secret">
-                  <span>Secret</span>
-                  <code>{mfaSecret}</code>
-                </div>
+              <div class="mfa-secret">
+                <span>Secret</span>
+                <code>{mfaSecret}</code>
+              </div>
 
-                <button class="submit-button" type="button" onclick={async () => {
+              <button
+                class="submit-button"
+                type="button"
+                onclick={async () => {
                   stage = 'mfa';
                   await tick();
                   focusCodeInput(0);
-                }}>
-                  Já escaneei, continuar
-                  <span aria-hidden="true">→</span>
-                </button>
+                }}
+              >
+                Já escaneei, continuar
+                <span aria-hidden="true">→</span>
+              </button>
 
-                <button class="mfa-back" type="button" onclick={() => {
+              <button
+                class="mfa-back"
+                type="button"
+                onclick={() => {
                   stage = 'credentials';
                   errorMessage = '';
                   resetMfaState();
                   clearEnrollmentStorage();
-                }}>
-                  Voltar para as credenciais
-                </button>
-              </div>
+                }}
+              >
+                Voltar para as credenciais
+              </button>
             </div>
-          {:else}
+          </div>
+        {:else}
           <div class="mfa-step" aria-live="polite">
-            <div class="code-inputs" role="group" aria-label="Código de autenticação de seis dígitos">
+            <div
+              class="code-inputs"
+              role="group"
+              aria-label="Código de autenticação de seis dígitos"
+            >
               {#each mfaDigits as digit, index}
                 <div class="code-input">
                   <input
@@ -567,7 +585,8 @@
                     maxlength="1"
                     value={digit}
                     disabled={verifyingMfa}
-                    oninput={(event) => updateMfaDigit(index, (event.currentTarget as HTMLInputElement).value)}
+                    oninput={(event) =>
+                      updateMfaDigit(index, (event.currentTarget as HTMLInputElement).value)}
                     onkeydown={(event) => handleMfaKeydown(index, event)}
                     onpaste={(event) => handleMfaPaste(index, event)}
                   />
@@ -600,12 +619,16 @@
                 {/if}
               </button>
 
-              <button class="mfa-back" type="button" onclick={returnToCredentials} disabled={verifyingMfa}>
+              <button
+                class="mfa-back"
+                type="button"
+                onclick={returnToCredentials}
+                disabled={verifyingMfa}
+              >
                 Voltar para senha
               </button>
             </div>
           </div>
-          {/if}
         {/if}
 
         {#if errorMessage}

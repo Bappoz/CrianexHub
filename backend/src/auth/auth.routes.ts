@@ -69,7 +69,9 @@ function getRefreshTokenFromRequest(request: Request): string | null {
 }
 
 function getAccessTokenFromBody(request: Request): string {
-  return typeof request.body?.['accessToken'] === 'string' ? request.body['accessToken'].trim() : '';
+  return typeof request.body?.['accessToken'] === 'string'
+    ? request.body['accessToken'].trim()
+    : '';
 }
 
 function getCodeFromBody(request: Request): string {
@@ -187,7 +189,8 @@ authRouter.post('/mfa/verify', async (request, response) => {
     });
   } catch (err) {
     console.error('[auth] mfa verify error:', err);
-    const reason = err instanceof Error && 'reason' in err ? (err as { reason?: string }).reason : null;
+    const reason =
+      err instanceof Error && 'reason' in err ? (err as { reason?: string }).reason : null;
 
     response.status(400).json({
       message: reason === 'expired' ? 'Código TOTP expirado' : 'Código TOTP inválido',
@@ -210,7 +213,8 @@ authRouter.get('/mfa/status', validateJWT, async (_request, response) => {
 });
 
 authRouter.post('/mfa/enroll', validateJWT, async (request, response) => {
-  const authContext = (response.locals as { auth: { accessToken: string; user: { name: string } } }).auth;
+  const authContext = (response.locals as { auth: { accessToken: string; user: { name: string } } })
+    .auth;
   const friendlyName = getFriendlyNameFromBody(request) || authContext.user.name || 'Crianex Admin';
 
   try {
@@ -251,7 +255,8 @@ authRouter.post('/mfa/enroll/verify', validateJWT, async (request, response) => 
     });
   } catch (err) {
     console.error('[auth] mfa enroll verify error:', err);
-    const reason = err instanceof Error && 'reason' in err ? (err as { reason?: string }).reason : null;
+    const reason =
+      err instanceof Error && 'reason' in err ? (err as { reason?: string }).reason : null;
 
     response.status(400).json({
       message: reason === 'expired' ? 'Código TOTP expirado' : 'Código TOTP inválido',

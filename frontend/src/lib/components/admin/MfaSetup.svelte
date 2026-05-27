@@ -103,7 +103,8 @@
         verificationCode = '';
         statusMessage = 'O segundo fator já está ativo nesta conta.';
       } else if (response.hasAnyFactor && pendingFactorId && !enrollment) {
-        statusMessage = 'Há um cadastro TOTP pendente. Se você ainda tem o QR anterior, conclua a verificação.';
+        statusMessage =
+          'Há um cadastro TOTP pendente. Se você ainda tem o QR anterior, conclua a verificação.';
       }
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -137,7 +138,8 @@
       pendingFactorId = response.id;
       verificationCode = '';
       saveEnrollment();
-      statusMessage = 'QR code gerado. Escaneie com o seu app autenticador e depois confirme o código.';
+      statusMessage =
+        'QR code gerado. Escaneie com o seu app autenticador e depois confirme o código.';
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
         statusMessage = 'Esse usuário já possui TOTP ativo.';
@@ -189,95 +191,103 @@
 
 {#if visible}
   <section class="mfa-card" aria-labelledby="mfa-title">
-  <div class="mfa-header">
-    <p class="eyebrow">Segurança da conta</p>
-    <h2 id="mfa-title">Vincular app autenticador</h2>
-    <p>
-      Gere um QR code padrão TOTP, escaneie no aplicativo que você preferir e confirme o código de
-      6 dígitos para ativar a autenticação em duas etapas.
-    </p>
-  </div>
-
-  {#if loadingStatus}
-    <p class="status">Carregando status do 2FA...</p>
-  {:else if hasVerifiedFactor}
-    <div class="success-box">
-      <strong>2FA ativo</strong>
-      <p>{statusMessage}</p>
+    <div class="mfa-header">
+      <p class="eyebrow">Segurança da conta</p>
+      <h2 id="mfa-title">Vincular app autenticador</h2>
+      <p>
+        Gere um QR code padrão TOTP, escaneie no aplicativo que você preferir e confirme o código de
+        6 dígitos para ativar a autenticação em duas etapas.
+      </p>
     </div>
-  {:else}
-    <div class="enroll-grid">
-      <div class="enroll-copy">
-        <label for="friendly-name">Nome exibido no app</label>
-        <input
-          id="friendly-name"
-          class="setup-input"
-          type="text"
-          bind:value={friendlyName}
-          placeholder="Crianex Admin"
-        />
 
-        <button class="setup-button" type="button" on:click={startEnrollment} disabled={loadingEnroll}>
-          {#if loadingEnroll}
-            Gerando QR code...
-          {:else}
-            Gerar QR code
+    {#if loadingStatus}
+      <p class="status">Carregando status do 2FA...</p>
+    {:else if hasVerifiedFactor}
+      <div class="success-box">
+        <strong>2FA ativo</strong>
+        <p>{statusMessage}</p>
+      </div>
+    {:else}
+      <div class="enroll-grid">
+        <div class="enroll-copy">
+          <label for="friendly-name">Nome exibido no app</label>
+          <input
+            id="friendly-name"
+            class="setup-input"
+            type="text"
+            bind:value={friendlyName}
+            placeholder="Crianex Admin"
+          />
+
+          <button
+            class="setup-button"
+            type="button"
+            on:click={startEnrollment}
+            disabled={loadingEnroll}
+          >
+            {#if loadingEnroll}
+              Gerando QR code...
+            {:else}
+              Gerar QR code
+            {/if}
+          </button>
+
+          {#if statusMessage}
+            <p class="status">{statusMessage}</p>
           {/if}
-        </button>
 
-        {#if statusMessage}
-          <p class="status">{statusMessage}</p>
-        {/if}
+          {#if pendingFactorId && !enrollment}
+            <p class="hint">
+              Existe um cadastro TOTP em andamento. Se o QR anterior ainda estiver visível, conclua
+              a verificação abaixo.
+            </p>
+          {/if}
+        </div>
 
-        {#if pendingFactorId && !enrollment}
-          <p class="hint">Existe um cadastro TOTP em andamento. Se o QR anterior ainda estiver visível, conclua a verificação abaixo.</p>
+        {#if enrollment}
+          <div class="qr-panel">
+            <div class="qr-box">
+              <img src={enrollment.totp.qr_code} alt={enrollment.totp.uri} />
+            </div>
+
+            <div class="secret-box">
+              <span>Secret</span>
+              <code>{enrollment.totp.secret}</code>
+            </div>
+
+            <div class="verify-box">
+              <label for="verification-code">Código do app</label>
+              <input
+                id="verification-code"
+                class="setup-input code-input"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                bind:value={verificationCode}
+                placeholder="000000"
+              />
+
+              <button
+                class="setup-button confirm-button"
+                type="button"
+                on:click={confirmEnrollment}
+                disabled={loadingVerify}
+              >
+                {#if loadingVerify}
+                  Confirmando...
+                {:else}
+                  Confirmar e ativar
+                {/if}
+              </button>
+            </div>
+          </div>
         {/if}
       </div>
+    {/if}
 
-      {#if enrollment}
-        <div class="qr-panel">
-          <div class="qr-box">
-            <img src={enrollment.totp.qr_code} alt={enrollment.totp.uri} />
-          </div>
-
-          <div class="secret-box">
-            <span>Secret</span>
-            <code>{enrollment.totp.secret}</code>
-          </div>
-
-          <div class="verify-box">
-            <label for="verification-code">Código do app</label>
-            <input
-              id="verification-code"
-              class="setup-input code-input"
-              type="text"
-              inputmode="numeric"
-              maxlength="6"
-              bind:value={verificationCode}
-              placeholder="000000"
-            />
-
-            <button
-              class="setup-button confirm-button"
-              type="button"
-              on:click={confirmEnrollment}
-              disabled={loadingVerify}
-            >
-              {#if loadingVerify}
-                Confirmando...
-              {:else}
-                Confirmar e ativar
-              {/if}
-            </button>
-          </div>
-        </div>
-      {/if}
-    </div>
-  {/if}
-
-  {#if errorMessage}
-    <p class="error">{errorMessage}</p>
-  {/if}
+    {#if errorMessage}
+      <p class="error">{errorMessage}</p>
+    {/if}
   </section>
 {/if}
 
