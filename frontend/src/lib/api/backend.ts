@@ -25,6 +25,11 @@ export async function apiFetch<T>(
     return undefined as unknown as T;
   }
 
+  // 204 No Content: tratar como sucesso sem corpo (evita erro ao chamar res.json() em resposta vazia)
+  if (res.status === 204) {
+    return undefined as unknown as T;
+  }
+
   if (!res.ok) {
     throw new Error(`[backend] ${res.status} ${res.statusText} — ${API_PREFIX}${normalizedPath}`);
   }

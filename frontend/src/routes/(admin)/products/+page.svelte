@@ -18,8 +18,11 @@
   } from 'lucide-svelte';
   
   import { apiFetch } from '$lib/api/backend';
+  import { tick } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import ProductModal from './productModal.svelte'; // Importa o componente que criamos
+
+  import DeleteModal from './deleteModal.svelte';
 
   // Estados de controle do Modal
   let isModalOpen = false;
@@ -32,10 +35,14 @@
     category_pt: '', category_en: '',
     tagline_pt: '', tagline_en: '',
     description_pt: '', description_en: '',
-    color: '#6366f1', icon_text: '', published: false
+    color: '#6366f1', icon_text: '', image_url: '', published: false
   };
 
   let modalData = { ...emptyForm };
+
+  // Estado global de processamento para operações async (criar/editar/publicar/excluir)
+  let isProcessing = false;
+  let processingMessage = '';
 
   // Gatilho: Clicou em "+ Novo Produto"
   function handleNovoProduto() {
@@ -56,24 +63,29 @@
   // Função disparada quando o modal clica em "Salvar" ou "Criar"
   async function handleSaveModal() {
     try {
+      // Close modal first so native dialog/backdrop is removed
+      isModalOpen = false;
+      await tick();
+
+      isProcessing = true;
+      processingMessage = isEditingMode ? 'Salvando alterações...' : 'Criando produto...';
+
       if (isEditingMode) {
-        
         await apiFetch(`/products/${currentProductId}`, {
           method: 'PATCH',
-          body: JSON.stringify(modalData)
+          body: JSON.stringify(modalData),
         });
       } else {
-  
-        // Criação de produto (POST)
         await apiFetch('/products', {
           method: 'POST',
-          body: JSON.stringify(modalData)
+          body: JSON.stringify(modalData),
         });
       }
 
-      isModalOpen = false; // Fecha o modal
       await invalidateAll(); // Recarrega a tabela de produtos automaticamente!
+      isProcessing = false;
     } catch (err) {
+      isProcessing = false;
       console.error('Falha ao processar operação do produto:', err);
     }
   }
@@ -149,6 +161,23 @@
       .slice(0, 2);
   }
 
+  // Retorna um texto relativo com base em um timestamp ISO (updated_at)
+  function getTimeAgo(iso?: string | null) {
+    if (!iso) return 'há alguns dias';
+    const then = new Date(iso).getTime();
+    if (Number.isNaN(then)) return 'há alguns dias';
+    const diffMs = Date.now() - then;
+    const mins = Math.floor(diffMs / 1000 / 60);
+    const hours = Math.floor(mins / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days >= 2) return `há ${days} dias`;
+    if (days === 1) return 'há 1 dia';
+    if (hours >= 1) return `há ${hours} horas`;
+    if (mins >= 1) return `há ${mins} minutos`;
+    return 'agora';
+  }
+
   // Lógica das Ações do Menu
   function handleEditar(id: string) {
     console.log('Editar produto id:', id);
@@ -158,6 +187,8 @@
   async function handleTogglePublicacao(id: string, currentStatus: boolean) {
     console.log('Mudar status do id:', id, 'para:', !currentStatus);
     try {
+      isProcessing = true;
+      processingMessage = currentStatus ? 'Despublicando...' : 'Publicando...';
       console.debug('[client] about to call apiFetch for', id, '->', !currentStatus);
       const res = await apiFetch(`/products/${id}`, {
         method: 'PATCH',
@@ -167,19 +198,79 @@
       console.debug('[client] apiFetch returned', res);
 
       await invalidateAll();
+      isProcessing = false;
     } catch (error) {
+      isProcessing = false;
       console.error('Erro ao altera status de publicação:', error);
     }
   }
 
-  async function handleExcluir(id: string) {
-    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
-    console.log('Deletar produto id:', id);
-    // Disparar o DELETE /admin/products/:id
+  let showDeleteModal = false;
+  let productIdToDelete : string | null = null;
+
+  function openDeleteModal(id: string) {
+    productIdToDelete = id;
+    showDeleteModal = true;
+  }
+  
+  function closeDeleteModal() {
+    showDeleteModal = false;
+    productIdToDelete = null;
+  }
+
+  // Nome do produto selecionado para exclusão (derivado do id)
+  $: productToDeleteName = productIdToDelete
+    ? (listaProdutos.find((p) => p.id === productIdToDelete)?.name_pt
+        ?? listaProdutos.find((p) => p.id === productIdToDelete)?.name_en
+        ?? '')
+    : '';
+
+  async function handleExcluir(id?: string) {
+    // If caller passed a non-string (e.g. an Event), ignore it and use the selected id
+    const idToDelete = typeof id === 'string' ? id : productIdToDelete;
+    if (!idToDelete) {
+      console.warn('handleExcluir called without a valid product id', { id });
+      return;
+    }
+
+    console.debug('[client] Deleting product id:', idToDelete);
+
+    // Close the modal first so the native dialog/backdrop is removed
+    closeDeleteModal();
+    await tick();
+
+    isProcessing = true;
+    processingMessage = 'Excluindo produto...';
+
+    try {
+      await apiFetch(`/products/${idToDelete}`, {
+        method: 'DELETE',
+      });
+
+      console.log('Produto excluído com sucesso do banco de dados!');
+
+      await invalidateAll();
+    } catch (error) {
+      console.error('Erro ao tentar excluir o produto:', error);
+      alert('Não foi possível excluir o produto. Verifique se ele está despublicado!');
+    } finally {
+      isProcessing = false;
+    }
   }
 </script>
 
 <div class="min-h-screen bg-[#0a0a0b] text-zinc-100 p-8 font-sans">
+  {#if isProcessing}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div class="bg-[#0b0b0c] border border-zinc-800 rounded-lg px-6 py-4 flex items-center gap-4 shadow-lg">
+        <svg class="animate-spin h-5 w-5 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <div class="text-sm text-zinc-200">{processingMessage || 'Processando...'}</div>
+      </div>
+    </div>
+  {/if}
   <header class="flex justify-between items-center mb-8">
     <div>
       <h1 class="text-lg font-semibold flex items-center gap-2 tracking-tight">
@@ -297,7 +388,7 @@
             </span>
 
             <div class="flex items-center gap-4 text-zinc-500 text-xs whitespace-nowrap">
-              <span>edit. há {produto.days_ago || '2 dias'}</span>
+              <span>edit. {getTimeAgo(produto.updated_at)}</span>
               <span class="text-zinc-600 font-mono text-[10px]">PT · EN</span>
             </div>
 
@@ -319,7 +410,7 @@
                   <button
                     type="button"
                     on:click={() => handleEditarProduto(produto)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-white hover:text-black cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
                   >
                     <Pencil class="h-3.5 w-3.5 text-zinc-400" />
                     <span>Editar produto</span>
@@ -329,21 +420,10 @@
                   <button
                     type="button"
                     on:click={() => handleTogglePublicacao(produto.id, produto.published)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-white hover:text-black cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
                   >
                     <EyeOff class="h-3.5 w-3.5 text-zinc-400" />
                     <span>Despublicar</span>
-                  </button>
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator class="bg-zinc-800/60 my-1" />
-                <DropdownMenu.Item class="p-0">
-                  <button
-                    type="button"
-                    on:click={() => handleExcluir(produto.id)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded text-[#f43f5e] hover:bg-rose-950/20 cursor-pointer focus:bg-rose-950/20 focus:text-[#f43f5e] font-medium text-left"
-                  >
-                    <Trash2 class="h-3.5 w-3.5" />
-                    <span>Excluir</span>
                   </button>
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
@@ -359,6 +439,8 @@
         bind:formData={modalData}
         onSave={handleSaveModal}
       />
+
+      
 
       <div
         class="text-[10px] font-bold text-zinc-500 tracking-wider px-6 py-2 bg-[#161619]/40 border-b border-zinc-800/40 flex justify-between items-center mt-2"
@@ -402,7 +484,7 @@
             </span>
 
             <div class="flex items-center gap-4 text-zinc-500 text-xs whitespace-nowrap">
-              <span>edit. há {produto.days_ago || '5 dias'}</span>
+              <span>edit. {getTimeAgo(produto.updated_at)}</span>
               <span class="text-zinc-600 font-mono text-[10px]">PT · EN</span>
             </div>
 
@@ -424,7 +506,7 @@
                   <button
                     type="button"
                     on:click={() => handleEditarProduto(produto)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-white hover:text-black cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
                   >
                     <Pencil class="h-3.5 w-3.5 text-zinc-400" />
                     <span>Editar produto</span>
@@ -434,18 +516,18 @@
                   <button
                     type="button"
                     on:click={() => handleTogglePublicacao(produto.id, produto.published)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded hover:bg-white hover:text-black cursor-pointer focus:bg-zinc-900 focus:text-white text-left"
                   >
                     <Eye class="h-3.5 w-3.5 text-zinc-400" />
                     <span>Publicar</span>
                   </button>
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator class="bg-zinc-800/60 my-1" />
-                <DropdownMenu.Item class="p-0">
+                <DropdownMenu.Item class="p-0" variant="destructive">
                   <button
                     type="button"
-                    on:click={() => handleExcluir(produto.id)}
-                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded text-[#f43f5e] hover:bg-rose-950/20 cursor-pointer focus:bg-rose-950/20 focus:text-[#f43f5e] font-medium text-left"
+                    on:click={() => openDeleteModal(produto.id)}
+                    class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded text-[#f43f5e] hover:bg-red-950/20 hover:text-[#f43f5e] cursor-pointer focus:bg-rose-950/20 focus:text-[#f43f5e] font-medium text-left"
                   >
                     <Trash2 class="h-3.5 w-3.5" />
                     <span>Excluir</span>
@@ -456,6 +538,9 @@
           </div>
         </div>
       {/each}
+
+
+       <DeleteModal isOpen={showDeleteModal} onClose={closeDeleteModal} onConfirm={handleExcluir}>{productToDeleteName}</DeleteModal>
     </Card.Content>
   </Card.Root>
 </div>

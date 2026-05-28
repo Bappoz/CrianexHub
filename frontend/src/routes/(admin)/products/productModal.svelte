@@ -22,22 +22,11 @@
     color: '#7c3aed', // Roxo padrão do protótipo
     icon_text: 'AV',
     published: false,
-    slug: ''
+    slug: '',
+    image_url: ''
   };
   
   export let onSave: () => Promise<void>;
-
-
-  const inputClass = "w-full rounded-lg border border-zinc-800/80 bg-[#09090b] px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-700 focus:border-zinc-700 focus:bg-[#050507] focus:outline-none transition-all";
-
-  // Estado das abas de idioma individual por campo
-  let langFields = {
-    category: 'pt',
-    tagline: 'pt',
-    description: 'pt',
-    target: 'pt',
-    clients: 'pt'
-  };
 
   function fechar() {
     isOpen = false;
@@ -47,7 +36,7 @@
 {#if isOpen}
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade">
     
-    <div class="relative flex h-full max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#121214] text-zinc-100 shadow-2xl">
+    <div class="admin-modal wide relative flex h-full max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#121214] text-zinc-100 shadow-2xl">
       
       <button 
         type="button" 
