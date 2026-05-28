@@ -79,8 +79,7 @@
     padding: 24px;
     background:
       radial-gradient(circle at top, rgba(127, 63, 229, 0.22), transparent 34%),
-      radial-gradient(circle at bottom right, rgba(231, 31, 132, 0.16), transparent 32%),
-      #060606;
+      radial-gradient(circle at bottom right, rgba(231, 31, 132, 0.16), transparent 32%), #060606;
   }
 
   .callback-card {

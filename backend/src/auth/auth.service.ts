@@ -284,7 +284,11 @@ export async function loadAdminProfile(
 
     return {
       id: userId,
-      name: normalizeDisplayName(profileById.name ?? null, profileById.email ?? email, userMetadata),
+      name: normalizeDisplayName(
+        profileById.name ?? null,
+        profileById.email ?? email,
+        userMetadata
+      ),
       role,
     };
   }
@@ -317,7 +321,11 @@ export async function loadAdminProfile(
 
   return {
     id: userId,
-    name: normalizeDisplayName(profileByEmail.name ?? null, profileByEmail.email ?? email, userMetadata),
+    name: normalizeDisplayName(
+      profileByEmail.name ?? null,
+      profileByEmail.email ?? email,
+      userMetadata
+    ),
     role,
   };
 }

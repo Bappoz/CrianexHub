@@ -6,9 +6,7 @@
   <main class="admin-home-card" aria-labelledby="admin-home-title">
     <span class="tag">Crianex Admin</span>
     <h1 id="admin-home-title">Painel administrativo.</h1>
-    <p>
-      Você já pode continuar o fluxo do painel. As próximas telas de gestão vão aparecer aqui.
-    </p>
+    <p>Você já pode continuar o fluxo do painel. As próximas telas de gestão vão aparecer aqui.</p>
   </main>
 </div>
 
@@ -20,8 +18,7 @@
     padding: 24px;
     background:
       radial-gradient(circle at top, rgba(127, 63, 229, 0.18), transparent 32%),
-      radial-gradient(circle at bottom right, rgba(231, 31, 132, 0.14), transparent 30%),
-      #060606;
+      radial-gradient(circle at bottom right, rgba(231, 31, 132, 0.14), transparent 30%), #060606;
   }
 
   .admin-home-card {

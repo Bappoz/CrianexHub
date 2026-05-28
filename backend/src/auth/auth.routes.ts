@@ -174,16 +174,19 @@ authRouter.post('/refresh', async (request, response) => {
 });
 
 authRouter.patch('/profiles/:id/status', validateJWT, async (request, response) => {
-  const authContext = (response.locals as {
-    auth: { user: { id: string; role: string } };
-  }).auth;
+  const authContext = (
+    response.locals as {
+      auth: { user: { id: string; role: string } };
+    }
+  ).auth;
 
   if (authContext.user.role !== 'owner') {
     response.status(403).json({ message: 'Acesso restrito a owners' });
     return;
   }
 
-  const targetProfileId = typeof request.params?.['id'] === 'string' ? request.params['id'].trim() : '';
+  const targetProfileId =
+    typeof request.params?.['id'] === 'string' ? request.params['id'].trim() : '';
   const status = normalizeProfileStatus(
     typeof request.body?.['status'] === 'string' ? request.body['status'] : null
   );

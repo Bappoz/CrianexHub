@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, beforeAll } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { supabase as sharedSupabase } from './supabase';
 
 // Use the shared supabase client from src/lib/supabase which already
@@ -7,8 +7,8 @@ import { supabase as sharedSupabase } from './supabase';
 // services are not available.
 const hasConfig = true;
 
-let anon: typeof sharedSupabase;
-let admin: typeof sharedSupabase;
+const anon = sharedSupabase as any;
+const admin = sharedSupabase as any;
 
 const TEST_EMAIL = 'vitest-leads@test.invalid';
 
@@ -18,12 +18,6 @@ const validLead = {
   message: 'Interested in product X',
   ip_hash: 'a'.repeat(64),
 };
-
-beforeAll(() => {
-  if (!hasConfig) return;
-  anon = sharedSupabase;
-  admin = sharedSupabase;
-});
 
 afterEach(async () => {
   if (!hasConfig) return;

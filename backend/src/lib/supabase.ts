@@ -255,15 +255,11 @@ let supabaseClient: ReturnType<typeof createClient> | null = null;
 
 if (url && key) {
   try {
-    // Use a short fetch to probe connectivity. Top-level await is available
-    // because this project uses ES modules.
-    // eslint-disable-next-line no-undef
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2000);
 
     // perform a simple GET to the URL root; if it fails we'll fallback
     // to the in-memory client.
-    // eslint-disable-next-line no-undef
     const res = await fetch(url, { method: 'GET', signal: controller.signal });
     clearTimeout(timeout);
 
@@ -273,7 +269,7 @@ if (url && key) {
       console.warn('[supabase] ping returned non-OK status, using in-memory fallback');
       supabaseClient = createInMemorySupabase() as unknown as ReturnType<typeof createClient>;
     }
-  } catch (err) {
+  } catch {
     console.warn('[supabase] could not reach Supabase at %s, using in-memory fallback', url);
     supabaseClient = createInMemorySupabase() as unknown as ReturnType<typeof createClient>;
   }

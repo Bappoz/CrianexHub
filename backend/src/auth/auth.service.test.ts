@@ -128,14 +128,14 @@ describe('loadAdminProfile', () => {
       loadAdminProfile(supabase as never, 'google-auth-id', 'inactive@example.com', null)
     ).rejects.toMatchObject({
       status: 403,
-      message: 'Conta nÃ£o autorizada. Solicite acesso ao administrador.',
+      message: 'Conta não autorizada. Solicite acesso ao administrador.',
     });
 
     await expect(
       loadAdminProfile(supabase as never, 'google-auth-id', 'missing@example.com', null)
     ).rejects.toMatchObject({
       status: 403,
-      message: 'Conta nÃ£o autorizada. Solicite acesso ao administrador.',
+      message: 'Conta não autorizada. Solicite acesso ao administrador.',
     });
   });
 
