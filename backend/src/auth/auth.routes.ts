@@ -7,6 +7,7 @@ import {
   parseCookieHeader,
   refreshWithRefreshToken,
   revokeSession,
+  validateAccessToken,
 } from './auth.service.js';
 import { validateJWT } from '../middleware/validate-jwt.js';
 
@@ -28,6 +29,8 @@ const COOKIE_OPTIONS = {
 };
 
 const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+const ALLOWED_PROFILE_STATUSES = new Set(['active', 'inactive']);
 
 function setAuthCookies(
   response: Response,
@@ -62,6 +65,24 @@ function getRefreshTokenFromRequest(request: Request): string | null {
   const cookies = parseCookieHeader(request.headers.cookie);
 
   return cookies[REFRESH_TOKEN_COOKIE] ?? null;
+}
+
+function getAccessTokenFromRequest(request: Request): string | null {
+  const authorizationHeader = request.headers.authorization ?? null;
+
+  if (authorizationHeader) {
+    const [scheme, token] = authorizationHeader.split(' ');
+
+    if (scheme?.toLowerCase() === 'bearer' && token) {
+      return token.trim() || null;
+    }
+  }
+
+  return typeof request.body?.['accessToken'] === 'string' ? request.body['accessToken'] : null;
+}
+
+function normalizeProfileStatus(status: string | null | undefined): string {
+  return status?.trim().toLowerCase() || '';
 }
 
 export const authRouter = Router();
@@ -99,6 +120,29 @@ authRouter.post('/login', async (request, response) => {
   }
 });
 
+authRouter.post('/session', async (request, response) => {
+  const accessToken = getAccessTokenFromRequest(request);
+
+  if (!accessToken) {
+    response.status(401).json({ message: 'Sessão inválida' });
+    return;
+  }
+
+  try {
+    const user = await validateAccessToken(getSupabaseClient(), accessToken);
+    response.status(200).json({ user });
+  } catch (err) {
+    const status =
+      typeof err === 'object' && err !== null && 'status' in err
+        ? Number((err as { status?: number }).status ?? 401)
+        : 401;
+    const message = err instanceof Error ? err.message : 'Sessão inválida';
+
+    console.error('[auth] session validation error:', err);
+    response.status(status).json({ message });
+  }
+});
+
 authRouter.post('/refresh', async (request, response) => {
   const refreshToken = getRefreshTokenFromRequest(request);
 
@@ -126,6 +170,56 @@ authRouter.post('/refresh', async (request, response) => {
   } catch (err) {
     console.error('[auth] refresh error:', err);
     response.status(401).json({ message: 'Sessão inválida' });
+  }
+});
+
+authRouter.patch('/profiles/:id/status', validateJWT, async (request, response) => {
+  const authContext = (response.locals as {
+    auth: { user: { id: string; role: string } };
+  }).auth;
+
+  if (authContext.user.role !== 'owner') {
+    response.status(403).json({ message: 'Acesso restrito a owners' });
+    return;
+  }
+
+  const targetProfileId = typeof request.params?.['id'] === 'string' ? request.params['id'].trim() : '';
+  const status = normalizeProfileStatus(
+    typeof request.body?.['status'] === 'string' ? request.body['status'] : null
+  );
+
+  if (!targetProfileId) {
+    response.status(400).json({ message: 'Profile id é obrigatório' });
+    return;
+  }
+
+  if (!ALLOWED_PROFILE_STATUSES.has(status)) {
+    response.status(400).json({ message: 'Status inválido' });
+    return;
+  }
+
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ status })
+      .eq('id', targetProfileId)
+      .select('id,name,role,email,status')
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      response.status(404).json({ message: 'Profile não encontrado' });
+      return;
+    }
+
+    response.status(200).json({ profile: data });
+  } catch (err) {
+    console.error('[auth] profile status update error:', err);
+    response.status(500).json({ message: 'Falha ao atualizar o status do profile' });
   }
 });
 

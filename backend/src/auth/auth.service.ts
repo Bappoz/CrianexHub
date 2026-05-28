@@ -25,6 +25,7 @@ type ProfileRow = {
   name: string | null;
   role: string | null;
   email: string | null;
+  status: string | null;
 };
 
 type AuthServiceError = Error & {
@@ -59,7 +60,15 @@ export function normalizeRole(role: string | null | undefined): string {
   return role?.trim() || 'member';
 }
 
-const ADMIN_ROLES = new Set(['admin', 'owner', 'member']);
+export function normalizeEmail(email: string | null | undefined): string {
+  return email?.trim().toLowerCase() || '';
+}
+
+function normalizeStatus(status: string | null | undefined): string {
+  return status?.trim().toLowerCase() || 'inactive';
+}
+
+const ADMIN_ROLES = new Set(['owner', 'member']);
 
 export function parseBearerToken(authorizationHeader: string | null | undefined): string | null {
   if (!authorizationHeader) {
@@ -171,9 +180,9 @@ export async function loadAdminProfile(
   email: string | null,
   userMetadata: Record<string, unknown> | null | undefined
 ): Promise<AuthenticatedAdminUser> {
-  const { data, error } = await supabase
+  const { data: profileById, error } = await supabase
     .from('profiles')
-    .select('id,name,role,email')
+    .select('id,name,role,email,status')
     .eq('id', userId)
     .maybeSingle<ProfileRow>();
 
@@ -181,7 +190,41 @@ export async function loadAdminProfile(
     throw createAuthError(error.message, 500);
   }
 
-  const role = normalizeRole(data?.role ?? null);
+  if (profileById && normalizeStatus(profileById.status) === 'active') {
+    const role = normalizeRole(profileById.role ?? null);
+
+    if (!ADMIN_ROLES.has(role)) {
+      throw createAuthError('Acesso restrito a administradores', 403);
+    }
+
+    return {
+      id: userId,
+      name: normalizeDisplayName(profileById.name ?? null, profileById.email ?? email, userMetadata),
+      role,
+    };
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!normalizedEmail) {
+    throw createAuthError('Conta não autorizada. Solicite acesso ao administrador.', 403);
+  }
+
+  const { data: profileByEmail, error: emailLookupError } = await supabase
+    .from('profiles')
+    .select('id,name,role,email,status')
+    .eq('email', normalizedEmail)
+    .maybeSingle<ProfileRow>();
+
+  if (emailLookupError) {
+    throw createAuthError(emailLookupError.message, 500);
+  }
+
+  if (!profileByEmail || normalizeStatus(profileByEmail.status) !== 'active') {
+    throw createAuthError('Conta não autorizada. Solicite acesso ao administrador.', 403);
+  }
+
+  const role = normalizeRole(profileByEmail.role ?? null);
 
   if (!ADMIN_ROLES.has(role)) {
     throw createAuthError('Acesso restrito a administradores', 403);
@@ -189,7 +232,7 @@ export async function loadAdminProfile(
 
   return {
     id: userId,
-    name: normalizeDisplayName(data?.name ?? null, data?.email ?? email, userMetadata),
+    name: normalizeDisplayName(profileByEmail.name ?? null, profileByEmail.email ?? email, userMetadata),
     role,
   };
 }
