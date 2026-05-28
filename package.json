@@ -19,11 +19,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@rollup/rollup-win32-x64-msvc": "^4.60.4",
     "@supabase/supabase-js": "^2.106.1"
-  },
-  "optionalDependencies": {
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0"
   }
 }
