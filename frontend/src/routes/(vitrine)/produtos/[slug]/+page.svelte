@@ -34,6 +34,6 @@
   {/if}
 
   <div class="content prose text-zinc-200">
-    {@html description || '<p>Sem descrição disponível.</p>'}
+    <p class="whitespace-pre-wrap">{description || 'Sem descrição disponível.'}</p>
   </div>
 </section>

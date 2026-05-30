@@ -1,5 +1,4 @@
 import { supabase } from '$lib/api/supabase';
-import { env } from '$env/dynamic/public';
 
 export async function GET(event: any) {
   const origin = event.url.origin;
