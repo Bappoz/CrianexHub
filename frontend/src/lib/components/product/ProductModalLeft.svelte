@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { supabase } from '$lib/api/supabase';
+  import { env } from '$env/dynamic/public';
   import { Plus, Check } from 'lucide-svelte';
 
   export let formData: any;
@@ -56,37 +56,27 @@
     setPreview(file);
 
     try {
-      const fileExt = file.name.split('.').pop() ?? 'jpg';
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-      const filePath = `covers/${fileName}`;
+      const fd = new FormData();
+      fd.append('image', file);
 
-      if (supabase) {
-        const { error: uploadError } = await supabase.storage
-          .from('product-images')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-          });
+      const base = env.PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+      const res = await fetch(`${base}/api/products/upload`, {
+        method: 'POST',
+        body: fd,
+        credentials: 'include',
+      });
 
-        if (uploadError) throw uploadError;
-
-        const {
-          data: { publicUrl },
-        } = await supabase.storage.from('product-images').getPublicUrl(filePath);
-        formData.image_url = publicUrl;
-      } else {
-        const reader = new FileReader();
-        const dataUrl: string = await new Promise((resolve, reject) => {
-          reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
-          reader.onload = () => resolve(String(reader.result));
-          reader.readAsDataURL(file);
-        });
-        formData.image_url = dataUrl;
-        console.info('Imagem carregada localmente como data URL (fallback)');
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error ?? `Upload falhou (${res.status})`);
       }
-    } catch (error: any) {
-      console.error('Erro ao fazer upload da imagem:', error?.message ?? error);
-      imageError = error?.message ? String(error.message) : 'Falha ao enviar imagem';
+
+      const { image_url } = await res.json();
+      formData.image_url = image_url;
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Falha ao enviar imagem';
+      console.error('Erro ao fazer upload da imagem:', msg);
+      imageError = msg;
       formData.image_url = '';
       previewUrl = '';
       if (objectUrlToCleanup) {

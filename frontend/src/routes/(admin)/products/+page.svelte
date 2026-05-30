@@ -445,14 +445,10 @@
             </div>
 
             <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-8 w-8 text-zinc-500 hover:text-zinc-300 rounded-lg"
-                >
-                  <EllipsisVertical class="h-4 w-4" />
-                </Button>
+              <DropdownMenu.Trigger
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:text-zinc-300"
+              >
+                <EllipsisVertical class="h-4 w-4" />
               </DropdownMenu.Trigger>
               <DropdownMenu.Content
                 align="end"
@@ -543,14 +539,10 @@
             </div>
 
             <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-8 w-8 text-zinc-500 hover:text-zinc-300 rounded-lg"
-                >
-                  <EllipsisVertical class="h-4 w-4" />
-                </Button>
+              <DropdownMenu.Trigger
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:text-zinc-300"
+              >
+                <EllipsisVertical class="h-4 w-4" />
               </DropdownMenu.Trigger>
               <DropdownMenu.Content
                 align="end"
