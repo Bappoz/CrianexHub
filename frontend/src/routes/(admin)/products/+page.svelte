@@ -343,13 +343,14 @@
         <span class="absolute top-2 right-2.5 h-1.5 w-1.5 bg-white rounded-full"></span>
       </Button>
 
-      <Button
-        on:click={() => handleNovoProduto()}
-        class="h-9 bg-white text-black hover:bg-zinc-200 font-medium text-xs rounded-lg px-4 flex items-center gap-2 whitespace-nowrap"
+      <button
+        type="button"
+        on:click={handleNovoProduto}
+        class="h-9 bg-white text-black hover:bg-zinc-200 font-medium text-xs rounded-lg px-4 flex items-center gap-2 whitespace-nowrap cursor-pointer border-0"
       >
         <Plus class="h-4 w-4" />
         <span>Novo produto</span>
-      </Button>
+      </button>
     </div>
   </header>
 
