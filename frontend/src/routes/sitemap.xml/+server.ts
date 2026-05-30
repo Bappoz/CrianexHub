@@ -4,7 +4,6 @@ export async function GET(event: any) {
   const origin = event.url.origin;
 
   try {
-
     // static pages
     const staticUrls = [
       { loc: `${origin}/`, lastmod: new Date().toISOString() },
@@ -46,7 +45,9 @@ export async function GET(event: any) {
     console.error('[sitemap] unexpected error:', err?.message ?? err);
     // In dev return the error details to help debugging; in production keep generic
     const isDev = process.env.NODE_ENV !== 'production';
-    const body = isDev ? JSON.stringify({ message: 'sitemap error', error: String(err) }) : JSON.stringify({ message: 'Internal Error' });
+    const body = isDev
+      ? JSON.stringify({ message: 'sitemap error', error: String(err) })
+      : JSON.stringify({ message: 'Internal Error' });
     return new Response(body, { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

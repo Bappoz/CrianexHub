@@ -4,9 +4,16 @@
 
   const lang = selectedLang ?? 'pt';
 
-  const name = lang === 'en' ? (product.name_en || product.name_pt) : (product.name_pt || product.name_en);
-  const tagline = lang === 'en' ? (product.tagline_en || product.tagline_pt) : (product.tagline_pt || product.tagline_en);
-  const description = lang === 'en' ? (product.description_en || product.description_pt) : (product.description_pt || product.description_en);
+  const name =
+    lang === 'en' ? product.name_en || product.name_pt : product.name_pt || product.name_en;
+  const tagline =
+    lang === 'en'
+      ? product.tagline_en || product.tagline_pt
+      : product.tagline_pt || product.tagline_en;
+  const description =
+    lang === 'en'
+      ? product.description_en || product.description_pt
+      : product.description_pt || product.description_en;
 </script>
 
 <svelte:head>
