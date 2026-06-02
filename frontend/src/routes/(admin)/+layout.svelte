@@ -1,6 +1,7 @@
 <script lang="ts">
   import '../../app.css';
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
   import {
     Users,
     Package,
@@ -50,6 +51,29 @@
   function closeSidebar() {
     sidebarOpen = false;
   }
+
+  onMount(() => {
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    import('$lib/api/supabase')
+      .then(({ supabase }) => {
+        const { data: authData } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (session) {
+            document.cookie = `access_token=${session.access_token}; path=/; max-age=${session.expires_in || 3600}; SameSite=Lax;`;
+          } else {
+            document.cookie = 'access_token=; path=/; max-age=0; SameSite=Lax;';
+          }
+        });
+        subscription = authData.subscription;
+      })
+      .catch((err) => {
+        console.error('[admin layout] Failed to set auth listener:', err);
+      });
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  });
 </script>
 
 <div class="admin-root admin-shell" class:sidebar-open={sidebarOpen}>
