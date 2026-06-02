@@ -42,7 +42,7 @@
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toastMessage = '';
-    }, 4000);
+    }, 3000);
   }
 
   // Filtered members list using $derived
@@ -60,7 +60,7 @@
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) throw new Error('Sessão expirada. Faça login novamente.');
 
-      await apiFetch(`/api/admin/members/${member.id}/status`, {
+      await apiFetch(`/admin/members/${member.id}/status`, {
         method: 'PATCH',
         token: session.access_token,
         body: JSON.stringify({ status: newStatus }),
@@ -88,7 +88,7 @@
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) throw new Error('Sessão expirada. Faça login novamente.');
 
-      await apiFetch(`/api/admin/members/${memberToRemove.id}`, {
+      await apiFetch(`/admin/members/${memberToRemove.id}`, {
         method: 'DELETE',
         token: session.access_token,
       });
@@ -128,7 +128,7 @@
 
     if (isEditing && updatedMember.id) {
       // Edit Member
-      const res = await apiFetch<Member>(`/api/admin/members/${updatedMember.id}`, {
+      const res = await apiFetch<Member>(`/admin/members/${updatedMember.id}`, {
         method: 'PATCH',
         token: session.access_token,
         body: JSON.stringify({
@@ -141,7 +141,7 @@
       showToast('Membro atualizado com sucesso!');
     } else {
       // Create/Invite Member
-      const res = await apiFetch<Member>('/api/admin/members', {
+      const res = await apiFetch<Member>('/admin/members', {
         method: 'POST',
         token: session.access_token,
         body: JSON.stringify({
@@ -386,28 +386,77 @@
 
   <!-- Delete Confirmation Modal Dialog -->
   {#if isConfirmOpen}
-    <div class="modal-overlay">
-      <div class="modal confirm-modal" role="dialog" aria-labelledby="confirm-title">
-        <header class="modal-header">
-          <h3 id="confirm-title">Confirmar Remoção</h3>
+    <div class="admin-overlay" style="z-index: 110;" role="presentation">
+      <div
+        class="admin-modal danger-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        style="max-width: 400px;"
+      >
+        <header class="admin-modal-head">
+          <h3 id="confirm-title">Remover membro</h3>
           <button
-            class="modal-close-btn"
+            class="x"
+            type="button"
             onclick={() => (isConfirmOpen = false)}
-            disabled={deleting}>&times;</button
+            disabled={deleting}
+            aria-label="Fechar"
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </header>
-        <div class="modal-body">
-          <p>Tem certeza que deseja remover o membro <strong>{memberToRemove?.name}</strong>?</p>
-          <p class="warning-text">
-            Esta ação irá revogar permanentemente o acesso dele à plataforma.
+        <div class="admin-modal-body">
+          <div class="danger-icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+            </svg>
+          </div>
+          <h4>Confirmar remoção</h4>
+          <p>
+            Esta ação irá revogar permanentemente o acesso à plataforma e não pode ser desfeita.
           </p>
+          <div class="name-confirm">
+            <span class="lbl">membro</span>
+            <span class="val">{memberToRemove?.name}</span>
+          </div>
         </div>
-        <footer class="modal-footer">
-          <button class="btn-cancel" onclick={() => (isConfirmOpen = false)} disabled={deleting}>
+        <footer class="admin-modal-foot">
+          <button
+            class="btn ghost sm"
+            type="button"
+            onclick={() => (isConfirmOpen = false)}
+            disabled={deleting}
+          >
             Cancelar
           </button>
-          <button class="btn-submit danger-btn" onclick={confirmRemoveMember} disabled={deleting}>
-            {deleting ? 'Removendo...' : 'Remover Membro'}
+          <button class="btn-danger" type="button" onclick={confirmRemoveMember} disabled={deleting}>
+            {deleting ? 'Removendo...' : 'Remover'}
           </button>
         </footer>
       </div>
@@ -750,141 +799,14 @@
     margin-top: 6px;
   }
 
-  /* Modals Overlay (Confirm Modal Specifics) */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 6, 6, 0.6);
-    backdrop-filter: blur(2px);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+  /* btn-danger disabled state */
+  :global(.btn-danger:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
-  .modal {
-    background-color: var(--bg-elev);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-3);
-    animation: modalIn 0.2s ease-out;
-  }
-
-  @keyframes modalIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .modal-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .modal-close-btn {
-    background: transparent;
-    border: none;
-    font-size: 22px;
-    color: var(--text-muted);
-    cursor: pointer;
-  }
-
-  .modal-close-btn:hover {
-    color: var(--text);
-  }
-
-  .modal-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 14.5px;
-    line-height: 1.5;
-    color: var(--text);
-  }
-
-  .warning-text {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 20px;
-    border-top: 1px solid var(--line);
-  }
-
-  .btn-cancel {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-      border-color 0.2s,
-      color 0.2s;
-  }
-
-  .btn-cancel:hover:not(:disabled) {
-    border-color: var(--line-strong);
-    color: var(--text);
-  }
-
-  .btn-submit {
-    background-color: #ffffff;
-    color: #101010;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .btn-submit:hover:not(:disabled) {
-    background-color: var(--purple);
-    color: #ffffff;
-  }
-
-  .btn-submit.danger-btn {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
-
-  .btn-submit.danger-btn:hover:not(:disabled) {
-    background-color: #ef4444;
-    color: #ffffff;
-    border-color: #ef4444;
-  }
-
-  .btn-submit:disabled,
-  .btn-cancel:disabled {
+  :global(.btn.ghost.sm:disabled),
+  :global(.btn.sm:disabled) {
     opacity: 0.5;
     cursor: not-allowed;
   }

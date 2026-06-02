@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { validateEmail, type Member } from '$lib/utils/membros';
+  import { getInitials, validateEmail, type Member } from '$lib/utils/membros';
+  import { ApiError } from '$lib/api/backend';
 
   let {
     isOpen = false,
@@ -18,138 +19,192 @@
   let name = $state('');
   let email = $state('');
   let role = $state<'owner' | 'member'>('member');
-  let status = $state<'active' | 'inactive'>('active');
 
   let loading = $state(false);
   let errorMessage = $state('');
+  let emailError = $state('');
 
-  // Sync internal state when member prop changes
   $effect(() => {
-    name = member.name || '';
-    email = member.email || '';
-    role = member.role || 'member';
-    status = member.status || 'active';
-    errorMessage = '';
+    if (isOpen) {
+      name = member.name || '';
+      email = member.email || '';
+      role = member.role || 'member';
+      errorMessage = '';
+      emailError = '';
+    }
   });
+
+  let initials = $derived(getInitials(name || member.name || ''));
 
   async function handleSubmit(e: Event) {
     e.preventDefault();
     errorMessage = '';
+    emailError = '';
 
     const cleanedName = name.trim();
     const cleanedEmail = email.trim().toLowerCase();
 
-    if (!cleanedName || !cleanedEmail) {
-      errorMessage = 'Por favor, preencha todos os campos obrigatórios.';
+    if (!cleanedName) {
+      errorMessage = 'Por favor, preencha o nome.';
       return;
     }
 
-    if (!validateEmail(cleanedEmail)) {
-      errorMessage = 'Por favor, insira um e-mail válido (ex: nome@empresa.com).';
+    if (!isEditing && (!cleanedEmail || !validateEmail(cleanedEmail))) {
+      emailError = 'Insira um e-mail válido (ex: nome@empresa.com).';
       return;
     }
 
     loading = true;
     try {
-      await onSave({
-        ...member,
-        name: cleanedName,
-        email: cleanedEmail,
-        role,
-        status,
-      });
-    } catch (err: any) {
-      errorMessage = err.message || 'Falha ao salvar membro. Tente novamente.';
+      await onSave({ ...member, name: cleanedName, email: cleanedEmail, role });
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status === 409) {
+        emailError = err.message || 'E-mail já cadastrado na plataforma.';
+      } else if (err instanceof Error) {
+        errorMessage = err.message || 'Falha ao salvar membro. Tente novamente.';
+      } else {
+        errorMessage = 'Falha ao salvar membro. Tente novamente.';
+      }
     } finally {
       loading = false;
     }
   }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && !loading) onClose();
+  }
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 {#if isOpen}
-  <div class="modal-overlay">
-    <div class="modal" role="dialog" aria-labelledby="modal-title">
-      <header class="modal-header">
-        <h3 id="modal-title">{isEditing ? 'Editar Membro' : 'Cadastrar Membro'}</h3>
-        <button class="modal-close-btn" onclick={onClose} disabled={loading}>&times;</button>
+  <div class="admin-overlay" role="presentation">
+    <div
+      class="admin-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="member-modal-title"
+    >
+      <header class="admin-modal-head">
+        <h3 id="member-modal-title">{isEditing ? 'Editar membro' : 'Adicionar membro'}</h3>
+        <button class="x" type="button" onclick={onClose} disabled={loading} aria-label="Fechar">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </header>
 
-      <form class="modal-body" onsubmit={handleSubmit}>
-        {#if errorMessage}
-          <div class="error-banner" role="alert">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="error-icon"
+      <form onsubmit={handleSubmit}>
+        <div class="admin-modal-body">
+          <div class="avatar-edit-wrap">
+            <button
+              type="button"
+              class="avatar-edit"
+              disabled={loading}
+              aria-label="Alterar avatar"
             >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>{errorMessage}</span>
+              <span class="avatar-initials">{initials}</span>
+              <span class="avatar-edit-overlay" aria-hidden="true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                  ></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </span>
+            </button>
           </div>
-        {/if}
 
-        <div class="fld">
-          <label for="name">Nome Completo *</label>
-          <input
-            type="text"
-            id="name"
-            placeholder="ex. Marina Pereira"
-            bind:value={name}
-            required
-            disabled={loading}
-          />
-        </div>
-
-        <div class="fld">
-          <label for="email">E-mail Corporativo *</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="nome@crianex.com.br"
-            bind:value={email}
-            required
-            disabled={isEditing || loading}
-          />
-          {#if isEditing}
-            <span class="field-hint">O e-mail não pode ser alterado após o cadastro.</span>
+          {#if errorMessage}
+            <div class="error-banner" role="alert">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{errorMessage}</span>
+            </div>
           {/if}
+
+          <div class="fld-group">
+            <div class="fld">
+              <label for="m-name">Nome</label>
+              <input
+                type="text"
+                id="m-name"
+                placeholder="ex. Marina Pereira"
+                bind:value={name}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div class="fld">
+              <label for="m-email">E-mail</label>
+              <input
+                type="email"
+                id="m-email"
+                placeholder="nome@crianex.com.br"
+                bind:value={email}
+                required
+                disabled={isEditing || loading}
+                class:fld-input-err={emailError}
+              />
+              {#if emailError}
+                <span class="fld-err" role="alert">{emailError}</span>
+              {:else if isEditing}
+                <span class="fld-hint">O e-mail não pode ser alterado após o cadastro.</span>
+              {/if}
+            </div>
+
+            <div class="fld">
+              <label for="m-role">Papel de Acesso</label>
+              <select id="m-role" bind:value={role} disabled={loading}>
+                <option value="member">Member</option>
+                <option value="owner">Owner</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="fld-row">
-          <div class="fld">
-            <label for="role">Papel de Acesso *</label>
-            <select id="role" bind:value={role} disabled={loading}>
-              <option value="member">Member</option>
-              <option value="owner">Owner</option>
-            </select>
-          </div>
-
-          <div class="fld">
-            <label for="status">Status *</label>
-            <select id="status" bind:value={status} disabled={loading}>
-              <option value="active">Ativo</option>
-              <option value="inactive">Inativo</option>
-            </select>
-          </div>
-        </div>
-
-        <footer class="modal-footer">
-          <button type="button" class="btn-cancel" onclick={onClose} disabled={loading}>
+        <footer class="admin-modal-foot">
+          <button type="button" class="btn ghost sm" onclick={onClose} disabled={loading}>
             Cancelar
           </button>
-          <button type="submit" class="btn-submit" disabled={loading}>
-            {#if loading}
-              Salvando...
-            {:else}
-              {isEditing ? 'Salvar Alterações' : 'Cadastrar e Enviar Convite'}
-            {/if}
+          <button type="submit" class="btn sm" disabled={loading}>
+            {loading ? 'Salvando...' : 'Salvar'}
           </button>
         </footer>
       </form>
@@ -158,209 +213,95 @@
 {/if}
 
 <style>
-  .modal-overlay {
-    position: fixed;
+  .avatar-edit-wrap {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 8px;
+  }
+
+  .avatar-edit {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    position: relative;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: box-shadow 0.15s;
+  }
+
+  .avatar-edit:hover {
+    box-shadow: 0 0 0 3px var(--line-strong);
+  }
+
+  .avatar-edit:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .avatar-initials {
+    position: absolute;
     inset: 0;
-    background: rgba(6, 6, 6, 0.6);
-    backdrop-filter: blur(2px);
-    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-  }
-
-  .modal {
-    background-color: var(--bg-elev);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 520px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-3);
-    animation: modalIn 0.2s ease-out;
-  }
-
-  @keyframes modalIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .modal-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .modal-close-btn {
-    background: transparent;
-    border: none;
+    font-family: var(--font-mono);
     font-size: 22px;
-    color: var(--text-muted);
-    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    z-index: 1;
+    pointer-events: none;
   }
 
-  .modal-close-btn:hover {
-    color: var(--text);
-  }
-
-  .modal-body {
-    padding: 20px;
+  .avatar-edit-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.52);
     display: flex;
-    flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 2;
+    color: #fff;
+    pointer-events: none;
+  }
+
+  .avatar-edit:hover:not(:disabled) .avatar-edit-overlay {
+    opacity: 1;
   }
 
   .error-banner {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    background-color: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 6px;
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
     padding: 10px 12px;
     color: #ef4444;
     font-size: 13px;
     line-height: 1.4;
   }
 
-  .error-icon {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    margin-top: 1px;
+  .fld-input-err {
+    border-color: #ef4444 !important;
   }
 
-  .fld {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .fld label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-
-  .fld input,
-  .fld select {
-    background-color: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-family: inherit;
-    font-size: 13.5px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .fld input:focus,
-  .fld select:focus {
-    border-color: var(--purple);
-  }
-
-  .fld input:disabled,
-  .fld select:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .field-hint {
-    font-size: 11px;
-    color: var(--text-faint);
+  .fld-err {
+    font-size: 11.5px;
+    color: #ef4444;
     margin-top: 2px;
   }
 
-  .fld-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 8px;
-    border-top: 1px solid var(--line);
-    margin-top: 12px;
-  }
-
-  .btn-cancel {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 10px 16px;
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-      border-color 0.2s,
-      color 0.2s;
-  }
-
-  .btn-cancel:hover:not(:disabled) {
-    border-color: var(--line-strong);
-    color: var(--text);
-  }
-
-  .btn-cancel:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .btn-submit {
-    background-color: #ffffff;
-    color: #101010;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 16px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background-color 0.2s,
-      opacity 0.2s;
-  }
-
-  .btn-submit:hover:not(:disabled) {
-    background-color: var(--purple);
-    color: #ffffff;
-  }
-
-  .btn-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 768px) {
-    .modal-overlay {
-      padding: 12px;
-    }
-
-    .fld-row {
-      grid-template-columns: 1fr;
-    }
+  .fld-hint {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-top: 2px;
   }
 </style>
