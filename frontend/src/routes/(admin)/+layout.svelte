@@ -29,7 +29,10 @@
 
   let sidebarOpen = false;
 
-  $: activeItem = navItems.find((item) => $page.url.pathname.startsWith(item.href)) ?? null;
+  $: activeItem =
+    navItems.find(
+      (item) => $page.url.pathname === item.href || $page.url.pathname.startsWith(item.href + '/'),
+    ) ?? null;
   $: activeTitle = activeItem?.label ?? 'Painel';
   $: activeCrumb = `admin / ${activeItem?.label.toLowerCase() ?? 'dashboard'}`;
 
@@ -50,9 +53,13 @@
 </script>
 
 <div class="admin-root admin-shell" class:sidebar-open={sidebarOpen}>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="admin-sidebar-backdrop" on:click={closeSidebar}></div>
+  <button
+    class="admin-sidebar-backdrop"
+    on:click={closeSidebar}
+    on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
+    aria-label="Fechar menu"
+    tabindex="-1"
+  ></button>
 
   <aside class="admin-sidebar" aria-label="Menu de navegação">
     <a href="/admin" class="brand" on:click={closeSidebar}>
