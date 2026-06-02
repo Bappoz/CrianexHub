@@ -19,6 +19,23 @@
     return pathname === href || (href !== '/' && pathname.startsWith(href));
   }
 
+  // ── Mobile menu ─────────────────────────────────────────────────────────────
+  let mobileOpen = false;
+  function toggleMobile() {
+    mobileOpen = !mobileOpen;
+  }
+  function closeMobile() {
+    mobileOpen = false;
+  }
+
+  onMount(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeMobile();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   // ── Language toggle ─────────────────────────────────────────────────────────
   function toggleLang() {
     lang.set($lang === 'pt' ? 'en' : 'pt');
@@ -228,8 +245,14 @@
         {/if}
       </div>
 
-      <!-- Mobile hamburger (drawer fora do escopo desta issue) -->
-      <button class="menu-btn" aria-label="Abrir menu" aria-expanded="false">
+      <!-- Mobile hamburger -->
+      <button
+        class="menu-btn"
+        class:open={mobileOpen}
+        aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+        aria-expanded={mobileOpen}
+        on:click={toggleMobile}
+      >
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
@@ -237,6 +260,32 @@
     </div>
   </div>
 </header>
+
+<!-- Mobile drawer -->
+{#if mobileOpen}
+  <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+  <div class="mobile-backdrop" on:click={closeMobile} transition:fade={{ duration: 150 }}></div>
+  <nav class="mobile-drawer" aria-label="Menu mobile" transition:fade={{ duration: 180 }}>
+    {#each navItems as item (item.href)}
+      <a
+        href={item.href}
+        class="mobile-link"
+        class:active={isActive(item.href)}
+        on:click={closeMobile}
+      >
+        {$lang === 'en' ? item.en : item.pt}
+      </a>
+    {/each}
+    <div class="mobile-divider"></div>
+    <button class="mobile-lang" on:click={() => { toggleLang(); closeMobile(); }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      {$lang === 'pt' ? 'Switch to English' : 'Mudar para Português'}
+    </button>
+  </nav>
+{/if}
 
 <!-- Spacer para compensar o fixed header -->
 <div class="header-spacer" aria-hidden="true"></div>
@@ -432,6 +481,88 @@
     border-radius: 1px;
     background: var(--venom);
     transition: opacity 0.2s;
+  }
+
+  /* ── Hamburger open state ──────────────────────────────────────────────────── */
+  .menu-btn.open .bar:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .menu-btn.open .bar:nth-child(2) {
+    opacity: 0;
+  }
+  .menu-btn.open .bar:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+  .bar {
+    transition: transform 0.22s ease, opacity 0.15s ease;
+  }
+
+  /* ── Mobile drawer ─────────────────────────────────────────────────────────── */
+  .mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 6, 6, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: 39;
+  }
+
+  .mobile-drawer {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--vitrine-surface, #fcfcfc);
+    border-bottom: 1px solid var(--vitrine-border, #e8e6e2);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px 24px;
+    gap: 2px;
+    box-shadow: 0 8px 24px rgba(6, 6, 6, 0.08);
+  }
+
+  .mobile-link {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--vitrine-text-muted, #6b6862);
+    text-decoration: none;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--vitrine-border, #e8e6e2);
+    transition: color 0.15s;
+    letter-spacing: -0.01em;
+  }
+
+  .mobile-link:last-of-type {
+    border-bottom: 0;
+  }
+
+  .mobile-link.active,
+  .mobile-link:hover {
+    color: var(--venom, #060606);
+  }
+
+  .mobile-divider {
+    height: 1px;
+    background: var(--vitrine-border, #e8e6e2);
+    margin: 8px 0;
+  }
+
+  .mobile-lang {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--vitrine-text-muted, #6b6862);
+    padding: 10px 0;
+    text-align: left;
+  }
+
+  .mobile-lang:hover {
+    color: var(--venom, #060606);
   }
 
   /* ── Responsive ────────────────────────────────────────────────────────────── */

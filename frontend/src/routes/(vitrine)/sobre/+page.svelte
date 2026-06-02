@@ -158,10 +158,11 @@
   }
 
   .hero-inner {
-    max-width: 30rem;
+    width: 40rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    margin-bottom: 5rem;
   }
 
   .hero-badge {

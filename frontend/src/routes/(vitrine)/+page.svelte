@@ -34,6 +34,17 @@
       accentIdx = (accentIdx + 1) % ACCENT_COLORS.length;
     }, 2200);
     resetTimer();
+
+    // Se vier do footer com ?produto=slug, ativa o slide e rola até o carrossel
+    const slug = new URLSearchParams(window.location.search).get('produto');
+    if (slug) {
+      const idx = products.findIndex((p) => p.slug === slug);
+      if (idx >= 0) active = idx;
+      setTimeout(() => {
+        document.getElementById('products-carousel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    }
+
     return () => {
       clearInterval(accentInterval);
       clearTimeout(carouselTimer);
@@ -174,7 +185,10 @@
                 <polyline points="7 7 17 7 17 17" />
               </svg>
             </a>
-            <button class="btn ghost" onclick={() => jumpTo(0)}>
+            <button class="btn ghost" onclick={() => {
+              jumpTo(0);
+              document.getElementById('products-carousel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}>
               {t.ctaSecondary[$lang]}
             </button>
           </div>
@@ -524,9 +538,10 @@
   .hero {
     position: relative;
     overflow: hidden;
+    max-width: 100%;
   }
   .hero-canvas-section {
-    padding: 64px 40px 56px;
+    padding: 100px 40px 148px;
     overflow: hidden;
     background: var(--bg);
   }
@@ -612,8 +627,8 @@
   }
   .hero-grid {
     display: grid;
-    grid-template-columns: 2fr 1.4fr;
-    gap: 18px;
+    grid-template-columns: 1.6fr 1.4fr;
+    gap: 48px;
     align-items: center;
   }
   .hero-meta {
@@ -623,11 +638,12 @@
 
   /* H1 display */
   .display {
-    font-size: clamp(40px, 7vw, 76px);
-    line-height: 0.98;
-    letter-spacing: -0.035em;
+    font-size: clamp(30px, 8.5vw, 70px);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
     font-weight: 500;
     margin: 0;
+    max-width: 60rem;
   }
   .underline {
     position: relative;
@@ -645,9 +661,9 @@
 
   .hero-lede {
     font-size: 17px;
-    line-height: 1.5;
+    line-height: 1.55;
     color: var(--text-muted);
-    max-width: 38ch;
+    max-width: 40ch;
     margin: 0;
   }
   .hero-cta {
@@ -660,7 +676,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
     border-top: 1px solid var(--line);
-    padding-top: 18px;
+    padding-top: 25px;
   }
   .hero-stats > div {
     display: flex;
@@ -668,7 +684,7 @@
     gap: 2px;
   }
   .hero-stats .n {
-    font-size: 22px;
+    font-size: 26px;
     letter-spacing: -0.03em;
     font-weight: 500;
   }
@@ -1100,9 +1116,13 @@
       padding-left: 28px;
       padding-right: 28px;
     }
+    .hero-canvas-section {
+      padding-top: 100px;
+      padding-bottom: 88px;
+    }
     .hero-grid {
       grid-template-columns: 1fr;
-      gap: 28px;
+      gap: 36px;
     }
     .hero-illustration {
       max-width: 520px;
@@ -1148,23 +1168,53 @@
   /* ── Responsive — mobile ───────────────────────── */
   @media (max-width: 480px) {
     .hero-canvas-section {
-      padding: 28px 20px 24px;
+      padding: 80px 20px 56px;
     }
     .section {
-      padding: 40px 20px;
+      padding: 48px 20px;
     }
     .hero-rail {
       display: none;
     }
     .hero-grid {
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 32px;
+    }
+    .hero-art {
+      display: none;
     }
     .display {
-      font-size: 38px;
+      font-size: clamp(28px, 8vw, 38px);
+      line-height: 1.05;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .underline {
+      white-space: normal;
+    }
+    .hero-lede {
+      font-size: 15px;
+      max-width: 100%;
+      overflow-wrap: break-word;
+    }
+    .hero-cta {
+      flex-direction: column;
+    }
+    .hero-cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .hero-stats {
+      padding-top: 16px;
+    }
+    .hero-stats .n {
+      font-size: 20px;
+    }
+    .hero-stats .l {
+      font-size: 9px;
     }
     .hero-illustration {
-      max-width: 360px;
+      max-width: 280px;
       margin: 0 auto;
     }
     .section-head {
@@ -1172,7 +1222,10 @@
       gap: 12px;
     }
     .section-head h2 {
-      font-size: 28px;
+      font-size: 26px;
+    }
+    .section-head .desc {
+      font-size: 14px;
     }
     .products-chips-strip {
       padding: 14px 20px;
@@ -1199,25 +1252,55 @@
       padding: 32px 20px;
     }
     .carousel-slides {
-      height: auto;
-      min-height: 500px;
+      height: 360px;
     }
     .carousel-slide {
       grid-template-columns: 1fr;
-      grid-template-rows: 180px 1fr;
+      grid-template-rows: 88px 1fr;
+    }
+    .cs-visual {
+      min-height: 0;
+      height: 15rem;
     }
     .cs-icon-text {
-      font-size: 96px;
+      font-size: 52px;
+    }
+    .cs-num {
+      top: 12px;
+      left: 16px;
+      font-size: 11px;
+    }
+    .cs-tag {
+      bottom: 12px;
+      left: 16px;
+      font-size: 10px;
+      padding: 3px 8px;
     }
     .cs-content {
-      padding: 24px 20px;
-      gap: 12px;
+      padding: 100px 20px 20px;
+      gap: 8px;
     }
     .cs-content h3 {
-      font-size: 28px;
+      font-size: 22px;
     }
     .cs-content .lede {
-      font-size: 14px;
+      font-size: 13px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+    }
+    .cs-content .actions {
+      flex-direction: row;
+      margin-top: 4px;
+      gap: 8px;
+    }
+    .cs-content .actions a {
+      flex: 1;
+      justify-content: center;
+      font-size: 13px;
+      padding: 9px 12px;
     }
     .carousel-foot {
       padding: 14px 16px;
@@ -1230,18 +1313,29 @@
       width: 28px;
       height: 28px;
     }
+    .diff-section .section-head h2 {
+      font-size: 26px;
+    }
     .diff-grid {
       grid-template-columns: 1fr;
     }
+    .diff-item {
+      padding: 20px 18px;
+    }
     .cta-banner {
       grid-template-columns: 1fr;
-      padding: 24px;
+      padding: 24px 20px;
     }
     .cta-banner h3 {
-      font-size: 24px;
+      font-size: 22px;
     }
     .cta-banner .end {
+      flex-direction: column;
       justify-content: flex-start;
+    }
+    .cta-banner .end a {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
