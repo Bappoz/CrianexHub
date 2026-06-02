@@ -122,24 +122,6 @@
     margin-top: 22px;
   }
 
-  .social {
-    width: 32px;
-    height: 32px;
-    border-radius: 100px;
-    border: 1px solid rgba(252, 252, 252, 0.15);
-    display: grid;
-    place-items: center;
-    color: rgba(252, 252, 252, 0.7);
-    transition:
-      color 0.15s,
-      border-color 0.15s;
-  }
-
-  .social:hover {
-    color: var(--vitrine-surface);
-    border-color: rgba(252, 252, 252, 0.4);
-  }
-
   .site-footer h5 {
     font-family: var(--font-mono);
     font-size: 11px;
