@@ -3,8 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { getAuthenticatedAdminSession } from '$lib/server/admin-session';
 
 export const load: LayoutServerLoad = async ({ cookies, locals }) => {
-  const adminUser =
-    locals.adminUser ?? (await getAuthenticatedAdminSession(cookies))?.user ?? null;
+  const adminUser = locals.adminUser ?? (await getAuthenticatedAdminSession(cookies))?.user ?? null;
 
   if (!adminUser) {
     redirect(303, '/admin/login');
