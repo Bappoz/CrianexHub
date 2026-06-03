@@ -79,12 +79,7 @@
 
 {#if isOpen}
   <div class="admin-overlay" role="presentation">
-    <div
-      class="admin-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="member-modal-title"
-    >
+    <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="member-modal-title">
       <header class="admin-modal-head">
         <h3 id="member-modal-title">{isEditing ? 'Editar membro' : 'Adicionar membro'}</h3>
         <button class="x" type="button" onclick={onClose} disabled={loading} aria-label="Fechar">

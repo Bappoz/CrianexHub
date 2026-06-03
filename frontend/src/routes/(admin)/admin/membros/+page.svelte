@@ -189,7 +189,24 @@
 
   {#if loadError}
     <div class="load-error" role="alert">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        ><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line
+          x1="12"
+          y1="16"
+          x2="12.01"
+          y2="16"
+        ></line></svg
+      >
       <span>Erro ao carregar membros: {loadError}</span>
     </div>
   {/if}
@@ -425,7 +442,8 @@
               stroke-linejoin="round"
             >
               <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
               ></path>
             </svg>
           </div>
@@ -447,7 +465,12 @@
           >
             Cancelar
           </button>
-          <button class="btn-danger" type="button" onclick={confirmRemoveMember} disabled={deleting}>
+          <button
+            class="btn-danger"
+            type="button"
+            onclick={confirmRemoveMember}
+            disabled={deleting}
+          >
             {deleting ? 'Removendo...' : 'Remover'}
           </button>
         </footer>
