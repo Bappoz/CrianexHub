@@ -89,10 +89,7 @@ export async function createMember(
       if (orphan) {
         const { data, error } = await supabase
           .from('profiles')
-          .upsert(
-            { id: orphan.id, email, name, role, status: 'active' },
-            { onConflict: 'id' }
-          )
+          .upsert({ id: orphan.id, email, name, role, status: 'active' }, { onConflict: 'id' })
           .select(SELECT_FIELDS)
           .single();
         if (error) throw error;
