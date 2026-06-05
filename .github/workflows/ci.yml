@@ -132,6 +132,29 @@ jobs:
           supabase telemetry disable
           supabase start
 
+          # Capture and parse supabase status to extract the actual API keys.
+          # Strips ANSI escape codes before parsing.
+          # Supports both the new sb_ key format and the legacy JWT format.
+          supabase status 2>&1 \
+            | sed $'s/\033\\[[0-9;]*[A-Za-z]//g' \
+            > /tmp/sb-status.txt || true
+
+          SECRET_KEY=$(grep -oE 'sb_secret_[A-Za-z0-9_-]+' /tmp/sb-status.txt | head -1)
+          ANON_KEY=$(grep -oE 'sb_publishable_[A-Za-z0-9_-]+' /tmp/sb-status.txt | head -1)
+
+          # Fallback for older CLI versions that emit JWT keys
+          if [ -z "$SECRET_KEY" ]; then
+            SECRET_KEY=$(grep -iE 'service.?role' /tmp/sb-status.txt \
+              | grep -oE 'eyJ[A-Za-z0-9._-]+' | head -1)
+          fi
+          if [ -z "$ANON_KEY" ]; then
+            ANON_KEY=$(grep -iE 'anon' /tmp/sb-status.txt \
+              | grep -oE 'eyJ[A-Za-z0-9._-]+' | head -1)
+          fi
+
+          [ -n "$SECRET_KEY" ] && echo "SUPABASE_SECRET_KEY=${SECRET_KEY}" >> "$GITHUB_ENV"
+          [ -n "$ANON_KEY"   ] && echo "PUBLIC_SUPABASE_PUBLISHABLE_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
+
       - name: Apply Supabase migrations
         run: |
           set -euo pipefail

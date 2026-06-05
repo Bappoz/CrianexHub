@@ -974,6 +974,16 @@ video {
 }
 
 /* ── Form helpers (admin) ─────────────────────────────────────────────────── */
+.fld-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 540px) {
+  .fld-row {
+    grid-template-columns: 1fr;
+  }
+}
 .fld-group {
   display: flex;
   flex-direction: column;

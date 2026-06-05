@@ -1,40 +1,34 @@
 <script lang="ts">
-  import { getInitials, filterMembers, type Member } from '$lib/utils/membros';
-  import MemberFilters from '$lib/components/admin/MemberFilters.svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { getInitials, filterMembers, formatLastAccess, type Member } from '$lib/utils/membros';
   import MemberModal from '$lib/components/admin/MemberModal.svelte';
   import { apiFetch } from '$lib/api/backend';
-  import { supabase } from '$lib/api/supabase';
+  import { topbarActions } from '$lib/stores/topbar';
 
-  let { data } = $props<{ data: { members: Member[] } }>();
+  let { data } = $props<{ data: { members: Member[]; error?: string } }>();
 
-  // Synchronize state with data loaded from server
   let members = $state<Member[]>([]);
+  let loadError = $state<string | undefined>(undefined);
   $effect(() => {
     members = data.members;
+    loadError = data.error;
   });
 
-  // Reactive state for filters
-  let filterStatus = $state<'Todos' | 'active' | 'inactive'>('Todos');
-  let filterRole = $state<'Todos' | 'owner' | 'member'>('Todos');
-  let searchQuery = $state<string>('');
+  let searchQuery = $state('');
 
-  // Dropdown context menu state
   let activeMenuId = $state<string | null>(null);
 
-  // Member Modal (Add/Edit) state
-  let isModalOpen = $state<boolean>(false);
+  let isModalOpen = $state(false);
   let modalMember = $state<Partial<Member>>({});
-  let isEditing = $state<boolean>(false);
+  let isEditing = $state(false);
 
-  // Custom Delete Confirmation state
-  let isConfirmOpen = $state<boolean>(false);
+  let isConfirmOpen = $state(false);
   let memberToRemove = $state<Member | null>(null);
-  let deleting = $state<boolean>(false);
+  let deleting = $state(false);
 
-  // Toast Notifications state
-  let toastMessage = $state<string>('');
+  let toastMessage = $state('');
   let toastType = $state<'success' | 'error'>('success');
-  let toastTimer: any = null;
+  let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   function showToast(message: string, type: 'success' | 'error' = 'success') {
     toastMessage = message;
@@ -42,34 +36,29 @@
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toastMessage = '';
-    }, 4000);
+    }, 3000);
   }
 
-  // Filtered members list using $derived
-  let filteredMembers = $derived(filterMembers(members, filterStatus, filterRole, searchQuery));
+  let filteredMembers = $derived(filterMembers(members, 'Todos', 'Todos', searchQuery));
 
-  // KPIs dynamically computed from the members array
   let totalActive = $derived(members.filter((m) => m.status === 'active').length);
   let totalInactive = $derived(members.filter((m) => m.status === 'inactive').length);
   let totalOwners = $derived(members.filter((m) => m.role === 'owner').length);
 
-  // Actions
   async function toggleStatus(member: Member) {
     const newStatus = member.status === 'active' ? 'inactive' : 'active';
     try {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) throw new Error('Sessão expirada. Faça login novamente.');
-
-      await apiFetch(`/api/admin/members/${member.id}/status`, {
+      await apiFetch(`/admin/members/${member.id}/status`, {
         method: 'PATCH',
-        token: session.access_token,
         body: JSON.stringify({ status: newStatus }),
       });
-
       members = members.map((m) => (m.id === member.id ? { ...m, status: newStatus } : m));
-      showToast(`Membro ${newStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
-    } catch (err: any) {
-      showToast(err.message || 'Falha ao atualizar status do membro.', 'error');
+      showToast(`Membro ${newStatus === 'active' ? 'reativado' : 'inativado'} com sucesso!`);
+    } catch (err: unknown) {
+      showToast(
+        err instanceof Error ? err.message : 'Falha ao atualizar status do membro.',
+        'error'
+      );
     } finally {
       activeMenuId = null;
     }
@@ -85,20 +74,13 @@
     if (!memberToRemove) return;
     deleting = true;
     try {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) throw new Error('Sessão expirada. Faça login novamente.');
-
-      await apiFetch(`/api/admin/members/${memberToRemove.id}`, {
-        method: 'DELETE',
-        token: session.access_token,
-      });
-
+      await apiFetch(`/admin/members/${memberToRemove.id}`, { method: 'DELETE' });
       members = members.filter((m) => m.id !== memberToRemove!.id);
       showToast('Membro removido com sucesso!');
       isConfirmOpen = false;
       memberToRemove = null;
-    } catch (err: any) {
-      showToast(err.message || 'Falha ao remover membro.', 'error');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Falha ao remover membro.', 'error');
     } finally {
       deleting = false;
     }
@@ -110,6 +92,7 @@
       name: '',
       email: '',
       role: 'member',
+      display_role: 'Comercial',
       status: 'active',
     };
     isModalOpen = true;
@@ -122,93 +105,143 @@
     activeMenuId = null;
   }
 
-  async function handleSaveMember(updatedMember: Partial<Member>) {
-    const session = (await supabase.auth.getSession()).data.session;
-    if (!session) throw new Error('Sessão expirada. Faça login novamente.');
+  async function handleSaveMember(updated: Partial<Member>) {
+    if (isEditing && updated.id) {
+      const current = members.find((m) => m.id === updated.id);
 
-    if (isEditing && updatedMember.id) {
-      // Edit Member
-      const res = await apiFetch<Member>(`/api/admin/members/${updatedMember.id}`, {
+      // Update status separately if changed
+      if (current?.status !== updated.status && updated.status) {
+        await apiFetch(`/admin/members/${updated.id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: updated.status }),
+        });
+      }
+
+      const res = await apiFetch<Member>(`/admin/members/${updated.id}`, {
         method: 'PATCH',
-        token: session.access_token,
         body: JSON.stringify({
-          name: updatedMember.name,
-          role: updatedMember.role,
-          avatar_url: updatedMember.avatar_url || null,
+          name: updated.name,
+          role: updated.role,
+          display_role: updated.display_role,
+          permissions: updated.permissions,
         }),
       });
-      members = members.map((m) => (m.id === updatedMember.id ? res : m));
+      members = members.map((m) =>
+        m.id === updated.id ? { ...res, status: updated.status ?? res.status } : m
+      );
       showToast('Membro atualizado com sucesso!');
     } else {
-      // Create/Invite Member
-      const res = await apiFetch<Member>('/api/admin/members', {
+      const res = await apiFetch<Member>('/admin/members', {
         method: 'POST',
-        token: session.access_token,
         body: JSON.stringify({
-          name: updatedMember.name,
-          email: updatedMember.email,
-          role: updatedMember.role,
+          name: updated.name,
+          email: updated.email,
+          role: updated.role,
+          display_role: updated.display_role,
+          permissions: updated.permissions,
         }),
       });
       members = [...members, res];
-      showToast('Membro convidado com sucesso!');
+      showToast('Convite enviado com sucesso!');
     }
 
     isModalOpen = false;
   }
 
-  // Close context menus when clicking outside
   function handleOutsideClick(e: MouseEvent) {
     const target = e.target as HTMLElement;
     if (activeMenuId && !target.closest('.menu-container') && !target.closest('.menu-btn')) {
       activeMenuId = null;
     }
   }
+
+  const COL = '44px 1.4fr 1.4fr 130px 100px 80px 40px';
+
+  onMount(() => {
+    topbarActions.set([{ label: '+ Cadastrar membro', onClick: openAddModal }]);
+  });
+  onDestroy(() => {
+    topbarActions.set([]);
+  });
 </script>
 
 <svelte:window onclick={handleOutsideClick} />
 
 <div class="membros-container">
-  <!-- Topbar -->
-  <header class="admin-topbar">
-    <div class="crumbs" aria-label="Navegação de contexto">
-      <span>/ operações</span>
-      <span class="active-crumb">/ membros</span>
-    </div>
-    <div class="header-action-group">
-      <button class="btn-add" onclick={openAddModal}>
-        <span>+</span> Cadastrar membro
-      </button>
-    </div>
-  </header>
-
   <!-- KPIs -->
-  <section class="kpis-grid" aria-label="Indicadores chave dos membros">
-    <div class="kpi-card">
-      <span class="kpi-label">Membros Ativos</span>
-      <span class="kpi-value">{totalActive}</span>
+  <section class="kpi-grid" aria-label="Indicadores chave dos membros">
+    <div class="kpi">
+      <div class="label">Membros ativos</div>
+      <div class="value">{totalActive}</div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Inativos</span>
-      <span class="kpi-value inactive">{totalInactive}</span>
+    <div class="kpi">
+      <div class="label">Inativos</div>
+      <div class="value inactive">{totalInactive}</div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Owners</span>
-      <span class="kpi-value">{totalOwners}</span>
+    <div class="kpi">
+      <div class="label">Owners</div>
+      <div class="value">{totalOwners}</div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Total Cadastrado</span>
-      <span class="kpi-value">{members.length}</span>
+    <div class="kpi">
+      <div class="label">Convites pendentes</div>
+      <div class="value">0</div>
     </div>
   </section>
 
-  <!-- Filters Component -->
-  <MemberFilters bind:searchQuery bind:filterStatus bind:filterRole />
+  {#if loadError}
+    <div class="load-error" role="alert">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        ><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line
+          x1="12"
+          y1="16"
+          x2="12.01"
+          y2="16"
+        ></line></svg
+      >
+      <span>Erro ao carregar membros: {loadError}</span>
+    </div>
+  {/if}
 
-  <!-- Content Panel / Table -->
+  <!-- Content Panel -->
   <main class="panel">
+    <div class="panel-head">
+      <h3>{members.length} membros</h3>
+      <span class="grow"></span>
+      <div class="admin-search" style="width: 240px;">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          placeholder="nome, e-mail, papel…"
+          bind:value={searchQuery}
+          aria-label="Pesquisar membros"
+        />
+      </div>
+    </div>
+
     {#if filteredMembers.length === 0}
-      <!-- Empty State -->
       <div class="empty">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -225,25 +258,27 @@
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
-        <p>Nenhum membro cadastrado</p>
-        <div class="empty-actions">
-          <button class="btn-add" onclick={openAddModal}> Adicionar membro </button>
-        </div>
+        <p>Nenhum membro encontrado</p>
+        {#if !searchQuery}
+          <div class="empty-actions">
+            <button class="btn-add" onclick={openAddModal}>Adicionar membro</button>
+          </div>
+        {/if}
       </div>
     {:else}
-      <!-- Data Table -->
       <div class="data-table" role="table" aria-label="Tabela de membros">
-        <div class="dt-row header" role="row">
+        <div class="dt-row header" role="row" style="grid-template-columns: {COL}">
           <span></span>
           <span>Membro</span>
           <span>E-mail</span>
           <span>Papel</span>
+          <span>Último acesso</span>
           <span>Status</span>
-          <span>Ações</span>
+          <span></span>
         </div>
 
         {#each filteredMembers as member (member.id)}
-          <div class="dt-row" role="row">
+          <div class="dt-row" role="row" style="grid-template-columns: {COL}">
             <!-- Avatar -->
             <span class="avatar-cell">
               <span
@@ -264,14 +299,17 @@
             <!-- E-mail -->
             <span class="email-cell mono">{member.email}</span>
 
-            <!-- Role Chip -->
+            <!-- Papel -->
             <span class="role-cell">
               <span class="role-chip" class:owner={member.role === 'owner'}>
-                {member.role}
+                {member.display_role ?? member.role}
               </span>
             </span>
 
-            <!-- Status Pill -->
+            <!-- Último acesso -->
+            <span class="last-cell mono">{formatLastAccess(member.last_sign_in_at)}</span>
+
+            <!-- Status -->
             <span class="status-cell">
               <span class="status-pill {member.status}">
                 <span class="dt"></span>
@@ -279,7 +317,7 @@
               </span>
             </span>
 
-            <!-- Menu de Ações -->
+            <!-- Menu -->
             <span class="actions-cell">
               <div class="action-wrapper">
                 <button
@@ -287,7 +325,18 @@
                   aria-label="Ações para {member.name}"
                   onclick={() => (activeMenuId = activeMenuId === member.id ? null : member.id)}
                 >
-                  ⋯
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="5" r="1.5"></circle>
+                    <circle cx="12" cy="12" r="1.5"></circle>
+                    <circle cx="12" cy="19" r="1.5"></circle>
+                  </svg>
                 </button>
 
                 {#if activeMenuId === member.id}
@@ -303,11 +352,14 @@
                         stroke-linejoin="round"
                         class="menu-ico"
                       >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                        ></path>
                       </svg>
-                      Editar
+                      Editar perfil & permissões
                     </button>
+
                     <button class="menu-item" role="menuitem" onclick={() => toggleStatus(member)}>
                       {#if member.status === 'active'}
                         <svg
@@ -324,7 +376,7 @@
                           <line x1="9" y1="9" x2="15" y2="15"></line>
                           <line x1="15" y1="9" x2="9" y2="15"></line>
                         </svg>
-                        Inativar
+                        Inativar membro
                       {:else}
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -338,9 +390,10 @@
                         >
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        Ativar
+                        Reativar
                       {/if}
                     </button>
+
                     <button
                       class="menu-item danger"
                       role="menuitem"
@@ -360,10 +413,8 @@
                         <path
                           d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
                         ></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
                       </svg>
-                      Remover
+                      Remover do painel
                     </button>
                   </div>
                 {/if}
@@ -375,7 +426,7 @@
     {/if}
   </main>
 
-  <!-- Modal Component -->
+  <!-- Member Modal -->
   <MemberModal
     isOpen={isModalOpen}
     {isEditing}
@@ -384,37 +435,92 @@
     onSave={handleSaveMember}
   />
 
-  <!-- Delete Confirmation Modal Dialog -->
+  <!-- Delete Confirmation Dialog -->
   {#if isConfirmOpen}
-    <div class="modal-overlay">
-      <div class="modal confirm-modal" role="dialog" aria-labelledby="confirm-title">
-        <header class="modal-header">
-          <h3 id="confirm-title">Confirmar Remoção</h3>
+    <div class="admin-overlay" style="z-index: 110;" role="presentation">
+      <div
+        class="admin-modal danger-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        style="max-width: 400px;"
+      >
+        <header class="admin-modal-head">
+          <h3 id="confirm-title">Remover membro</h3>
           <button
-            class="modal-close-btn"
+            class="x"
+            type="button"
             onclick={() => (isConfirmOpen = false)}
-            disabled={deleting}>&times;</button
+            disabled={deleting}
+            aria-label="Fechar"
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </header>
-        <div class="modal-body">
-          <p>Tem certeza que deseja remover o membro <strong>{memberToRemove?.name}</strong>?</p>
-          <p class="warning-text">
-            Esta ação irá revogar permanentemente o acesso dele à plataforma.
+        <div class="admin-modal-body">
+          <div class="danger-icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+            </svg>
+          </div>
+          <h4>Confirmar remoção</h4>
+          <p>
+            Esta ação irá revogar permanentemente o acesso à plataforma e não pode ser desfeita.
           </p>
+          <div class="name-confirm">
+            <span class="lbl">membro</span>
+            <span class="val">{memberToRemove?.name}</span>
+          </div>
         </div>
-        <footer class="modal-footer">
-          <button class="btn-cancel" onclick={() => (isConfirmOpen = false)} disabled={deleting}>
+        <footer class="admin-modal-foot">
+          <button
+            class="btn ghost sm"
+            type="button"
+            onclick={() => (isConfirmOpen = false)}
+            disabled={deleting}
+          >
             Cancelar
           </button>
-          <button class="btn-submit danger-btn" onclick={confirmRemoveMember} disabled={deleting}>
-            {deleting ? 'Removendo...' : 'Remover Membro'}
+          <button
+            class="btn-danger"
+            type="button"
+            onclick={confirmRemoveMember}
+            disabled={deleting}
+          >
+            {deleting ? 'Removendo...' : 'Remover definitivamente'}
           </button>
         </footer>
       </div>
     </div>
   {/if}
 
-  <!-- Toast Notification -->
+  <!-- Toast -->
   {#if toastMessage}
     <div
       class="toast-container"
@@ -435,64 +541,26 @@
     gap: 20px;
   }
 
-  /* Topbar */
-  .admin-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .crumbs {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-faint);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    display: flex;
-    gap: 6px;
-  }
-
-  .active-crumb {
-    color: var(--text);
-  }
-
-  .header-action-group {
-    display: flex;
-    gap: 10px;
-  }
-
-  .btn-add {
-    background-color: #ffffff;
-    color: #101010;
-    border: none;
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
+  .load-error {
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition:
-      background-color 0.2s,
-      transform 0.15s;
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #ef4444;
+    font-size: 13px;
   }
 
-  .btn-add:hover {
-    background-color: var(--purple);
-    color: #ffffff;
-  }
-
-  /* KPIs Grid */
-  .kpis-grid {
+  /* KPI Grid */
+  .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
   }
 
-  .kpi-card {
+  .kpi {
     background-color: var(--bg-elev);
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -502,44 +570,33 @@
     gap: 6px;
   }
 
-  .kpi-label {
-    font-family: var(--font-sans);
+  .kpi .label {
     font-size: 12.5px;
     color: var(--text-muted);
     font-weight: 500;
   }
 
-  .kpi-value {
-    font-size: 24px;
+  .kpi .value {
+    font-size: 22px;
     font-weight: 700;
     color: var(--green);
     letter-spacing: -0.02em;
   }
 
-  .kpi-value.inactive {
+  .kpi .value.inactive {
     color: var(--text-faint);
   }
 
-  /* Panel */
-  .panel {
-    background-color: var(--bg-elev);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 16px;
-    overflow-x: auto;
-  }
-
-  /* Table styling */
+  /* Table */
   .data-table {
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-width: 600px;
+    min-width: 680px;
   }
 
   .data-table .dt-row {
     display: grid;
-    grid-template-columns: 44px 1.6fr 2fr 120px 100px 48px;
     align-items: center;
     padding: 10px 12px;
     border-bottom: 1px solid var(--line);
@@ -574,14 +631,17 @@
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
+    flex-shrink: 0;
   }
 
   .name-cell {
+    font-size: 13px;
     font-weight: 500;
     color: var(--text);
   }
 
   .email-cell {
+    font-size: 11.5px;
     color: var(--text-muted);
   }
 
@@ -606,6 +666,11 @@
     color: var(--pink);
   }
 
+  .last-cell {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
   .status-cell {
     display: flex;
     align-items: center;
@@ -615,7 +680,6 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: var(--font-sans);
     font-size: 11.5px;
     font-weight: 500;
     text-transform: lowercase;
@@ -653,7 +717,6 @@
   .menu-btn {
     background: transparent;
     border: none;
-    font-size: 18px;
     color: var(--text-muted);
     cursor: pointer;
     width: 28px;
@@ -671,7 +734,6 @@
     color: var(--text);
   }
 
-  /* Actions Context Menu */
   .menu-container {
     position: absolute;
     right: 0;
@@ -681,7 +743,7 @@
     border-radius: 8px;
     padding: 4px;
     box-shadow: var(--shadow-3);
-    min-width: 140px;
+    min-width: 180px;
     z-index: 50;
     display: flex;
     flex-direction: column;
@@ -691,7 +753,7 @@
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     padding: 8px 10px;
     background: transparent;
@@ -720,7 +782,7 @@
   .menu-ico {
     width: 13px;
     height: 13px;
-    color: currentColor;
+    flex-shrink: 0;
   }
 
   /* Empty state */
@@ -750,146 +812,19 @@
     margin-top: 6px;
   }
 
-  /* Modals Overlay (Confirm Modal Specifics) */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 6, 6, 0.6);
-    backdrop-filter: blur(2px);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-
-  .modal {
-    background-color: var(--bg-elev);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-3);
-    animation: modalIn 0.2s ease-out;
-  }
-
-  @keyframes modalIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .modal-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .modal-close-btn {
-    background: transparent;
-    border: none;
-    font-size: 22px;
-    color: var(--text-muted);
-    cursor: pointer;
-  }
-
-  .modal-close-btn:hover {
-    color: var(--text);
-  }
-
-  .modal-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 14.5px;
-    line-height: 1.5;
-    color: var(--text);
-  }
-
-  .warning-text {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 20px;
-    border-top: 1px solid var(--line);
-  }
-
-  .btn-cancel {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-      border-color 0.2s,
-      color 0.2s;
-  }
-
-  .btn-cancel:hover:not(:disabled) {
-    border-color: var(--line-strong);
-    color: var(--text);
-  }
-
-  .btn-submit {
-    background-color: #ffffff;
-    color: #101010;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .btn-submit:hover:not(:disabled) {
-    background-color: var(--purple);
-    color: #ffffff;
-  }
-
-  .btn-submit.danger-btn {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
-
-  .btn-submit.danger-btn:hover:not(:disabled) {
-    background-color: #ef4444;
-    color: #ffffff;
-    border-color: #ef4444;
-  }
-
-  .btn-submit:disabled,
-  .btn-cancel:disabled {
+  /* Disabled states */
+  :global(.btn-danger:disabled) {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
-  /* Toast Notification */
+  :global(.btn.ghost.sm:disabled),
+  :global(.btn.sm:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Toast */
   .toast-container {
     position: fixed;
     bottom: 24px;
@@ -921,20 +856,9 @@
     }
   }
 
-  /* Responsive styling */
   @media (max-width: 768px) {
-    .data-table .dt-row {
-      grid-template-columns: 44px 1.4fr 1.6fr 40px;
-      font-size: 12.5px;
-    }
-
-    .email-cell,
-    .status-cell {
-      display: none;
-    }
-
-    .modal-overlay {
-      padding: 12px;
+    .data-table {
+      overflow-x: auto;
     }
   }
 </style>
