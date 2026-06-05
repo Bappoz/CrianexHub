@@ -31,7 +31,6 @@ describe('filterMembers', () => {
       email: 'marina@crianex.com.br',
       role: 'owner',
       status: 'active',
-      last: 'Agora',
     },
     {
       id: '2',
@@ -39,7 +38,6 @@ describe('filterMembers', () => {
       email: 'ricardo@crianex.com.br',
       role: 'member',
       status: 'active',
-      last: '10m',
     },
     {
       id: '3',
@@ -47,7 +45,6 @@ describe('filterMembers', () => {
       email: 'tiago@crianex.com.br',
       role: 'member',
       status: 'inactive',
-      last: '1d',
     },
   ];
 

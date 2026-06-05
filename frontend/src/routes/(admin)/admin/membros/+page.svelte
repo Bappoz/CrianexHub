@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { getInitials, filterMembers, type Member } from '$lib/utils/membros';
-  import MemberFilters from '$lib/components/admin/MemberFilters.svelte';
+  import { getInitials, filterMembers, formatLastAccess, type Member } from '$lib/utils/membros';
   import MemberModal from '$lib/components/admin/MemberModal.svelte';
   import { apiFetch } from '$lib/api/backend';
 
   let { data } = $props<{ data: { members: Member[]; error?: string } }>();
 
-  // Synchronize state with data loaded from server
   let members = $state<Member[]>([]);
   let loadError = $state<string | undefined>(undefined);
   $effect(() => {
@@ -14,26 +12,19 @@
     loadError = data.error;
   });
 
-  // Reactive state for filters
-  let filterStatus = $state<'Todos' | 'active' | 'inactive'>('Todos');
-  let filterRole = $state<'Todos' | 'owner' | 'member'>('Todos');
-  let searchQuery = $state<string>('');
+  let searchQuery = $state('');
 
-  // Dropdown context menu state
   let activeMenuId = $state<string | null>(null);
 
-  // Member Modal (Add/Edit) state
-  let isModalOpen = $state<boolean>(false);
+  let isModalOpen = $state(false);
   let modalMember = $state<Partial<Member>>({});
-  let isEditing = $state<boolean>(false);
+  let isEditing = $state(false);
 
-  // Custom Delete Confirmation state
-  let isConfirmOpen = $state<boolean>(false);
+  let isConfirmOpen = $state(false);
   let memberToRemove = $state<Member | null>(null);
-  let deleting = $state<boolean>(false);
+  let deleting = $state(false);
 
-  // Toast Notifications state
-  let toastMessage = $state<string>('');
+  let toastMessage = $state('');
   let toastType = $state<'success' | 'error'>('success');
   let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -46,15 +37,12 @@
     }, 3000);
   }
 
-  // Filtered members list using $derived
-  let filteredMembers = $derived(filterMembers(members, filterStatus, filterRole, searchQuery));
+  let filteredMembers = $derived(filterMembers(members, 'Todos', 'Todos', searchQuery));
 
-  // KPIs dynamically computed from the members array
   let totalActive = $derived(members.filter((m) => m.status === 'active').length);
   let totalInactive = $derived(members.filter((m) => m.status === 'inactive').length);
   let totalOwners = $derived(members.filter((m) => m.role === 'owner').length);
 
-  // Actions
   async function toggleStatus(member: Member) {
     const newStatus = member.status === 'active' ? 'inactive' : 'active';
     try {
@@ -62,11 +50,13 @@
         method: 'PATCH',
         body: JSON.stringify({ status: newStatus }),
       });
-
       members = members.map((m) => (m.id === member.id ? { ...m, status: newStatus } : m));
-      showToast(`Membro ${newStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
-    } catch (err: any) {
-      showToast(err.message || 'Falha ao atualizar status do membro.', 'error');
+      showToast(`Membro ${newStatus === 'active' ? 'reativado' : 'inativado'} com sucesso!`);
+    } catch (err: unknown) {
+      showToast(
+        err instanceof Error ? err.message : 'Falha ao atualizar status do membro.',
+        'error'
+      );
     } finally {
       activeMenuId = null;
     }
@@ -82,16 +72,13 @@
     if (!memberToRemove) return;
     deleting = true;
     try {
-      await apiFetch(`/admin/members/${memberToRemove.id}`, {
-        method: 'DELETE',
-      });
-
+      await apiFetch(`/admin/members/${memberToRemove.id}`, { method: 'DELETE' });
       members = members.filter((m) => m.id !== memberToRemove!.id);
       showToast('Membro removido com sucesso!');
       isConfirmOpen = false;
       memberToRemove = null;
-    } catch (err: any) {
-      showToast(err.message || 'Falha ao remover membro.', 'error');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Falha ao remover membro.', 'error');
     } finally {
       deleting = false;
     }
@@ -103,6 +90,7 @@
       name: '',
       email: '',
       role: 'member',
+      display_role: 'Comercial',
       status: 'active',
     };
     isModalOpen = true;
@@ -115,40 +103,57 @@
     activeMenuId = null;
   }
 
-  async function handleSaveMember(updatedMember: Partial<Member>) {
-    if (isEditing && updatedMember.id) {
-      const res = await apiFetch<Member>(`/admin/members/${updatedMember.id}`, {
+  async function handleSaveMember(updated: Partial<Member>) {
+    if (isEditing && updated.id) {
+      const current = members.find((m) => m.id === updated.id);
+
+      // Update status separately if changed
+      if (current?.status !== updated.status && updated.status) {
+        await apiFetch(`/admin/members/${updated.id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: updated.status }),
+        });
+      }
+
+      const res = await apiFetch<Member>(`/admin/members/${updated.id}`, {
         method: 'PATCH',
         body: JSON.stringify({
-          name: updatedMember.name,
-          role: updatedMember.role,
+          name: updated.name,
+          role: updated.role,
+          display_role: updated.display_role,
+          permissions: updated.permissions,
         }),
       });
-      members = members.map((m) => (m.id === updatedMember.id ? res : m));
+      members = members.map((m) =>
+        m.id === updated.id ? { ...res, status: updated.status ?? res.status } : m
+      );
       showToast('Membro atualizado com sucesso!');
     } else {
       const res = await apiFetch<Member>('/admin/members', {
         method: 'POST',
         body: JSON.stringify({
-          name: updatedMember.name,
-          email: updatedMember.email,
-          role: updatedMember.role,
+          name: updated.name,
+          email: updated.email,
+          role: updated.role,
+          display_role: updated.display_role,
+          permissions: updated.permissions,
         }),
       });
       members = [...members, res];
-      showToast('Membro convidado com sucesso!');
+      showToast('Convite enviado com sucesso!');
     }
 
     isModalOpen = false;
   }
 
-  // Close context menus when clicking outside
   function handleOutsideClick(e: MouseEvent) {
     const target = e.target as HTMLElement;
     if (activeMenuId && !target.closest('.menu-container') && !target.closest('.menu-btn')) {
       activeMenuId = null;
     }
   }
+
+  const COL = '44px 1.4fr 1.4fr 130px 100px 80px 40px';
 </script>
 
 <svelte:window onclick={handleOutsideClick} />
@@ -160,30 +165,28 @@
       <span>/ operações</span>
       <span class="active-crumb">/ membros</span>
     </div>
-    <div class="header-action-group">
-      <button class="btn-add" onclick={openAddModal}>
-        <span>+</span> Cadastrar membro
-      </button>
-    </div>
+    <button class="btn-add" onclick={openAddModal}>
+      <span>+</span> Cadastrar membro
+    </button>
   </header>
 
   <!-- KPIs -->
-  <section class="kpis-grid" aria-label="Indicadores chave dos membros">
-    <div class="kpi-card">
-      <span class="kpi-label">Membros Ativos</span>
-      <span class="kpi-value">{totalActive}</span>
+  <section class="kpi-grid" aria-label="Indicadores chave dos membros">
+    <div class="kpi">
+      <div class="label">Membros ativos</div>
+      <div class="value">{totalActive}</div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Inativos</span>
-      <span class="kpi-value inactive">{totalInactive}</span>
+    <div class="kpi">
+      <div class="label">Inativos</div>
+      <div class="value inactive">{totalInactive}</div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Owners</span>
-      <span class="kpi-value">{totalOwners}</span>
+    <div class="kpi">
+      <div class="label">Owners</div>
+      <div class="value">{totalOwners}</div>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Total Cadastrado</span>
-      <span class="kpi-value">{members.length}</span>
+    <div class="kpi">
+      <div class="label">Convites pendentes</div>
+      <div class="value">0</div>
     </div>
   </section>
 
@@ -211,13 +214,36 @@
     </div>
   {/if}
 
-  <!-- Filters Component -->
-  <MemberFilters bind:searchQuery bind:filterStatus bind:filterRole />
-
-  <!-- Content Panel / Table -->
+  <!-- Content Panel -->
   <main class="panel">
+    <div class="panel-head">
+      <h3>{members.length} membros</h3>
+      <span class="grow"></span>
+      <div class="admin-search" style="width: 240px;">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          placeholder="nome, e-mail, papel…"
+          bind:value={searchQuery}
+          aria-label="Pesquisar membros"
+        />
+      </div>
+    </div>
+
     {#if filteredMembers.length === 0}
-      <!-- Empty State -->
       <div class="empty">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -234,25 +260,27 @@
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
-        <p>Nenhum membro cadastrado</p>
-        <div class="empty-actions">
-          <button class="btn-add" onclick={openAddModal}> Adicionar membro </button>
-        </div>
+        <p>Nenhum membro encontrado</p>
+        {#if !searchQuery}
+          <div class="empty-actions">
+            <button class="btn-add" onclick={openAddModal}>Adicionar membro</button>
+          </div>
+        {/if}
       </div>
     {:else}
-      <!-- Data Table -->
       <div class="data-table" role="table" aria-label="Tabela de membros">
-        <div class="dt-row header" role="row">
+        <div class="dt-row header" role="row" style="grid-template-columns: {COL}">
           <span></span>
           <span>Membro</span>
           <span>E-mail</span>
           <span>Papel</span>
+          <span>Último acesso</span>
           <span>Status</span>
-          <span>Ações</span>
+          <span></span>
         </div>
 
         {#each filteredMembers as member (member.id)}
-          <div class="dt-row" role="row">
+          <div class="dt-row" role="row" style="grid-template-columns: {COL}">
             <!-- Avatar -->
             <span class="avatar-cell">
               <span
@@ -273,14 +301,17 @@
             <!-- E-mail -->
             <span class="email-cell mono">{member.email}</span>
 
-            <!-- Role Chip -->
+            <!-- Papel -->
             <span class="role-cell">
               <span class="role-chip" class:owner={member.role === 'owner'}>
-                {member.role}
+                {member.display_role ?? member.role}
               </span>
             </span>
 
-            <!-- Status Pill -->
+            <!-- Último acesso -->
+            <span class="last-cell mono">{formatLastAccess(member.last_sign_in_at)}</span>
+
+            <!-- Status -->
             <span class="status-cell">
               <span class="status-pill {member.status}">
                 <span class="dt"></span>
@@ -288,7 +319,7 @@
               </span>
             </span>
 
-            <!-- Menu de Ações -->
+            <!-- Menu -->
             <span class="actions-cell">
               <div class="action-wrapper">
                 <button
@@ -296,7 +327,18 @@
                   aria-label="Ações para {member.name}"
                   onclick={() => (activeMenuId = activeMenuId === member.id ? null : member.id)}
                 >
-                  ⋯
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="5" r="1.5"></circle>
+                    <circle cx="12" cy="12" r="1.5"></circle>
+                    <circle cx="12" cy="19" r="1.5"></circle>
+                  </svg>
                 </button>
 
                 {#if activeMenuId === member.id}
@@ -312,11 +354,14 @@
                         stroke-linejoin="round"
                         class="menu-ico"
                       >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                        ></path>
                       </svg>
-                      Editar
+                      Editar perfil & permissões
                     </button>
+
                     <button class="menu-item" role="menuitem" onclick={() => toggleStatus(member)}>
                       {#if member.status === 'active'}
                         <svg
@@ -333,7 +378,7 @@
                           <line x1="9" y1="9" x2="15" y2="15"></line>
                           <line x1="15" y1="9" x2="9" y2="15"></line>
                         </svg>
-                        Inativar
+                        Inativar membro
                       {:else}
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -347,9 +392,10 @@
                         >
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        Ativar
+                        Reativar
                       {/if}
                     </button>
+
                     <button
                       class="menu-item danger"
                       role="menuitem"
@@ -369,10 +415,8 @@
                         <path
                           d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
                         ></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
                       </svg>
-                      Remover
+                      Remover do painel
                     </button>
                   </div>
                 {/if}
@@ -384,7 +428,7 @@
     {/if}
   </main>
 
-  <!-- Modal Component -->
+  <!-- Member Modal -->
   <MemberModal
     isOpen={isModalOpen}
     {isEditing}
@@ -393,7 +437,7 @@
     onSave={handleSaveMember}
   />
 
-  <!-- Delete Confirmation Modal Dialog -->
+  <!-- Delete Confirmation Dialog -->
   {#if isConfirmOpen}
     <div class="admin-overlay" style="z-index: 110;" role="presentation">
       <div
@@ -478,7 +522,7 @@
     </div>
   {/if}
 
-  <!-- Toast Notification -->
+  <!-- Toast -->
   {#if toastMessage}
     <div
       class="toast-container"
@@ -534,11 +578,6 @@
     color: var(--text);
   }
 
-  .header-action-group {
-    display: flex;
-    gap: 10px;
-  }
-
   .btn-add {
     background-color: #ffffff;
     color: #101010;
@@ -561,14 +600,14 @@
     color: #ffffff;
   }
 
-  /* KPIs Grid */
-  .kpis-grid {
+  /* KPI Grid */
+  .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
   }
 
-  .kpi-card {
+  .kpi {
     background-color: var(--bg-elev);
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -578,44 +617,33 @@
     gap: 6px;
   }
 
-  .kpi-label {
-    font-family: var(--font-sans);
+  .kpi .label {
     font-size: 12.5px;
     color: var(--text-muted);
     font-weight: 500;
   }
 
-  .kpi-value {
-    font-size: 24px;
+  .kpi .value {
+    font-size: 22px;
     font-weight: 700;
     color: var(--green);
     letter-spacing: -0.02em;
   }
 
-  .kpi-value.inactive {
+  .kpi .value.inactive {
     color: var(--text-faint);
   }
 
-  /* Panel */
-  .panel {
-    background-color: var(--bg-elev);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 16px;
-    overflow-x: auto;
-  }
-
-  /* Table styling */
+  /* Table */
   .data-table {
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-width: 600px;
+    min-width: 680px;
   }
 
   .data-table .dt-row {
     display: grid;
-    grid-template-columns: 44px 1.6fr 2fr 120px 100px 48px;
     align-items: center;
     padding: 10px 12px;
     border-bottom: 1px solid var(--line);
@@ -650,14 +678,17 @@
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
+    flex-shrink: 0;
   }
 
   .name-cell {
+    font-size: 13px;
     font-weight: 500;
     color: var(--text);
   }
 
   .email-cell {
+    font-size: 11.5px;
     color: var(--text-muted);
   }
 
@@ -682,6 +713,11 @@
     color: var(--pink);
   }
 
+  .last-cell {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
   .status-cell {
     display: flex;
     align-items: center;
@@ -691,7 +727,6 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: var(--font-sans);
     font-size: 11.5px;
     font-weight: 500;
     text-transform: lowercase;
@@ -729,7 +764,6 @@
   .menu-btn {
     background: transparent;
     border: none;
-    font-size: 18px;
     color: var(--text-muted);
     cursor: pointer;
     width: 28px;
@@ -747,7 +781,6 @@
     color: var(--text);
   }
 
-  /* Actions Context Menu */
   .menu-container {
     position: absolute;
     right: 0;
@@ -757,7 +790,7 @@
     border-radius: 8px;
     padding: 4px;
     box-shadow: var(--shadow-3);
-    min-width: 140px;
+    min-width: 180px;
     z-index: 50;
     display: flex;
     flex-direction: column;
@@ -767,7 +800,7 @@
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     padding: 8px 10px;
     background: transparent;
@@ -796,7 +829,7 @@
   .menu-ico {
     width: 13px;
     height: 13px;
-    color: currentColor;
+    flex-shrink: 0;
   }
 
   /* Empty state */
@@ -826,7 +859,7 @@
     margin-top: 6px;
   }
 
-  /* btn-danger disabled state */
+  /* Disabled states */
   :global(.btn-danger:disabled) {
     opacity: 0.5;
     cursor: not-allowed;
@@ -838,7 +871,7 @@
     cursor: not-allowed;
   }
 
-  /* Toast Notification */
+  /* Toast */
   .toast-container {
     position: fixed;
     bottom: 24px;
@@ -870,20 +903,9 @@
     }
   }
 
-  /* Responsive styling */
   @media (max-width: 768px) {
-    .data-table .dt-row {
-      grid-template-columns: 44px 1.4fr 1.6fr 40px;
-      font-size: 12.5px;
-    }
-
-    .email-cell,
-    .status-cell {
-      display: none;
-    }
-
-    .modal-overlay {
-      padding: 12px;
+    .data-table {
+      overflow-x: auto;
     }
   }
 </style>

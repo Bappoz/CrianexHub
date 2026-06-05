@@ -3,8 +3,10 @@ export interface Member {
   name: string;
   email: string;
   role: 'owner' | 'member';
+  display_role?: string | null;
   status: 'active' | 'inactive';
-  last?: string;
+  permissions?: Record<string, string[]>;
+  last_sign_in_at?: string | null;
   avatar_url?: string;
   created_at?: string;
   updated_at?: string;
@@ -35,15 +37,26 @@ export function filterMembers(
   filterRole: 'Todos' | 'owner' | 'member',
   searchQuery: string
 ): Member[] {
-  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-
+  const q = searchQuery.trim().toLowerCase();
   return members.filter((m) => {
     const matchStatus = filterStatus === 'Todos' || m.status === filterStatus;
     const matchRole = filterRole === 'Todos' || m.role === filterRole;
     const matchSearch =
-      normalizedSearchQuery === '' ||
-      m.name.toLowerCase().includes(normalizedSearchQuery) ||
-      m.email.toLowerCase().includes(normalizedSearchQuery);
+      q === '' ||
+      m.name.toLowerCase().includes(q) ||
+      m.email.toLowerCase().includes(q) ||
+      (m.display_role ?? '').toLowerCase().includes(q);
     return matchStatus && matchRole && matchSearch;
   });
+}
+
+export function formatLastAccess(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'agora';
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
 }

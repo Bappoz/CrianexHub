@@ -28,7 +28,21 @@ membersRouter.post('/', ...ownerGuard, async (req, res) => {
   const email =
     typeof req.body?.['email'] === 'string' ? req.body['email'].trim().toLowerCase() : '';
   const roleRaw = req.body?.['role'];
-  const role: 'owner' | 'member' = roleRaw === 'owner' ? 'owner' : 'member';
+  const displayRoleRaw = req.body?.['display_role'];
+
+  const display_role = typeof displayRoleRaw === 'string' ? displayRoleRaw.trim() : undefined;
+  const permissions =
+    req.body?.['permissions'] && typeof req.body['permissions'] === 'object'
+      ? (req.body['permissions'] as Record<string, string[]>)
+      : undefined;
+
+  // Derive auth role: display_role takes precedence over role field
+  const role: 'owner' | 'member' =
+    display_role === 'Owner' || display_role === 'Administrador'
+      ? 'owner'
+      : roleRaw === 'owner'
+        ? 'owner'
+        : 'member';
 
   if (!name || !email) {
     res.status(400).json({ message: 'Nome e e-mail são obrigatórios.' });
@@ -36,7 +50,7 @@ membersRouter.post('/', ...ownerGuard, async (req, res) => {
   }
 
   try {
-    const member = await createMember(name, email, role);
+    const member = await createMember(name, email, role, display_role, permissions);
     res.status(201).json(member);
   } catch (err) {
     if (err instanceof MemberServiceError && err.code === 'DUPLICATE_EMAIL') {
@@ -98,10 +112,19 @@ membersRouter.patch('/:id', ...ownerGuard, async (req, res) => {
     return;
   }
 
-  const updates: { name?: string; role?: 'owner' | 'member' } = {};
+  const updates: {
+    name?: string;
+    role?: 'owner' | 'member';
+    display_role?: string;
+    permissions?: Record<string, string[]>;
+  } = {};
   if (typeof req.body?.['name'] === 'string') updates.name = req.body['name'].trim();
   if (req.body?.['role'] === 'owner' || req.body?.['role'] === 'member')
     updates.role = req.body['role'];
+  if (typeof req.body?.['display_role'] === 'string')
+    updates.display_role = req.body['display_role'].trim();
+  if (req.body?.['permissions'] && typeof req.body['permissions'] === 'object')
+    updates.permissions = req.body['permissions'] as Record<string, string[]>;
 
   try {
     const member = await updateMember(id, updates);
