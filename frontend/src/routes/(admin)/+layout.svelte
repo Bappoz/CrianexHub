@@ -35,7 +35,7 @@
       label: 'Vitrine',
       items: [
         { href: '/products', label: 'Produtos', icon: Package },
-        { href: NAO_IMPL, label: 'Gestão FAQ', icon: CircleQuestionMark },
+        { href: '/gestao-faq', label: 'Gestão FAQ', icon: CircleQuestionMark },
       ],
     },
     {

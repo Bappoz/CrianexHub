@@ -1,10 +1,14 @@
 import { redirect } from '@sveltejs/kit';
 import { apiFetch } from '$lib/api/backend';
+
 import type { PageServerLoad } from './$types';
 
 export type FaqArticle = {
   id: string;
   title_pt: string;
+  title_en?: string | null;
+  content_pt?: string | null;
+  content_en?: string | null;
   category: string;
   status: 'published' | 'draft';
   ratings_positive: number;
@@ -14,19 +18,11 @@ export type FaqArticle = {
   updated_at: string;
 };
 
-export const load: PageServerLoad = async ({ cookies, locals }) => {
-  if (!locals.adminUser) {
-    throw redirect(303, '/admin/login');
-  }
-
+export const load: PageServerLoad = async ({ cookies }) => {
   const token = cookies.get('crianex_admin_access_token');
 
-  if (!token) {
-    throw redirect(303, '/admin/login');
-  }
-
   try {
-    const articles = await apiFetch<FaqArticle[]>('/api/admin/faq', { token });
+    const articles = await apiFetch<FaqArticle[]>('/admin/faq', { token });
     return { articles };
   } catch (err) {
     console.error('[gestao-faq load] Failed to fetch FAQ articles:', err);
