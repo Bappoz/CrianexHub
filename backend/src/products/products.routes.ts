@@ -34,7 +34,12 @@ productsPublicRouter.get('/', getPublishedProductsController);
 // Rotas de admin: todas as operações CRUD
 const productsAdminRouter = Router();
 productsAdminRouter.get('/', ...ownerGuard, getAllProductsController);
-productsAdminRouter.post('/upload', ...ownerGuard, upload.single('image'), uploadProductImageController);
+productsAdminRouter.post(
+  '/upload',
+  ...ownerGuard,
+  upload.single('image'),
+  uploadProductImageController
+);
 productsAdminRouter.post('/', ...ownerGuard, createProductController);
 productsAdminRouter.post('/reorder', ...ownerGuard, reorderProductsController);
 productsAdminRouter.patch('/reorder', ...ownerGuard, reorderProductsController);

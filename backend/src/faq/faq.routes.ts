@@ -144,7 +144,8 @@ faqRouter.post('/articles', ...ownerGuard, async (req, res) => {
     if (typeof req.body?.['title_en'] === 'string') articleInput.title_en = req.body['title_en'];
     if (typeof req.body?.['body_pt'] === 'string') articleInput.body_pt = req.body['body_pt'];
     if (typeof req.body?.['body_en'] === 'string') articleInput.body_en = req.body['body_en'];
-    if (typeof req.body?.['published'] === 'boolean') articleInput.published = req.body['published'];
+    if (typeof req.body?.['published'] === 'boolean')
+      articleInput.published = req.body['published'];
     const article = await createArticle(articleInput);
     res.status(201).json(article);
   } catch (err) {
