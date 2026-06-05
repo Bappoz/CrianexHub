@@ -136,6 +136,16 @@ jobs:
           supabase telemetry disable
           supabase start
 
+          # Export the actual JWT keys from the running instance so that the
+          # hardcoded defaults in the job env are overridden with the real values.
+          supabase status --output env > /tmp/supabase-status.env
+          REAL_URL=$(grep '^SUPABASE_URL=' /tmp/supabase-status.env | cut -d= -f2-)
+          REAL_SERVICE_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' /tmp/supabase-status.env | cut -d= -f2-)
+          REAL_ANON_KEY=$(grep '^SUPABASE_ANON_KEY=' /tmp/supabase-status.env | cut -d= -f2-)
+          echo "SUPABASE_URL=${REAL_URL}" >> "$GITHUB_ENV"
+          echo "SUPABASE_SECRET_KEY=${REAL_SERVICE_KEY}" >> "$GITHUB_ENV"
+          echo "PUBLIC_SUPABASE_PUBLISHABLE_KEY=${REAL_ANON_KEY}" >> "$GITHUB_ENV"
+
       - name: Apply Supabase migrations
         run: |
           set -euo pipefail
