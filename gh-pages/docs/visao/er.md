@@ -207,13 +207,20 @@ flowchart TD
 
 ## 4.5 Atividades de Engenharia de Requisitos
 
-A tabela abaixo mapeia as atividades clássicas de Engenharia de Requisitos às cerimônias e tarefas do processo híbrido FDD + Kanban adotado pelo projeto.
+O processo híbrido FDD + Kanban cobre as seis atividades clássicas de Engenharia de Requisitos — **Elicitação e Descoberta**, **Análise e Consenso**, **Declaração**, **Representação**, **Verificação e Validação** e **Organização e Atualização** — distribuídas entre as cinco etapas do FDD. A tabela abaixo mapeia, por etapa, quais atividades de ER são realizadas e quais técnicas cada uma emprega.
 
-| Atividade de ER               | Etapa FDD       | Ocorrência        | Cerimônia / Tarefa                                                                                                                                                                                                      |
-| ----------------------------- | --------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Elicitação e Descoberta**   | Etapas 1 e 2    | Única             | Domain Modeling Workshop; Feature Discovery Session                                                                                                                                                                     |
-| **Análise e Consenso**        | Etapas 2 e 3    | Única + Iterativa | Feature Discovery Session; Iteration Replenishment + Commitment; Technical Design Review                                                                                                                                |
-| **Declaração**                | Etapas 2, 3 e 4 | Única + Iterativa | Feature Card Specification; escrita de critérios de aceite BDD (Dado/Quando/Então); notas de design técnico                                                                                                             |
-| **Representação**             | Etapas 1, 2 e 4 | Única + Iterativa | Domain Modeling Workshop (diagrama de domínio e glossário); Feature Card Specification (formulação `<ação> <resultado> <objeto>`); Technical Design Review (diagramas de sequência e especificação técnica por feature) |
-| **Verificação e Validação**   | Etapa 5         | Iterativa         | Feature Build Consolidation (verificação técnica); Partial Client Validation (validação assíncrona); Formal Client Validation (demo orientada a valor)                                                                  |
-| **Organização e Atualização** | Etapas 3 e 5    | Única + Iterativa | Iteration Replenishment macro (roadmap); Iteration Artifact Closure; Backlog Reorganization; atualização da Matriz de Rastreabilidade                                                                                   |
+| Etapa FDD | Atividade de ER | Técnicas |
+| --------- | --------------- | -------- |
+| **Etapa 1** — Develop an Overall Model | Elicitação e Descoberta | Color Modeling |
+|  | Representação | Diagrama de domínio · Glossário de termos |
+| **Etapa 2** — Build a Feature List | Elicitação e Descoberta | Feature Discovery Session |
+|  | Análise e Consenso | Vertical Slicing · INVEST |
+|  | Declaração | Feature Card Specification (`<ação> <resultado> <de/para/no/com> <objeto>`) |
+|  | Representação | Feature Cards |
+| **Etapa 3** — Plan by Feature | Análise e Consenso | Matriz Valor × Esforço · Priorização IP (VB / PT) |
+|  | Organização e Atualização | Backlog macro priorizado · Roadmap de iterações · Feature Matrix |
+| **Etapa 4** — Design by Feature *(iterativa)* | Análise e Consenso | Reordenação por IP · Iteration Goal Statement |
+|  | Declaração | Critérios de aceite BDD (Dado / Quando / Então) · Notas de design técnico |
+|  | Representação | Diagrama de sequência leve · Análise de impacto · Prototipagem |
+| **Etapa 5** — Build by Feature *(iterativa)* | Verificação e Validação | Smoke test end-to-end · Verificação de critérios de aceite · Validação assíncrona (vídeo / screenshots + checklist) · Demo orientada a valor |
+|  | Organização e Atualização | Requirements Traceability Matrix · Backlog Reorganization · Checklist de empacotamento |

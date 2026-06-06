@@ -28,57 +28,58 @@ A estrutura modular garante que, se necessário no futuro, módulos possam ser e
 ## 2. Diagrama de Arquitetura Geral
 
 ```mermaid
-graph TD
-    subgraph BROWSER["🌐 Navegador Web"]
-        B[Browser]
-    end
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '15px', 'fontFamily': 'arial'}}}%%
+graph LR
+    B["🌐 Browser"]
 
-    subgraph FRONTEND["Frontend — SvelteKit + Vite + TypeScript"]
-        PUB["(public)\nvitrine · FAQ · lead"]
-        ADM["(admin)\nCRM · dashboard · financeiro"]
+    subgraph FRONTEND["Frontend — SvelteKit + TypeScript"]
+        direction TB
+        PUB["(vitrine)"]
+        LOGIN["admin/login"]
+        ADM["(admin)"]
     end
 
     subgraph BACKEND["Backend — Express.js + TypeScript"]
-        AUTH_MOD[auth]
-        CRM_MOD[crm]
-        PROD_MOD[products]
-        TICK_MOD[tickets]
-        FIN_MOD[finance]
-        NOTIF_MOD[notifications]
+        direction TB
+        AUTH_MOD["auth"]
+        PROD_MOD["products (público)"]
+        LEAD_MOD["leads"]
+        MW["Middleware JWT"]
+        PROD_ADM["products (admin)"]
+        MBR_MOD["members"]
+        FAQ_MOD["faq"]
+        MW --> PROD_ADM & MBR_MOD & FAQ_MOD
     end
 
     subgraph DADOS["Dados — Supabase / PostgreSQL"]
-        SUPA_AUTH[Supabase Auth]
-        SUPA_STORE[Supabase Storage]
-        SUPA_RLS[RLS Policies]
-        PG[(PostgreSQL)]
+        direction TB
+        SUPA_AUTH["Supabase Auth"]
+        SUPA_STORE["Supabase Storage"]
+        PG[("PostgreSQL")]
     end
 
     subgraph INFRA["Infra / CI-CD"]
-        GHA[GitHub Actions]
-        K8S["Kubernetes\n(pós-venda)"]
+        direction TB
+        GHA["GitHub Actions"]
+        K8S["Kubernetes (pós-venda)"]
+        GHA -->|"build → image → deploy"| K8S
     end
 
-    B -->|"GET /\nSSR + hydration"| PUB
-    B -->|"GET /admin\nSSR + JWT cookie"| ADM
-    PUB -->|"Supabase Client\nselect (RLS)"| SUPA_RLS
-    ADM -->|"fetch /api/*\nBearer JWT"| AUTH_MOD
-    AUTH_MOD --> SUPA_AUTH
-    AUTH_MOD --> CRM_MOD
-    AUTH_MOD --> PROD_MOD
-    AUTH_MOD --> TICK_MOD
-    AUTH_MOD --> FIN_MOD
-    AUTH_MOD --> NOTIF_MOD
-    CRM_MOD --> PG
-    PROD_MOD --> PG
-    TICK_MOD --> PG
-    FIN_MOD --> PG
-    NOTIF_MOD --> PG
-    SUPA_RLS --> PG
-    SUPA_STORE --> PG
-    GHA -->|"build → image → deploy"| K8S
+    B --> PUB & LOGIN & ADM
 
-    style BROWSER fill:#e3f2fd,stroke:#1565c0
+    PUB -->|"GET /api/products"| PROD_MOD
+    PUB -->|"POST /api/public/contact"| LEAD_MOD
+    PUB -->|"Supabase Client (RLS)"| PG
+
+    LOGIN -->|"OAuth / password → JWT cookie"| SUPA_AUTH
+
+    ADM -->|"POST /api/auth/*"| AUTH_MOD
+    ADM -->|"Bearer JWT"| MW
+    AUTH_MOD --> SUPA_AUTH
+
+    PROD_ADM -->|"upload"| SUPA_STORE
+    PROD_MOD & LEAD_MOD & PROD_ADM & MBR_MOD & FAQ_MOD --> PG
+
     style FRONTEND fill:#fff3e0,stroke:#e65100
     style BACKEND fill:#e8f5e9,stroke:#2e7d32
     style DADOS fill:#fce4ec,stroke:#880e4f
@@ -88,33 +89,66 @@ graph TD
 !!! note "Kubernetes — pós-venda"
 O nó Kubernetes está presente na arquitetura, mas não é utilizado durante as iterações de desenvolvimento (IT1–IT3). O ambiente de desenvolvimento usa Docker Compose local + Supabase gerenciado na nuvem.
 
+!!! note "Duas estratégias de leitura pública"
+Produtos e leads passam pelo Express (controle de rate limit e lógica de negócio no servidor). Os artigos FAQ públicos são lidos via Supabase Client diretamente do SvelteKit SSR — a RLS do PostgreSQL (`published = true`) garante que apenas artigos publicados são retornados, sem necessidade de endpoint Express intermediário.
+
 ---
 
 ## 3. Fluxo de Requisição — Vitrine Pública
 
-A vitrine pública acessa o Supabase diretamente via Supabase Client no servidor SvelteKit, sem passar pelo Express. Isso elimina um round-trip de rede e atende ao RNF02 (≤ 2s em 95% das requisições).
+A vitrine pública usa **duas estratégias distintas** dependendo do recurso:
+
+- **Produtos e leads**: passam pelo Express, onde há lógica de negócio e rate limiting.
+- **FAQ públicos**: lidos via Supabase Client direto no SvelteKit SSR — não existe endpoint Express público para FAQ; a RLS no banco garante que apenas artigos `published = true` são retornados.
+
+### 3a — Listagem de Produtos (via Express)
+
+```mermaid
+sequenceDiagram
+    participant Nav as Navegador
+    participant SK as SvelteKit SSR
+    participant API as Express API
+    participant PG as PostgreSQL
+
+    Nav->>SK: GET /produtos
+    activate SK
+    SK->>API: GET /api/products
+    activate API
+    API->>PG: SELECT * FROM products WHERE published = true ORDER BY display_order
+    activate PG
+    PG-->>API: products[]
+    deactivate PG
+    API-->>SK: 200 OK — JSON
+    deactivate API
+    SK-->>Nav: HTML renderizado (SSR) + hydration bundle
+    deactivate SK
+```
+
+### 3b — FAQ Público (Supabase Client direto, com RLS)
 
 ```mermaid
 sequenceDiagram
     participant Nav as Navegador
     participant SK as SvelteKit SSR
     participant SC as Supabase Client
-    participant RLS as RLS / PostgreSQL
+    participant PG as PostgreSQL (RLS ativa)
 
-    Nav->>SK: GET /produtos
+    Nav->>SK: GET /faq
     activate SK
-    SK->>SC: select * from produtos where publicado = true
+    SK->>SC: select * from faq_articles where published = true
     activate SC
-    SC->>RLS: query com política RLS ativa
-    RLS-->>SC: rows[] (apenas produtos publicados)
+    SC->>PG: query (política RLS: published = true)
+    activate PG
+    PG-->>SC: articles[] (apenas publicados)
+    deactivate PG
+    SC-->>SK: articles[]
     deactivate SC
-    SC-->>SK: rows[]
     SK-->>Nav: HTML renderizado (SSR) + hydration bundle
     deactivate SK
 ```
 
-!!! note "Segurança via RLS"
-A política RLS `WHERE publicado = true AND ativo = true` é aplicada **no banco de dados**, não na aplicação. Isso garante que dados não publicados nunca chegam ao cliente — mesmo que o Supabase Client seja chamado diretamente, sem backend intermediário validando os filtros.
+!!! note "RLS como segunda linha de defesa"
+Mesmo na leitura direta via Supabase Client, a política RLS `published = true` é aplicada no banco — dados não publicados nunca chegam ao cliente, independente de quem faz a query.
 
 ---
 
@@ -136,9 +170,9 @@ sequenceDiagram
     activate API
     API->>SA: verifyToken(JWT)
     activate SA
-    SA-->>API: { user_id, role, tenant_id }
+    SA-->>API: { user_id, role }
     deactivate SA
-    API->>PG: SELECT * FROM leads WHERE tenant_id = $1
+    API->>PG: SELECT * FROM leads WHERE status = 'new'
     activate PG
     PG-->>API: leads[]
     deactivate PG
@@ -193,37 +227,33 @@ O cookie `httpOnly` impede que qualquer script client-side acesse o token de ses
 
 ## 6. Estrutura de Módulos do Backend
 
-O Express é organizado em módulos independentes, cada um com seu próprio `router`, `service` e `repository`. O módulo `auth` é transversal: todos os módulos que expõem rotas protegidas passam pelo middleware de validação JWT antes de executar qualquer lógica de negócio.
+O Express é organizado em módulos independentes, cada um com seu próprio `router`, `controller` e `service`. O middleware de JWT (`validateJWT` + `requireRole('owner')`) é aplicado nas rotas `/api/admin/*` antes de qualquer lógica de módulo ser executada. Rotas públicas (`/api/products`, `/api/public/contact`, `/api/health`) não passam pelo middleware.
 
 ```mermaid
 graph LR
     Router[Express Router]
 
-    Router --> auth[auth\nmiddleware JWT]
-    Router --> crm[crm\nleads · cards · histórico]
-    Router --> products[products\ncatálogo SaaS]
-    Router --> tickets[tickets\nsuporte]
-    Router --> finance[finance\nrelatórios · exportação]
-    Router --> notifications[notifications\neventos · push]
+    Router -->|"/api/auth/*"| auth[auth\nlogin · logout · refresh · session]
+    Router -->|"/api/products\n(público)"| products[products\ncatálogo SaaS público]
+    Router -->|"/api/public/contact\n(público)"| leads[leads\ncaptação · rate limit]
+    Router -->|"/api/health\n(público)"| health[health\nstatus]
 
-    auth -.->|protege| crm
-    auth -.->|protege| products
-    auth -.->|protege| tickets
-    auth -.->|protege| finance
-    auth -.->|protege| notifications
+    Router -->|"/api/admin/*"| MW["Middleware JWT\nvalidateJWT\nrequireRole('owner')"]
+    MW --> admin_products[products admin\nCRUD · upload · publicação]
+    MW --> members[members\nCRUD · ativar/inativar]
+    MW --> faq[faq\ncategorias · artigos · publicação]
 
-    crm -->|evento: novo lead| notifications
-    tickets -->|vincula cliente/lead| crm
-
-    crm --> DB[(Supabase / PostgreSQL)]
+    auth --> SUPA_AUTH[(Supabase Auth)]
+    admin_products --> STORE[(Supabase Storage)]
+    admin_products --> DB[(PostgreSQL)]
     products --> DB
-    tickets --> DB
-    finance --> DB
-    notifications --> DB
+    leads --> DB
+    members --> DB
+    faq --> DB
 ```
 
-!!! tip "Isolamento entre módulos"
-`finance` não tem dependência de nenhum outro módulo além de `auth`. Isso facilita eventual extração futura como serviço independente, caso o volume de relatórios justifique escala separada.
+!!! tip "Módulos futuros (IT2 e IT3)"
+CRM, tickets, financeiro e notificações serão adicionados nas iterações IT2 e IT3. A estrutura modular do Express permite adicionar novos módulos sem alterar os existentes.
 
 ---
 
@@ -288,47 +318,8 @@ A alternativa de microsserviços foi avaliada e rejeitada pelos seguintes motivo
 
 ---
 
-## 8. Estrutura do Monorepo
 
-```
-apps/
-  web/                        ← SvelteKit (SSR + CSR)
-    src/
-      routes/
-        (public)/             ← vitrine, FAQ, formulário de lead
-        (admin)/              ← painel autenticado, CRM, dashboard
-      lib/
-        components/           ← componentes Shadcn/ui
-        stores/               ← estado global (Svelte stores)
-        api/                  ← wrappers de chamada ao Express
-  api/                        ← Express.js
-    src/
-      modules/
-        auth/                 ← JWT validation, middleware, hooks
-        crm/                  ← leads, cards Kanban, histórico
-        products/             ← catálogo SaaS CRUD
-        tickets/              ← suporte, SLA, histórico
-        finance/              ← relatórios, exportação PDF/CSV
-        notifications/        ← eventos, push, log de atividades
-      shared/                 ← utilitários internos do Express
-packages/
-  shared/                     ← tipos TypeScript compartilhados (web + api)
-    src/
-      types/                  ← interfaces de domínio
-      schemas/                ← validações Zod compartilhadas
-supabase/                     ← schema e migrations do banco (Supabase CLI)
-  migrations/                 ← arquivos SQL versionados (1 arquivo por issue de DB)
-    YYYYMMDDHHMMSS_<descricao>.sql
-  seed.sql                    ← dados iniciais (about_sections, faq_categories, etc.)
-  config.toml                 ← configuração do projeto Supabase CLI
-```
-
-!!! note "Tipos compartilhados"
-O pacote `packages/shared` é a única fonte de verdade para os contratos de API — os tipos TypeScript gerados aqui são consumidos tanto pelo frontend quanto pelo backend, eliminando divergências de contrato em tempo de desenvolvimento.
-
----
-
-## 9. Estratégia de Deploy por Fase
+## 8. Estratégia de Deploy por Fase
 
 ### Ambientes
 
@@ -394,7 +385,7 @@ Supabase Auth gerencia o hash. Fator mínimo 12 (RNF08).
 
 Row Level Security no PostgreSQL garante isolamento de dados mesmo em acessos diretos do frontend via Supabase JS client — não depender apenas de validações da camada de aplicação.
 
-## 10. Rastreabilidade Arquitetural → RNFs
+## 9. Rastreabilidade Arquitetural → RNFs
 
 | Decisão Arquitetural                                    | RNFs Atendidos      | Justificativa                                                                                           |
 | ------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------- |
