@@ -53,12 +53,14 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Login com credenciais válidas → sessão JWT + redirect `/admin` | ⬜ Pendente |
-| Login com credenciais inválidas → mensagem genérica sem expor detalhes | ⬜ Pendente |
-| Logout → `signOut()` + limpeza de sessão + redirect `/admin/login` | ⬜ Pendente |
-| Acesso a `/admin` sem sessão → redirect para `/admin/login` | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Login com credenciais válidas → Supabase Auth gera sessão JWT → redirect `/admin/dashboard` | RF08 | ⬜ |
+| MFA ativo → código TOTP solicitado antes de emitir sessão | RF08 · RNF08 | ⬜ |
+| Credenciais inválidas → 401 + mensagem genérica sem expor detalhes internos | RF08 | ⬜ |
+| Logout → `signOut()` + invalida `refresh_token` + limpa cookie + redirect `/admin/login` | RF09 | ⬜ |
+| Acesso a `/admin` sem sessão → redirect `/admin/login` sem renderizar dados do painel | RF09 · RNF01 | ⬜ |
+| Tempo de autenticação ≤ 2s | RNF03 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -145,11 +147,12 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| JWT válido com role admin → painel renderizado com dados do perfil | ⬜ Pendente |
-| JWT expirado → `refreshSession()` tentado; se falhar, redirect `/admin/login` | ⬜ Pendente |
-| Query no Supabase DB → RLS filtra por `auth.uid()` e `auth.role()` | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| JWT válido com `role = owner` → RLS filtra por `auth.uid()` + `auth.role()` → painel renderizado sem reload | RF10 · RNF09 | ⬜ |
+| JWT expirado → `refreshSession()` tentado; se falhar, redirect `/admin/login` sem renderizar dados | RF10 | ⬜ |
+| Token inválido ou sem `role = owner` → 401/403 + redirect `/admin/login` sem expor estrutura | RF10 · RNF01 | ⬜ |
+| Operação no painel → resposta entregue em ≤ 2s em condições normais | RNF03 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -229,16 +232,16 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Owner edita dados de usuário → RLS valida `role = owner` → persiste sem reload | ⬜ Pendente |
-| Edição sem role owner → bloqueio 403 pelo RLS | ⬜ Pendente |
-| Owner cadastra novo membro → `createUser()` + insert em `profiles` | ⬜ Pendente |
-| Email duplicado → erro informativo, sem registro duplicado | ⬜ Pendente |
-| Owner inativa membro → `active = false` + lista atualizada sem reload | ⬜ Pendente |
-| Owner tenta inativar a própria conta → operação bloqueada | ⬜ Pendente |
-| Owner remove membro → `deleteUser()` + remoção de `profiles` | ⬜ Pendente |
-| Owner tenta remover a própria conta → operação bloqueada | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Owner cadastra novo membro → `createUser()` + insert em `profiles` → lista atualizada sem reload | RF12 | ⬜ |
+| Email duplicado → erro informativo sem criar registro duplicado | RF12 | ⬜ |
+| Owner edita dados de membro → RLS valida `role = owner` → persiste sem reload | RF11 · RNF09 | ⬜ |
+| Edição sem `role = owner` → bloqueio 403 pelo RLS sem persistir nada | RF11 · RNF09 | ⬜ |
+| Owner inativa membro → `active = false` + lista atualizada sem reload | RF13 | ⬜ |
+| Owner tenta inativar a própria conta → operação bloqueada com mensagem de erro | RF13 | ⬜ |
+| Owner remove membro → `deleteUser()` + remoção de `profiles` → lista atualizada sem reload | RF14 | ⬜ |
+| Owner tenta remover a própria conta → bloqueado (ao menos um owner ativo garantido) | RF14 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -320,13 +323,14 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Admin cadastra produto → persistido no banco e apto para publicação | ⬜ Pendente |
-| Admin edita produto → dados substituídos no banco sem intervenção de dev | ⬜ Pendente |
-| Admin remove produto → excluído do catálogo e ausente na vitrine | ⬜ Pendente |
-| Vitrine carrega em ≤ 2 s (RNF02) | ⬜ Pendente |
-| Falha no banco → rollback total (RNF06) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Admin cadastra produto → persistido em transação ACID → apto para publicação | RF21 · RNF06 | ⬜ |
+| Admin edita produto → dados substituídos no banco sem intervenção de dev | RF22 | ⬜ |
+| Admin remove produto → excluído do catálogo e ausente na vitrine imediatamente | RF23 | ⬜ |
+| Requisição sem autorização → 401/403 sem executar operação no banco | RF21–23 · RNF01 | ⬜ |
+| Vitrine pública renderiza via SSR → apenas `published = true` em ≤ 2s sem JS | RNF02 · RNF21 | ⬜ |
+| Falha no banco → ROLLBACK completo sem registro parcial | RNF06 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -397,11 +401,11 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Admin publica produto → status alterado e produto visível na vitrine | ⬜ Pendente |
-| Admin despublica produto → produto oculto da vitrine, dados preservados | ⬜ Pendente |
-| Tempo de resposta ≤ 2 s para confirmação (RNF03) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Admin aciona toggle para publicar → `published = true` + confirmação visual em ≤ 2s | RF25 · RNF03 | ⬜ |
+| Admin aciona toggle para despublicar → produto ocultado da vitrine, dados preservados no banco | RF59 · RNF03 | ⬜ |
+| Credenciais inválidas no toggle → API rejeita → toggle revertido + mensagem de erro | RF25 · RF59 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -472,11 +476,11 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Visitante preenche formulário e clica "Enviar" → mensagem persistida + alerta de sucesso | ⬜ Pendente |
-| Falha no banco → rollback total, sem registro corrompido (RNF06) | ⬜ Pendente |
-| Rate Limiting na API bloqueia envios maliciosos (RNF10) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Formulário válido → persistido em transação ACID → alerta de sucesso em ≤ 2s | RF27 · RNF02 · RNF06 | ⬜ |
+| Rate limit excedido (5 req/IP/10min) → 429 + "Tente novamente mais tarde" | RNF10 | ⬜ |
+| Falha no banco → ROLLBACK completo sem registro parcial | RNF06 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -535,11 +539,12 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Visitante acessa "Sobre" → rota correta e dados institucionais exibidos | ⬜ Pendente |
-| Carregamento ≤ 2 s (RNF02) | ⬜ Pendente |
-| Conteúdo disponível no SSR e indexável (RNF21) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Visitante acessa `/sobre` → SSR carrega i18n estático em ≤ 2s sem chamada a API ou banco | RF28 · RNF02 · RNF04 | ⬜ |
+| Visitante clica "EN" → textos trocam para `en/about.json` em ≤ 1 clique sem reload | RNF13 | ⬜ |
+| Bot de indexação → HTML inicial com h1, textos e metadados Open Graph sem depender de JS | RNF04 · RNF21 | ⬜ |
+| Visitante sem autenticação → nenhum guard intercepta → conteúdo exibido normalmente | RNF20 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -617,14 +622,14 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Admin cadastra artigo → persistido e apto para publicação | ⬜ Pendente |
-| Admin edita artigo → dados substituídos, ID original preservado | ⬜ Pendente |
-| Admin remove artigo → excluído do banco e ausente na vitrine | ⬜ Pendente |
-| Admin categoriza artigo → vínculos produto + categoria atualizados com integridade referencial | ⬜ Pendente |
-| Endpoint administrativo exige autenticação (RNF01) | ⬜ Pendente |
-| Conteúdo disponível no SSR e indexável; despublicados ausentes no SSR (RNF04/RNF05) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Admin cadastra artigo (título, conteúdo, produto, categoria) → persistido e apto para publicação | RF30 · RNF01 | ⬜ |
+| Admin edita artigo → dados substituídos, ID original preservado | RF31 | ⬜ |
+| Admin remove artigo → excluído do banco e ausente na vitrine imediatamente | RF32 | ⬜ |
+| Admin categoriza artigo → vínculos `product_id` + `category_id` com integridade referencial | RF33 | ⬜ |
+| Agente externo forja requisição sem token → RLS bloqueia com 403 sem alterar dados | RNF01 · RNF09 | ⬜ |
+| Artigos publicados → conteúdo no SSR indexável; despublicados ausentes da resposta SSR | RNF04 · RNF05 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -694,12 +699,12 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Admin publica artigo → flag atualizada, artigo visível na próxima requisição pública | ⬜ Pendente |
-| Admin despublica artigo → artigo imediatamente ausente na vitrine, conteúdo preservado | ⬜ Pendente |
-| Endpoint administrativo exige autenticação (RNF01) | ⬜ Pendente |
-| Conteúdo publicado disponível no SSR; despublicados ausentes (RNF04/RNF05) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Admin publica artigo → `published = true` → visível na próxima requisição da vitrine sem reload | RF34 · RNF01 | ⬜ |
+| Admin despublica artigo → artigo ausente da vitrine imediatamente, conteúdo preservado no banco | RF35 | ⬜ |
+| Agente externo forja requisição sem token → RLS bloqueia com 403 sem alterar status | RNF01 · RNF09 | ⬜ |
+| Artigo publicado → conteúdo e metadados SEO no HTML inicial sem depender de JS | RNF04 · RNF05 | ⬜ |
 
 #### Evidências de Funcionamento
 
@@ -769,11 +774,12 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD) | Status |
-| -------------- | ------ |
-| Visitante clica "Útil / Não útil" → avaliação persistida de forma anônima + feedback visual imediato | ⬜ Pendente |
-| Tempo entre clique e confirmação visual ≤ 2 s em 95% das requisições (RNF02) | ⬜ Pendente |
-| Componente de avaliação não bloqueia nem degrada o SSR da página (RNF04/RNF05) | ⬜ Pendente |
+| Critério (BDD) | RF / RNF | Status |
+| -------------- | -------- | ------ |
+| Visitante clica "Útil" ou "Não Útil" → avaliação persistida anonimamente + feedback visual em ≤ 2s | RF37 · RNF02 | ⬜ |
+| Visitante já avaliou o artigo na sessão → interface bloqueia sem chamar a API | RF37 | ⬜ |
+| `session_hash` já existe no banco para o artigo → backend retorna 409 sem registrar duplicata | RF37 | ⬜ |
+| Componente de avaliação presente → SSR não bloqueado nem degradado | RNF04 · RNF05 | ⬜ |
 
 #### Evidências de Funcionamento
 

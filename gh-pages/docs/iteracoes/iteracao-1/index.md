@@ -142,55 +142,115 @@ document.addEventListener('keydown', function(e) {
 
 ## Critérios de Aceitação Validados (BDD)
 
-Todas as issues abaixo atingiram o _Definition of Ready (DoR)_ e passaram pela verificação dos requisitos funcionais (RF) e não funcionais (RNF).
-
-### CP4 — Plataforma Pública de Apresentação da Empresa
-
-| Requisito | Descrição                                      | Critério de Aceitação (BDD)                                                                                                                                                                                                                                                                                                                                        |
-| --------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **RF21**  | Cadastrar produto SaaS                         | **Dado** que o administrador está autenticado no painel de gestão, **Quando** ele preencher as informações obrigatórias de uma nova solução SaaS (nome, descrição, diferenciais) e submeter o formulário, **Então** o sistema deve persistir o novo produto no banco de dados e torná-lo imediatamente apto para exibição na vitrine pública.                      |
-| **RF22**  | Editar produto SaaS                            | **Dado** que o administrador acessa a lista de produtos existentes, **Quando** ele modificar os dados de um produto ativo (como atualizar um texto ou imagem) e salvar, **Então** o sistema deve substituir as informações antigas no banco e a mudança deve ser refletida na vitrine sem a necessidade de intervenção de um desenvolvedor.                        |
-| **RF23**  | Remover produto SaaS                           | **Dado** que a Crianex descontinuou uma solução SaaS, **Quando** o administrador confirmar a ação de remover (ou inativar) o produto no painel, **Então** o sistema deve processar a exclusão do catálogo e garantir que o produto deixe imediatamente de ser listado na vitrine pública para os clientes.                                                         |
-| **RF25**  | Publicar produto SaaS                          | **Dado** que o administrador acessa o painel de gerenciamento de produtos, **Quando** ele acionar a opção de "Publicar" um produto que estava inativo, **Então** o sistema deve alterar o status do registro e torná-lo imediatamente visível e acessível para os visitantes na vitrine pública.                                                                   |
-| **RF59**  | Despublicar produto SaaS                       | **Dado** que um produto SaaS está atualmente visível na vitrine, **Quando** o administrador acionar a opção de "Despublicar", **Então** o sistema deve ocultá-lo imediatamente da interface pública, preservando todos os dados e o histórico do produto intactos no banco de dados (sem exclusão).                                                                |
-| **RF27**  | Cadastrar contato com a empresa                | **Dado** que o visitante preencheu corretamente os campos do formulário de contato (ex: nome, e-mail, mensagem) no rodapé da vitrine, **Quando** ele clicar em "Enviar", **Então** o sistema deve registrar a mensagem no banco de dados e exibir um alerta visual de sucesso na tela.                                                                             |
-| **RF28**  | Acessar página institucional                   | **Dado** que o visitante está navegando pela vitrine pública, **Quando** ele clicar no link de "Sobre nós" ou "Sobre" ou "Institucional", **Então** o sistema deve redirecioná-lo para a rota correspondente e exibir os dados de apresentação da empresa.                                                                                                         |
-| **RNF02** | Tempo de resposta da vitrine                   | **Dado** que o visitante solicita o acesso à página institucional, **Quando** o sistema processar a requisição e montar a interface, **Então** o tempo total de carregamento dos dados não deve ultrapassar um limite aceitável (ex: 2 segundos), garantindo fluidez e retenção.                                                                                   |
-| **RNF03** | Tempo de resposta da área administrativa       | **Dado** que o administrador comanda a ação de publicação ou despublicação no painel, **Quando** o sistema processar a requisição, **Então** o tempo de resposta do servidor e da interface para confirmar o sucesso da operação não deve exceder 2 segundos, garantindo a fluidez exigida para a área administrativa.                                             |
-| **RNF06** | Integridade transacional                       | **Dado** que o backend iniciou o processo de gravação do contato, **Quando** ocorrer uma falha inesperada de comunicação com o banco de dados no meio da operação, **Então** o sistema deve realizar a reversão total da transação (rollback) para evitar o salvamento de registros corrompidos ou parciais, alertando o usuário sobre o erro.                     |
-| **RNF10** | Proteção contra abuso do formulário público    | **Dado** que o formulário está exposto publicamente na vitrine, **Quando** uma tentativa de submissão ocorrer, **Então** o sistema (API) deve validar a requisição por meio de um mecanismo de proteção (Rate Limiting) antes de processá-la, bloqueando envios maliciosos ou realizados por spam.                                                                 |
-| **RNF21** | Disponibilidade das informações institucionais | **Dado** que um artigo de FAQ foi publicado pelo administrador, **Quando** a página pública da base de conhecimento for renderizada, **Então** o conteúdo do artigo publicado deve estar disponível na resposta SSR de forma íntegra e indexável, sem depender de execução de JavaScript pelo crawler, e artigos despublicados não devem aparecer na resposta SSR. |
+Todas as features abaixo atingiram o _Definition of Ready (DoR)_. Os critérios estão agrupados por feature — não por RF individual — e a coluna **RF / RNF** indica qual requisito cada critério verifica.
 
 ### CP5 — Painel de Gerenciamento do Administrador
 
-| Requisito | Descrição                                 | Critério de Aceitação (BDD)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| --------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **RF08**  | Autenticar perfil de usuário              | **Cenário 1:** Dado que o administrador está na tela de login com credenciais válidas cadastradas no Supabase Auth, Quando submete email e senha corretos, Então o sistema deve autenticar via Supabase Auth, gerar sessão JWT e redirecionar para '/admin'.<br><br>**Cenário 2:** Dado que o administrador insere email ou senha incorretos, Quando submete o formulário, Então o Supabase Auth deve retornar erro e a interface deve exibir mensagem genérica sem expor detalhes internos.                                    |
-| **RF09**  | Encerrar sessão                           | **Cenário 1:** Dado que o administrador está autenticado no painel, Quando aciona "Sair", Então o sistema deve invocar signOut() no Supabase Auth, invalidar o refresh_token server-side, limpar a sessão local e redirecionar para '/admin/login'.<br><br>**Cenário 2:** Dado que o administrador encerrou a sessão, Quando tenta acessar /admin diretamente pela URL, Então o sistema deve bloquear o acesso e redirecionar para /admin/login, sem renderizar nenhum dado do painel.                                          |
-| **RNF01** | Isolamento de acesso administrativo       | **Dado** que a Crianex quer entrar na área administrativa da empresa, **Quando** o administrador/membro entra no domínio do site (diferente da vitrine pública), **Então** o sistema deve mostrar na tela a área de login para o membro/admin poder acessar o conteúdo.                                                                                                                                                                                                                                                         |
-| **RNF03** | Tempo de resposta da área administrativa  | **Cenário 1:** Dado que o administrador está autenticado e acessa qualquer tela do painel, Quando a requisição é enviada ao Supabase, Então a resposta deve ser entregue em no máximo 2 segundos em condições normais de rede.<br><br>**Cenário 2:** Dado que múltiplos administradores acessam o painel simultaneamente, Quando o volume de requisições aumenta, Então o tempo de resposta não deve ultrapassar 4 segundos e o sistema não deve retornar erro 500.                                                             |
-| **RF10**  | Acessar painel administrativo             | **Cenário 1:** Dado que o administrador possui sessão JWT válida com role admin, Quando acessa a rota /admin, Então o sistema deve validar o token via Supabase Auth, aplicar RLS no banco e renderizar o painel com os dados permitidos para aquele perfil.<br><br>**Cenário 2:** Dado que o administrador possui sessão expirada, Quando tenta acessar o painel, Então o sistema deve tentar renovar via refreshSession() e, se falhar, redirecionar para /admin/login sem renderizar nenhum dado.                            |
-| **RNF09** | Controle de acesso por linha (RLS)        | **Cenário 1:** Dado que o administrador autenticado realiza uma query no Supabase DB, Quando a requisição chega ao banco, Então a política RLS deve filtrar os dados com base em auth.uid() e auth.role(), retornando apenas os registros autorizados para aquele usuário.<br><br>**Cenário 2:** Dado que um administrador autenticado tenta acessar dados fora do seu escopo, Quando a query é executada no Supabase DB, Então a política RLS deve bloquear server-side e retornar conjunto vazio ou 403.                      |
-| **RF11**  | Editar informações de usuários da Crianex | **Cenário 1:** Dado que o owner está autenticado no painel, Quando submete alterações válidas nos dados de um usuário da Crianex, Então o sistema deve validar via RLS que auth.role() = owner, persistir as alterações no banco e retornar feedback visual de sucesso sem reload.<br><br>**Cenário 2:** Dado que uma requisição de edição é enviada sem role owner, Quando o Supabase DB processa a query, Então a política RLS deve bloquear a operação com 403, sem persistir nenhuma alteração.                             |
-| **RF12**  | Cadastrar novo membro                     | **Cenário 1:** Dado que o owner está autenticado no painel, Quando submete formulário com dados válidos do novo membro, Então o sistema deve criar o usuário via supabase.auth.admin.createUser(), inserir o perfil na tabela profiles e exibir o novo membro na lista sem reload.<br><br>**Cenário 2:** Dado que o owner tenta cadastrar um membro com email já existente, Quando a requisição chega ao Supabase Auth, Então o sistema deve retornar erro e exibir mensagem informativa sem criar registro duplicado.          |
-| **RF13**  | Inativar membro cadastrado                | **Cenário 1:** Dado que o owner está autenticado e seleciona um membro ativo, Quando confirma a ação de inativação, Então o sistema deve atualizar active = false no perfil via Supabase DB e refletir o novo status na lista sem reload.<br><br>**Cenário 2:** Dado que o owner tenta inativar sua própria conta, Quando a requisição é processada, Então o sistema deve bloquear a operação e exibir mensagem de erro, impedindo auto-inativação.                                                                             |
-| **RF14**  | Remover membro cadastrado                 | **Cenário 1:** Dado que o owner está autenticado e seleciona um membro para remoção, Quando confirma a ação, Então o sistema deve remover o perfil da tabela profiles e deletar o usuário via supabase.auth.admin.deleteUser(), removendo o item da lista sem reload.<br><br>**Cenário 2:** Dado que o owner tenta remover sua própria conta, Quando a requisição é processada, Então o sistema deve bloquear a operação com erro, impedindo auto-remoção e garantindo que sempre exista ao menos um owner ativo na plataforma. |
+#### F09 — Autenticar administradores
 
-### CP7 — FAQ e Base de Conhecimento
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o admin acessa `/admin/login` com credenciais válidas, **Quando** submete email e senha, **Então** autentica via Supabase Auth, gera sessão JWT e redireciona para `/admin/dashboard` | RF08 |
+| 2 | **Dado** que o MFA está ativo, **Quando** as credenciais base são validadas, **Então** o sistema solicita código TOTP antes de emitir a sessão | RF08 · RNF08 |
+| 3 | **Dado** que as credenciais são inválidas, **Quando** o Supabase Auth processa, **Então** retorna 401 e a interface exibe mensagem genérica sem expor detalhes internos | RF08 |
+| 4 | **Dado** que o admin aciona "Sair", **Quando** o sistema processa, **Então** invoca `signOut()`, invalida o `refresh_token`, limpa o cookie e redireciona para `/admin/login` | RF09 |
+| 5 | **Dado** que o admin encerrou sessão e tenta acessar `/admin` diretamente, **Quando** o servidor processa, **Então** redireciona para `/admin/login` sem renderizar nenhum dado do painel | RF09 · RNF01 |
+| 6 | **Dado** que a autenticação é processada pelo Supabase Auth, **Quando** a resposta chega, **Então** o tempo total até a sessão ser emitida não excede 2 segundos | RNF03 |
 
-| Requisito | Descrição                                                          | Critério de Aceitação (BDD)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **RF30**  | Cadastrar artigo de FAQ                                            | **Dado** que o administrador está autenticado no painel de gestão, **Quando** ele preencher as informações obrigatórias de um novo artigo de FAQ (título, conteúdo, produto SaaS associado e categoria de dúvida) e submeter o formulário, **Então** o sistema deve persistir o novo artigo no banco de dados e torná-lo imediatamente disponível para as ações de publicação na base de conhecimento.                                                                                                                        |
-| **RF31**  | Editar artigo de FAQ                                               | **Dado** que o administrador acessa a lista de artigos de FAQ existentes, **Quando** ele modificar os dados de um artigo (como atualizar o título, o conteúdo ou ajustar a redação de uma resposta) e salvar, **Então** o sistema deve substituir as informações antigas no banco preservando o ID original do artigo, e a alteração deve ser refletida na vitrine pública sem necessidade de intervenção de um desenvolvedor.                                                                                                |
-| **RF32**  | Remover artigo de FAQ                                              | **Dado** que um artigo de FAQ se tornou obsoleto ou incorreto, **Quando** o administrador confirmar a ação de remover o artigo no painel, **Então** o sistema deve processar a exclusão do registro e garantir que o artigo deixe imediatamente de ser listado na vitrine pública para os visitantes.                                                                                                                                                                                                                         |
-| **RF33**  | Categorizar artigo de FAQ                                          | **Dado** que o administrador acessa um artigo de FAQ, **Quando** ele selecionar ou alterar o produto SaaS associado e a categoria de dúvida do artigo e salvar, **Então** o sistema deve atualizar os vínculos de categorização preservando a integridade referencial, validando que tanto o produto SaaS quanto a categoria existam previamente.                                                                                                                                                                             |
-| **RF34**  | Publicar artigo de FAQ                                             | **Dado** que existe um artigo de FAQ cadastrado e em estado não publicado, **Quando** o administrador acionar a ação de publicar o artigo no painel de gestão, **Então** o sistema deve atualizar a flag de publicação do registro e o artigo deve passar a constar nas consultas públicas da vitrine na próxima requisição do visitante, sem necessidade de novo deploy ou intervenção técnica.                                                                                                                              |
-| **RF35**  | Despublicar artigo de FAQ                                          | **Dado** que existe um artigo de FAQ em estado publicado e visível na vitrine, **Quando** o administrador acionar a ação de despublicar o artigo no painel de gestão, **Então** o sistema deve atualizar a flag de publicação do registro e o artigo deve deixar de ser listado na vitrine pública imediatamente, preservando o conteúdo no banco para eventual republicação posterior.                                                                                                                                       |
-| **RF37**  | Avaliar artigo de FAQ                                              | **Dado** que o visitante está visualizando um artigo de FAQ publicado na vitrine pública da base de conhecimento, **Quando** ele clicar em um dos botões de avaliação (Útil ou Não útil) ao final do artigo, **Então** o sistema deve persistir a avaliação no banco de dados de forma anônima, sem coletar dado pessoal identificável do visitante, e atualizar imediatamente o componente de feedback na interface para indicar que a avaliação foi registrada.                                                             |
-| **RNF01** | Endpoint administrativo isolado (aplicado a RF30-RF35)             | **Dado** que as rotas de gestão de artigos de FAQ pertencem à área administrativa, **Quando** qualquer requisição às operações de Cadastrar, Editar, Remover, Categorizar, Publicar ou Despublicar for recebida pelo servidor, **Então** o endpoint deve estar servido em domínio distinto e não referenciado publicamente, exigindo autenticação válida para qualquer resposta diferente de 401/403.                                                                                                                         |
-| **RNF02** | Tempo de resposta da vitrine (aplicado a RF37)                     | **Dado** que o visitante submete uma avaliação de utilidade sobre um artigo de FAQ na vitrine pública, **Quando** o sistema processar a requisição de gravação, **Então** o tempo de resposta entre o clique no botão e a confirmação visual da avaliação registrada não deve exceder 2 segundos em 95% das requisições, garantindo a fluidez exigida para a experiência da vitrine.                                                                                                                                          |
-| **RNF04** | Renderização server-side da vitrine pública (aplicado a RF30-RF37) | **Dado** que um artigo de FAQ foi cadastrado, editado ou teve seu estado de publicação alterado pelo administrador, **Quando** a página pública da base de conhecimento for renderizada, **Então** o conteúdo do artigo publicado deve estar disponível na resposta SSR de forma íntegra e indexável, sem depender de execução de JavaScript pelo crawler, e artigos despublicados não devem aparecer na resposta SSR. O componente de avaliação não deve bloquear nem degradar a renderização inicial do conteúdo indexável. |
-| **RNF05** | Otimização para mecanismos de busca (SEO) (aplicado a RF30-RF37)   | **Dado** que o administrador cadastra, edita ou altera o estado de publicação de um artigo de FAQ, **Quando** o artigo for renderizado publicamente, **Então** os metadados de SEO derivados do conteúdo persistido (título, descrição, estrutura semântica) devem estar corretamente preenchidos na página pública para que o artigo seja encontrável por mecanismos de busca, e o componente de avaliação não deve interferir na estrutura semântica da página.                                                             |
+#### F10 — Acessar painel administrativo
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o owner possui JWT válido com `role = owner`, **Quando** acessa `/admin`, **Então** o sistema valida o token, aplica RLS filtrando por `auth.uid()` + `auth.role()` e renderiza o painel sem reload | RF10 · RNF09 |
+| 2 | **Dado** que o JWT expirou, **Quando** o owner acessa o painel, **Então** o sistema tenta `refreshSession()`; se bem-sucedido continua; se falhar, redireciona para `/admin/login` sem renderizar dados | RF10 |
+| 3 | **Dado** que a requisição chega sem token válido ou sem `role = owner`, **Quando** o middleware intercepta, **Então** bloqueia com 401/403 e redireciona para `/admin/login` | RF10 · RNF01 |
+| 4 | **Dado** que o painel carregou e o owner opera qualquer seção, **Quando** a requisição chega ao backend, **Então** a resposta é entregue em ≤ 2 segundos | RNF03 |
+
+#### F11 — Gerenciar membros da Crianex
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o owner submete dados válidos de novo membro, **Quando** a API processa, **Então** cria via `admin.createUser()`, insere em `profiles` e exibe na lista sem reload | RF12 |
+| 2 | **Dado** que o email informado já existe, **Quando** o Supabase Auth processa, **Então** retorna erro informativo sem criar registro duplicado | RF12 |
+| 3 | **Dado** que o owner submete alterações válidas em um membro, **Quando** o RLS valida `auth.role() = owner`, **Então** persiste as alterações e retorna feedback sem reload | RF11 · RNF09 |
+| 4 | **Dado** que uma edição chega sem `role = owner`, **Quando** o RLS processa, **Então** bloqueia com 403 sem persistir nada | RF11 · RNF09 |
+| 5 | **Dado** que o owner inativa um membro ativo, **Quando** confirma, **Então** `active = false` é persistido e refletido na lista sem reload | RF13 |
+| 6 | **Dado** que o owner tenta inativar a própria conta, **Quando** a API processa, **Então** bloqueia com mensagem de erro | RF13 |
+| 7 | **Dado** que o owner remove um membro, **Quando** confirma, **Então** remove de `profiles` e invoca `admin.deleteUser()`, atualizando a lista sem reload | RF14 |
+| 8 | **Dado** que o owner tenta remover a própria conta, **Quando** a API processa, **Então** bloqueia garantindo ao menos um owner ativo na plataforma | RF14 |
+
+---
+
+### CP4 — Vitrine Pública de Produtos SaaS
+
+#### F12 — Gerenciar produtos SaaS
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o admin submete dados válidos de novo produto, **Quando** a API valida o token e processa, **Então** persiste em transação ACID e exibe na lista sem reload | RF21 · RNF06 |
+| 2 | **Dado** que o admin edita produto existente e salva, **Quando** a API processa, **Então** o banco substitui as informações e a vitrine reflete sem intervenção de desenvolvedor | RF22 |
+| 3 | **Dado** que o admin confirma remoção, **Quando** a API processa, **Então** produto excluído do catálogo e ausente na vitrine imediatamente | RF23 |
+| 4 | **Dado** que requisição de alteração chega sem autorização, **Quando** o middleware intercepta, **Então** bloqueia com 401/403 sem executar operação no banco | RF21–23 · RNF01 |
+| 5 | **Dado** que visitante acessa a vitrine, **Quando** o SvelteKit renderiza via SSR, **Então** apenas produtos com `published = true` listados em ≤ 2s sem depender de JS | RNF02 · RNF21 |
+| 6 | **Dado** que ocorre falha no banco durante inserção ou edição, **Quando** o backend detecta, **Então** executa ROLLBACK completo sem registro parcial | RNF06 |
+
+#### F13 — Publicar / despublicar produto SaaS
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o admin aciona o toggle para publicar, **Quando** a API processa via PATCH, **Então** `published = true` e confirmação visual chega em ≤ 2s | RF25 · RNF03 |
+| 2 | **Dado** que o admin aciona o toggle para despublicar, **Quando** a API processa, **Então** produto imediatamente ocultado da vitrine com dados preservados no banco | RF59 · RNF03 |
+| 3 | **Dado** que credenciais inválidas são usadas no toggle, **Quando** a API rejeita, **Então** o toggle reverte ao estado original com mensagem de erro | RF25 · RF59 |
+
+#### F14 — Formulário de contato
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o visitante preenche o formulário corretamente e clica "Enviar", **Quando** a API processa, **Então** persiste em transação ACID e exibe alerta de sucesso em ≤ 2s | RF27 · RNF02 · RNF06 |
+| 2 | **Dado** que o formulário excede o rate limit (5 req/IP/10min), **Quando** a API intercepta, **Então** retorna 429 e a interface exibe "Tente novamente mais tarde" | RNF10 |
+| 3 | **Dado** que ocorre falha inesperada no banco durante inserção, **Quando** o backend detecta, **Então** executa ROLLBACK completo sem registro parcial | RNF06 |
+
+#### F15 — Página institucional
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o visitante acessa `/sobre`, **Quando** o SvelteKit renderiza, **Então** carrega conteúdo dos arquivos i18n estáticos via SSR em ≤ 2s, sem chamada a API ou banco | RF28 · RNF02 · RNF04 |
+| 2 | **Dado** que o visitante clica em "EN", **Quando** o locale muda, **Então** todos os textos trocam para `en/about.json` em ≤ 1 clique sem reload | RNF13 |
+| 3 | **Dado** que a página é acessada por bot de indexação, **Quando** renderiza via SSR, **Então** o HTML inicial contém h1, textos e metadados Open Graph sem depender de JS | RNF04 · RNF21 |
+| 4 | **Dado** que visitante sem autenticação acessa `/sobre`, **Quando** o servidor processa, **Então** nenhum guard intercepta — conteúdo exibido normalmente | RNF20 |
+
+---
+
+### CP6 — FAQ e Base de Conhecimentos por Produto
+
+#### F16 — CRUD de artigos de FAQ
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o admin tem permissão e preenche dados válidos, **Quando** cadastra artigo (título, conteúdo, produto, categoria), **Então** persiste e torna o artigo disponível para publicação | RF30 · RNF01 |
+| 2 | **Dado** que o admin edita artigo e salva, **Quando** a API processa, **Então** o banco substitui as informações preservando o ID original | RF31 |
+| 3 | **Dado** que o admin confirma remoção de artigo, **Quando** a API processa, **Então** artigo excluído do banco e ausente na vitrine imediatamente | RF32 |
+| 4 | **Dado** que o admin altera a categoria, **Quando** salva, **Então** o sistema atualiza vínculos validando integridade referencial de `product_id` e `category_id` | RF33 |
+| 5 | **Dado** que agente externo forja requisição sem token, **Quando** chega ao banco, **Então** o RLS verifica `auth.uid()` e bloqueia com 403 sem executar alteração | RNF01 · RNF09 |
+| 6 | **Dado** que artigos publicados existem, **Quando** a vitrine renderiza via SSR, **Então** conteúdo indexável no HTML inicial; despublicados ausentes da resposta SSR | RNF04 · RNF05 |
+
+#### F17 — Publicar / despublicar artigo de FAQ
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o admin aciona publicação, **Quando** a API processa via PATCH, **Então** `published = true` e artigo visível na próxima requisição da vitrine sem reload | RF34 · RNF01 |
+| 2 | **Dado** que o admin aciona despublicação, **Quando** a API processa, **Então** artigo removido da vitrine imediatamente, registro preservado no banco | RF35 |
+| 3 | **Dado** que agente externo forja requisição sem token, **Quando** o RLS intercepta, **Então** retorna 403 sem alterar status de publicação | RNF01 · RNF09 |
+| 4 | **Dado** que artigo está publicado e a vitrine renderiza, **Quando** o SSR processa, **Então** conteúdo e metadados SEO no HTML inicial sem depender de JS | RNF04 · RNF05 |
+
+#### F18 — Avaliação de artigos de FAQ
+
+| # | Critério de Aceite (BDD) | RF / RNF |
+| - | ------------------------ | -------- |
+| 1 | **Dado** que o visitante está na página de artigo publicado, **Quando** clica "Útil" ou "Não Útil", **Então** o sistema persiste anonimamente e exibe feedback visual em ≤ 2s | RF37 · RNF02 |
+| 2 | **Dado** que o visitante já avaliou o artigo na sessão atual, **Quando** tenta avaliar novamente, **Então** a interface bloqueia sem chamar a API | RF37 |
+| 3 | **Dado** que o `session_hash` já existe para o artigo no banco, **Quando** nova requisição chega, **Então** o backend retorna 409 Conflict sem registrar duplicata | RF37 |
+| 4 | **Dado** que o componente de avaliação está na página, **Quando** o SSR renderiza, **Então** não bloqueia nem degrada o HTML inicial indexável | RNF04 · RNF05 |
 
 ---
 
