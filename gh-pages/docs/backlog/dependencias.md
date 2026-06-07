@@ -1,5 +1,13 @@
 # Mapa de Dependências
 
+## Histórico de Revisão
+
+| Versão | Data       | Descrição                                                                                      | Autor(es)        |
+| ------ | ---------- | ---------------------------------------------------------------------------------------------- | ---------------- |
+| 1.0    | 06/06/2026 | Segmentação por iteração; remoção do mapa completo de sub-issues; adição de placeholders IT2/IT3 | Lucas A. Zanetti |
+
+---
+
 Rastreabilidade visual entre as features de cada iteração. Use este mapa para:
 
 - Identificar o caminho crítico antes de iniciar uma issue

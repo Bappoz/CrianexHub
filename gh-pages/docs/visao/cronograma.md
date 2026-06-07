@@ -12,6 +12,7 @@
 | 1.5    | 06/05/2026 | Remoção da coluna OEs e rastreabilidade de CPs na tabela 5.2                        | Equipe Crianex   |
 | 1.6    | 06/05/2026 | Renumeração de CPs (remoção de CP10/CP12 como RNFs) e renomeação IT5 para Pós-venda | Lucas A. Zanetti |
 | 1.7    | 06/05/2026 | Adição de CP14 (Portal do Cliente) na iteração Pós-venda                            | Lucas A. Zanetti |
+| 1.8    | 06/06/2026 | Substituição da imagem por fluxograma Mermaid corrigido (modelo FDD sem Modelar/Descobrir/Especificar) | Lucas A. Zanetti |
 
 ---
 

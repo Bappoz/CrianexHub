@@ -12,6 +12,7 @@
 | 1.5    | 05/05/2026 | Ajustes de clareza e consistência na seção 4                                                                     | Hugo             |
 | 1.6    | 08/05/2026 | Ajustes de cerimônias e técnicas                                                                                 | Lucas e Philipe  |
 | 1.7    | 18/05/2026 | Reestruturação completa: separação entre etapas únicas e iterativas do FDD; adição da tabela de atividades de ER | Lucas A. Zanetti |
+| 1.8    | 06/06/2026 | Reestruturação da tabela 4.5: colunas Etapa FDD · Atividade de ER · Técnicas; enunciação explícita das 6 atividades de ER | Lucas A. Zanetti |
 
 ---
 

@@ -8,6 +8,7 @@
 | 1.1    | 13/04/2026 | Revisão das seções 6.1 a 6.6                                                   | Equipe Crianex   |
 | 1.2    | 03/05/2026 | Atualização da composição da equipe                                            | Lucas A. Zanetti |
 | 1.3    | 05/05/2026 | Seções 6.2–6.6 reescritas: metodologia FDD + fluxogramas de validação e Kanban | Lucas A. Zanetti |
+| 1.4    | 06/06/2026 | Separação de cerimônias únicas e iterativas; distinção Replenishment Macro/Micro; correção das Etapas FDD nas tabelas semanais | Lucas A. Zanetti |
 
 ---
 
@@ -62,54 +63,67 @@ Cada ferramenta tem escopo exclusivo — o que vai para o Miro não vai para o D
 
 ---
 
-### _Cerimônias por Iteração_
+### 6.4 Cerimônias Únicas — Início do Projeto
 
-| Cerimônia                                | Formato               | Frequência                                        | Participantes               | Duração est. |
-| ---------------------------------------- | --------------------- | ------------------------------------------------- | --------------------------- | ------------ |
-| **Domain Modeling**                      | Reunião               | Início da Sem 1                                   | PM, Chief Arch, Otavio      | ~30h         |
-| **Feature Discovery**                    | Reunião               | Sem 1                                             | Todos, menos o Cliente      | ~1h          |
-| **Iteration Replenishment + Commitment** | Reunião               | Sem 1                                             | PM, Chief Arch, CPs, Otavio | ~1h          |
-| **Technical Design Review**              | Reunião               | Início da Sem 2 (e Sem 3 se necessário)           | PM, CPs, Class Owners       | ~1h          |
-| **Midweek Sync/Kanban Pull Execution**   | Assíncrono — Discord  | Meio de cada semana de execução (sexta ou sábado) | Toda a equipe               | -            |
-| **Partial Client Validation**            | Assíncrono — WhatsApp | Fim de cada Sem                                   | Resp. Validação + Otavio    | —            |
-| **Formal Client Validation**             | Reunião               | Fim da última semana da iteração                  | Toda a equipe + Otavio      | ~1h          |
-| **Artifact Closure**                     | Reunião               | Fim da unidade + fim da iteração                  | Toda a equipe               | ~1h 30min    |
-| **Feature Build Consolidation**          | Reunião               | Fim da semana 2 e semana 3                        | Toda a equipe               | ~45min       |
+Realizadas **uma única vez** antes da primeira iteração de construção. Correspondem às Etapas 1–3 do FDD e produzem os artefatos que servem de insumo para todas as iterações seguintes.
+
+| Cerimônia                            | Formato  | Quando       | Participantes               | Duração est. |
+| ------------------------------------ | -------- | ------------ | --------------------------- | ------------ |
+| **Domain Modeling Workshop**         | Reunião  | Antes da IT1 | PM, Chief Architect, Otavio | ~3h          |
+| **Feature Discovery Session**        | Reunião  | Antes da IT1 | Equipe (sem cliente)        | ~1h          |
+| **Iteration Replenishment Macro**    | Reunião  | Antes da IT1 | PM, CPs, Otavio             | ~1h          |
+
+> **Nota:** Devido correções de urgência ao modelo FDD implementado à partir do feedback do professor George, tanto *Feature Discovery Session* como *Iteration Replenishment Macro* foram feitas no ínicio da Iteração 1, uma vez que já haviamos iniciado.
 
 ---
 
-### _Cadência Detalhada por Semana_
+### 6.5 Cerimônias Iterativas — Repetidas em Cada Iteração
 
-Cada iteração padrão segue três semanas com objetivos distintos.
+Correspondem às Etapas 4–5 do FDD. O **Replenishment Micro** é a versão iterativa do planejamento: seleciona as features da iteração corrente com base no IP e na capacidade disponível, diferente do Macro que definiu o roadmap completo.
 
-#### Semana 1 — Planejamento e Refinamento
+| Cerimônia                                       | Formato               | Frequência                               | Participantes            | Duração est. |
+| ----------------------------------------------- | --------------------- | ---------------------------------------- | ------------------------ | ------------ |
+| **Iteration Replenishment Micro + Commitment**  | Reunião               | Início de cada iteração                  | PM, CPs, Otavio          | ~1h          |
+| **Technical Design Review**                     | Reunião               | Por feature comprometida                 | PM, CPs, Class Owners    | ~1h          |
+| **Midweek Sync / Kanban Pull Execution**        | Assíncrono — Discord  | Meio de cada semana de Build             | Toda a equipe            | —            |
+| **Feature Build Consolidation**                 | Reunião               | Fim de cada semana de Build              | Toda a equipe            | ~45min       |
+| **Partial Client Validation**                   | Assíncrono — WhatsApp | Fim de cada semana de Build              | Resp. Validação + Otavio | —            |
+| **Formal Client Validation**                    | Reunião               | Fim da iteração                          | Toda a equipe + Otavio   | ~1h          |
+| **Iteration Artifact Closure**                  | Reunião               | Fim da iteração                          | Toda a equipe            | ~1h 30min    |
 
-Dedicada ao alinhamento estratégico e ao refinamento de requisitos. Devs podem trabalhar em carry-over, spikes ou dívida técnica — novas features da iteração corrente só iniciam após o Technical Design Review da Semana 2.
+---
 
-| Atividade                                      | Etapa FDD    | Formato               |
-| ---------------------------------------------- | ------------ | --------------------- |
-| Domain Modeling Workshop                       | Etapas 1     | Síncrono              |
-| Feature Discovery Session                      | Etapas 2     | Síncrono              |
-| Iteration Replenishment + Iteration Commitment | Etapas 3 e 4 | Síncrono e Assíncrono |
+### 6.6 Cadência Detalhada por Semana
 
-#### Semana 2 — Build Controlado e Execução Kanban
+Cada iteração segue fases com objetivos distintos. As cerimônias únicas (Domain Modeling, Feature Discovery, Replenishment Macro) **não se repetem** — apenas o Replenishment Micro inicia cada ciclo.
 
-Todas as Features comprometidas começam a fluir pelo Kanban. A validação parcial ocorre de forma assíncrona ao fim da semana.
+#### Fase de Planejamento — Início da Iteração
+
+Seleção e comprometimento com o escopo da iteração. Novas features só entram no Kanban após o Technical Design Review estar concluído.
+
+| Atividade                                       | Etapa FDD | Formato               |
+| ----------------------------------------------- | --------- | --------------------- |
+| Iteration Replenishment Micro + Commitment      | Etapa 4   | Síncrono              |
+| Technical Design Review                         | Etapa 4   | Síncrono              |
+
+#### Fase de Build — Semanas de Execução
+
+Features fluem pelo Kanban. Pode se repetir por mais de uma semana conforme o escopo da iteração.
 
 | Atividade                            | Etapa FDD | Formato    |
 | ------------------------------------ | --------- | ---------- |
-| Technical Design Review              | Etapa 5   | Síncrono   |
-| Midweek Sync + Kanban Pull Execution | Etapa 6   | Assíncrono |
-| Feature Build Consolidation (Sem 2)  | Etapa 7   | Síncrono   |
-| Partial Client Validation            | Etapa 6   | Assíncrono |
+| Kanban Pull Execution                | Etapa 5   | Contínuo   |
+| Midweek Sync                         | Etapa 5   | Assíncrono |
+| Feature Build Consolidation          | Etapa 5   | Síncrono   |
+| Partial Client Validation            | Etapa 5   | Assíncrono |
 
-#### Semana 3 — Consolidação, Validação e Encerramento
+#### Fase de Encerramento — Fim da Iteração
 
-Features consolidadas, rastreabilidade auditada e artefatos empacotados. Apenas o encerramento formal reúne a equipe e o cliente.
+Features consolidadas, rastreabilidade auditada e artefatos empacotados.
 
-| Atividade                                                 | Etapa FDD | Formato    |
-| --------------------------------------------------------- | --------- | ---------- |
-| Feature Build Consolidation                               | Etapa 7   | Síncrono   |
-| Preparação da demo e fechamento de PRs pendentes          | —         | Assíncrono |
-| Formal Client Validation                                  | Etapa 7   | Síncrono   |
-| Artifact Closure + Backlog Reorganization caso necessário | Etapa 7   | Síncrono   |
+| Atividade                                    | Etapa FDD | Formato    |
+| -------------------------------------------- | --------- | ---------- |
+| Preparação da demo e fechamento de PRs       | —         | Assíncrono |
+| Formal Client Validation                     | Etapa 5   | Síncrono   |
+| Iteration Artifact Closure                   | Etapa 5   | Síncrono   |
+| Backlog Reorganization (se necessário)       | Etapa 5   | Síncrono   |

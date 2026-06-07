@@ -6,6 +6,7 @@
 | ------ | ---------- | ---------------------------------------------------------------- | ---------------- | --------------------- |
 | 1.0    | 14/05/2026 | Templete do backlog                                              | Lucas A. Zanetti | Heitor Macedo Ricardo |
 | 1.1    | 17/05/2026 | Coloquei todos OEs, CPs, Features, RFs, RNFs com rastreabilidade | Lucas A. Zanetti | Heitor Macedo Ricardo |
+| 1.2    | 06/06/2026 | Adição da coluna INVEST na tabela de Features                     | Lucas A. Zanetti | —                     |
 
 ---
 

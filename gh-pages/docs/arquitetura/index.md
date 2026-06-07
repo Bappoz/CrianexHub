@@ -3,6 +3,7 @@
 | Versão | Data       | Descrição                           | Autor          |
 | ------ | ---------- | ----------------------------------- | -------------- |
 | v1.0   | 20/05/2026 | Documentação inicial da arquitetura | Equipe Crianex |
+| v1.1   | 06/06/2026 | Correção do diagrama geral (rotas públicas, módulos reais do backend, estrutura do repositório) e fluxos de requisição | Lucas A. Zanetti |
 
 # Arquitetura do Sistema — Crianex Hub
 
