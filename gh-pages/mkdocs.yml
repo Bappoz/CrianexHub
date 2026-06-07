@@ -17,7 +17,9 @@ markdown_extensions:
   - tables
   - attr_list
   - md_in_html
-  - fenced_code
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
   - toc:
       permalink: true
       title: Nesta página
