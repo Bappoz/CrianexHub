@@ -16,17 +16,12 @@ export const cookieI18n: Record<'pt' | 'en', CookieI18n> = {
   en: enCookies,
 };
 
-export function getConsent(
-  storage: Pick<Storage, 'getItem'> | null,
-): CookieConsent | null {
+export function getConsent(storage: Pick<Storage, 'getItem'> | null): CookieConsent | null {
   const v = storage?.getItem(CONSENT_KEY);
   if (v === 'accepted' || v === 'rejected') return v as CookieConsent;
   return null;
 }
 
-export function setConsent(
-  storage: Pick<Storage, 'setItem'> | null,
-  value: CookieConsent,
-): void {
+export function setConsent(storage: Pick<Storage, 'setItem'> | null, value: CookieConsent): void {
   storage?.setItem(CONSENT_KEY, value);
 }

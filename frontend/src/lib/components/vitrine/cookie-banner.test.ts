@@ -45,13 +45,27 @@ describe('getConsent', () => {
 describe('setConsent', () => {
   it('grava CONSENT_KEY com valor "accepted"', () => {
     const store: Record<string, string> = {};
-    setConsent({ setItem: (k, v) => { store[k] = v; } }, 'accepted');
+    setConsent(
+      {
+        setItem: (k, v) => {
+          store[k] = v;
+        },
+      },
+      'accepted'
+    );
     expect(store[CONSENT_KEY]).toBe('accepted');
   });
 
   it('grava CONSENT_KEY com valor "rejected"', () => {
     const store: Record<string, string> = {};
-    setConsent({ setItem: (k, v) => { store[k] = v; } }, 'rejected');
+    setConsent(
+      {
+        setItem: (k, v) => {
+          store[k] = v;
+        },
+      },
+      'rejected'
+    );
     expect(store[CONSENT_KEY]).toBe('rejected');
   });
 
@@ -65,7 +79,9 @@ describe('fluxo completo: set → get', () => {
     const store: Record<string, string> = {};
     const storage = {
       getItem: (k: string) => store[k] ?? null,
-      setItem: (k: string, v: string) => { store[k] = v; },
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
     };
 
     expect(getConsent(storage)).toBeNull();

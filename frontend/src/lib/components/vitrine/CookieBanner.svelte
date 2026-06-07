@@ -38,15 +38,10 @@
       <p class="message">{t.message}</p>
     </div>
     <div class="actions">
-      <button
-        class="btn-accept"
-        on:click={() => dismiss('accepted')}
-        data-consent={CONSENT_KEY}
-      >{t.accept}</button>
-      <button
-        class="btn-reject"
-        on:click={() => dismiss('rejected')}
-      >{t.reject}</button>
+      <button class="btn-accept" on:click={() => dismiss('accepted')} data-consent={CONSENT_KEY}
+        >{t.accept}</button
+      >
+      <button class="btn-reject" on:click={() => dismiss('rejected')}>{t.reject}</button>
     </div>
   </div>
 {/if}
@@ -59,9 +54,11 @@
     right: 0;
     z-index: 9999;
     background: var(--bg);
-    background-color: rgb(240, 239, 239);
+    background-color: rgb(255, 255, 255);
     border-top: 1px solid rgb(166, 166, 166);
-    border-radius: 8px;
+    border: 1px solid rgb(166, 166, 166);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
