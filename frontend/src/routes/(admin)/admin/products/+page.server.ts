@@ -15,6 +15,7 @@ type Product = {
   icon_text?: string | null;
   color?: string | null;
   image_url?: string | null;
+  product_url?: string | null;
   published: boolean;
   display_order?: number | null;
   updated_at?: string | null;

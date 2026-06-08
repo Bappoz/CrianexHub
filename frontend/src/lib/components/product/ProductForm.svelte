@@ -9,7 +9,7 @@
   const dispatch = createEventDispatcher();
 
   const inputClass =
-    'w-full rounded-lg border border-zinc-800/80 bg-[#09090b] px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-700 focus:border-zinc-700 focus:bg-[#050507] focus:outline-none transition-all fld';
+    'w-full rounded-lg border border-zinc-800/80 bg-[#09090b] px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-700 focus:border-zinc-700 focus:bg-[#050507] focus:outline-none transition-all';
 
   let activeLang: 'pt' | 'en' = 'pt';
   let slugIsManual = false;
@@ -63,7 +63,10 @@
   }
 </script>
 
-<form on:submit|preventDefault={submit} class="flex w-[65%] flex-col justify-between bg-[#121214]">
+<form
+  on:submit|preventDefault={submit}
+  class="flex min-w-0 flex-1 flex-col justify-between bg-[#121214]"
+>
   <div class="px-8 pt-6 pb-2">
     <div class="flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
       <span class="capitalize">{isEditing ? 'Editar' : 'Criar'} · {formData.name_pt || 'Novo'}</span
@@ -75,7 +78,7 @@
     </div>
   </div>
 
-  <div class="flex-1 overflow-y-auto px-8 py-2 space-y-5 custom-scrollbar max-h-[64vh]">
+  <div class="flex-1 overflow-y-auto px-8 py-2 space-y-5 custom-scrollbar">
     <div>
       <div class="flex items-center justify-between mb-2">
         <span class="block text-[11px] font-bold text-zinc-500 uppercase tracking-widest"
@@ -224,10 +227,3 @@
     </div>
   </div>
 </form>
-
-<style>
-  /* Generic field helper used across the product modal fields */
-  .fld {
-    box-sizing: border-box;
-  }
-</style>

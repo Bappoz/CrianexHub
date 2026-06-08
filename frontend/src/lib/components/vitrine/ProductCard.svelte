@@ -27,6 +27,7 @@
       .toUpperCase()
   );
   const learnMore = $derived(lang === 'pt' ? 'Saiba mais' : 'Learn more');
+  const ctaHref = $derived(product.product_url || `/produtos/${product.slug}`);
 </script>
 
 <article class="product-card">
@@ -52,7 +53,13 @@
     {#if tagline}
       <p class="card-tagline">{tagline}</p>
     {/if}
-    <a href="/produtos/{product.slug}" class="card-cta" aria-label="{learnMore} — {name}">
+    <a
+      href={ctaHref}
+      class="card-cta"
+      aria-label="{learnMore} — {name}"
+      target={product.product_url ? '_blank' : undefined}
+      rel={product.product_url ? 'noopener noreferrer' : undefined}
+    >
       {learnMore}
       <svg
         width="14"

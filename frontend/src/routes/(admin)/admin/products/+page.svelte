@@ -31,6 +31,7 @@
     color: '#6366f1',
     icon_text: '',
     image_url: '',
+    product_url: '',
     published: false,
   };
 
@@ -85,6 +86,7 @@
       color: produto.color ?? '#6366f1',
       icon_text: produto.icon_text ?? '',
       image_url: produto.image_url ?? '',
+      product_url: produto.product_url ?? '',
     };
     isModalOpen = true;
   }
@@ -99,15 +101,21 @@
       isProcessing = true;
       processingMessage = isEditingMode ? 'Salvando alterações...' : 'Criando produto...';
 
+      const payload = {
+        ...modalData,
+        // name_en não tem input próprio — usa name_pt como fallback para satisfazer NOT NULL no banco
+        name_en: modalData.name_en || modalData.name_pt,
+      };
+
       if (isEditingMode) {
         await apiFetch(`/admin/products/${currentProductId}`, {
           method: 'PATCH',
-          body: JSON.stringify(modalData),
+          body: JSON.stringify(payload),
         });
       } else {
         await apiFetch('/admin/products', {
           method: 'POST',
-          body: JSON.stringify(modalData),
+          body: JSON.stringify(payload),
         });
       }
 

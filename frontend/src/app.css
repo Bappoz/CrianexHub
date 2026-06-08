@@ -873,7 +873,8 @@ video {
   animation: crx-modalIn 0.22s cubic-bezier(0.2, 0, 0.1, 1);
 }
 .admin-modal.wide {
-  max-width: 760px;
+  max-width: 960px;
+  overflow: hidden;
 }
 @keyframes crx-modalIn {
   from {

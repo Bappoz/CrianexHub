@@ -293,7 +293,11 @@
             {@const color = accentColor(i)}
             <div class="carousel-slide {i === active ? 'on' : ''}">
               <div class="cs-visual" style="background: {color};">
-                <div class="cs-icon-text">{initials(name)}</div>
+                {#if p.image_url}
+                  <img src={p.image_url} alt={name} class="cs-visual-img" />
+                {:else}
+                  <div class="cs-icon-text">{initials(name)}</div>
+                {/if}
                 <div class="cs-num">
                   {String(i + 1).padStart(2, '0')}&nbsp;<span style="opacity: 0.5;"
                     >/ {String(total).padStart(2, '0')}</span
@@ -311,7 +315,12 @@
                 <h3>{name}</h3>
                 <p class="lede">{tagline}</p>
                 <div class="actions">
-                  <a href="/produtos/{p.slug}" class="btn">
+                  <a
+                    href={p.product_url || `/produtos/${p.slug}`}
+                    class="btn"
+                    target={p.product_url ? '_blank' : undefined}
+                    rel={p.product_url ? 'noopener noreferrer' : undefined}
+                  >
                     {t.learnMore[$lang]}
                     <svg
                       width="14"
@@ -329,7 +338,9 @@
                       <polyline points="12 5 19 12 12 19" />
                     </svg>
                   </a>
-                  <a href="/contato" class="btn ghost">Demo</a>
+                  <a href="/contato?produto={p.slug}" class="btn ghost">
+                    {$lang === 'pt' ? 'Estou interessado' : "I'm interested"}
+                  </a>
                 </div>
               </div>
             </div>
@@ -885,6 +896,15 @@
       radial-gradient(circle at 22% 28%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
       radial-gradient(circle at 78% 82%, rgba(0, 0, 0, 0.22) 0%, transparent 55%);
   }
+  .cs-visual-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
   .cs-icon-text {
     font-family: var(--font-mono);
     font-weight: 700;

@@ -20,7 +20,7 @@
 
 <div class="contact-layout">
   <ContactInfo />
-  <ContactForm products={data.products} />
+  <ContactForm products={data.products} selectedProduct={data.selectedProduct} />
 </div>
 
 <style>

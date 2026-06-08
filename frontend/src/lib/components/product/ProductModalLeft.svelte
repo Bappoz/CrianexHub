@@ -110,7 +110,7 @@
   });
 </script>
 
-<div class="flex w-[35%] flex-col gap-6 bg-[#0a0a0c] p-6 border-r border-zinc-800/60">
+<div class="flex w-[35%] shrink-0 flex-col gap-6 bg-[#0a0a0c] p-6 border-r border-zinc-800/60">
   <div>
     <span class="block text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-3"
       >Imagem / Capa</span
@@ -201,7 +201,7 @@
 
       {#if !previewUrl && !formData.image_url}
         <span
-          class="relative z-10 text-5xl font-bold text-white uppercase tracking-wider select-none"
+          class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-zinc-800 uppercase tracking-wider select-none pointer-events-none"
         >
           {formData.icon_text || '??'}
         </span>
@@ -233,7 +233,7 @@
     <div class="mt-3 flex items-center gap-3">
       <input
         type="text"
-        class="w-full rounded-lg border border-zinc-800 bg-[#09090b] px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-700 focus:border-zinc-700 focus:outline-none fld"
+        class="w-full rounded-lg border border-zinc-800 bg-[#09090b] px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-700 focus:border-zinc-700 focus:outline-none"
         bind:value={formData.color}
         placeholder="#7c3aed"
         maxlength="7"
@@ -252,7 +252,7 @@
     <input
       type="text"
       maxlength="4"
-      class="w-full rounded-lg border border-zinc-800 bg-[#09090b] px-3 py-2.5 text-sm font-medium text-zinc-200 focus:border-zinc-700 focus:outline-none uppercase fld"
+      class="w-full rounded-lg border border-zinc-800 bg-[#09090b] px-3 py-2.5 text-sm font-medium text-zinc-200 focus:border-zinc-700 focus:outline-none uppercase"
       bind:value={formData.icon_text}
     />
   </div>
@@ -274,11 +274,6 @@
       box-shadow:
         0 6px 18px rgba(0, 0, 0, 0.45),
         0 0 0 4px rgba(127, 62, 229, 0.06);
-    }
-
-    /* Generic field helper */
-    .fld {
-      box-sizing: border-box;
     }
   </style>
 </div>
