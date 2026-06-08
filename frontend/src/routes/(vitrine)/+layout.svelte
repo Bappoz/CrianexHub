@@ -5,6 +5,7 @@
   import SiteHeader from '$lib/components/vitrine/SiteHeader.svelte';
   import PageLoader from '$lib/components/vitrine/PageLoader.svelte';
   import SiteFooter from '$lib/components/vitrine/SiteFooter.svelte';
+  import CookieBanner from '$lib/components/vitrine/CookieBanner.svelte';
   import type { LayoutData } from './$types';
 
   export let data: LayoutData;
@@ -47,6 +48,8 @@
 </main>
 
 <SiteFooter products={data.footerProducts} />
+
+<CookieBanner />
 
 <style>
   :global(body):has(.vitrine-root) {
