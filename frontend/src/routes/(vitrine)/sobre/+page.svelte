@@ -159,9 +159,7 @@
               {content.cta.emailLabel}
             </a>
 
-            <a class="btn ghost" href="mailto:contato@crianex.com">
-              contato@crianex.com
-            </a>
+            <a class="btn ghost" href="mailto:contato@crianex.com"> contato@crianex.com </a>
           </div>
         </div>
       </div>
@@ -659,6 +657,7 @@
     }
     .people-row .n {
       font-size: 42px;
+    }
     .cta-image-wrap {
       min-height: 280px;
     }
