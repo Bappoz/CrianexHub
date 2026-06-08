@@ -65,7 +65,7 @@
     phone: data.adminUser.phone ?? null,
     bio: data.adminUser.bio ?? null,
     avatar_url: data.adminUser.avatar_url ?? null,
-    permissions: data.adminUser.permissions ?? null as Record<string, string[]> | null,
+    permissions: data.adminUser.permissions ?? (null as Record<string, string[]> | null),
   };
 
   function canView(module: string | null): boolean {
@@ -155,7 +155,12 @@
       {/each}
     </nav>
 
-    <button class="footer profile-btn" type="button" on:click={openProfile} aria-label="Abrir meu perfil">
+    <button
+      class="footer profile-btn"
+      type="button"
+      on:click={openProfile}
+      aria-label="Abrir meu perfil"
+    >
       <div class="avatar" aria-hidden="true">
         {#if currentProfile.avatar_url}
           <img src={currentProfile.avatar_url} alt="" />
@@ -199,14 +204,14 @@
 
     <slot />
   </div>
-</div>
 
-<ProfileModal
-  isOpen={profileModalOpen}
-  profile={currentProfile}
-  onClose={() => (profileModalOpen = false)}
-  onSave={handleProfileSave}
-/>
+  <ProfileModal
+    isOpen={profileModalOpen}
+    profile={currentProfile}
+    onClose={() => (profileModalOpen = false)}
+    onSave={handleProfileSave}
+  />
+</div>
 
 <style>
   .nav-group {

@@ -24,8 +24,7 @@ profileRouter.patch('/me', validateJWT, async (req, res) => {
     if (trimmed) updates.name = trimmed;
   }
   if ('phone' in (req.body ?? {})) {
-    updates.phone =
-      typeof req.body['phone'] === 'string' ? req.body['phone'].trim() || null : null;
+    updates.phone = typeof req.body['phone'] === 'string' ? req.body['phone'].trim() || null : null;
   }
   if ('bio' in (req.body ?? {})) {
     updates.bio = typeof req.body['bio'] === 'string' ? req.body['bio'].trim() || null : null;
