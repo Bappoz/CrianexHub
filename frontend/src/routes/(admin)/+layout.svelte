@@ -27,26 +27,26 @@
     {
       label: 'Geral',
       items: [
-        { href: NAO_IMPL, label: 'Dashboard', icon: LayoutDashboard },
-        { href: NAO_IMPL, label: 'CRM · Leads', icon: Users },
-        { href: NAO_IMPL, label: 'Financeiro', icon: ChartBar },
+        { href: NAO_IMPL, label: 'Dashboard', icon: LayoutDashboard, module: null },
+        { href: NAO_IMPL, label: 'CRM · Leads', icon: Users, module: null },
+        { href: NAO_IMPL, label: 'Financeiro', icon: ChartBar, module: null },
       ],
     },
     {
       label: 'Vitrine',
       items: [
-        { href: '/admin/products', label: 'Produtos', icon: Package },
-        { href: '/admin/gestao-faq', label: 'Gestão FAQ', icon: CircleQuestionMark },
+        { href: '/admin/products', label: 'Produtos', icon: Package, module: 'products' },
+        { href: '/admin/gestao-faq', label: 'Gestão FAQ', icon: CircleQuestionMark, module: 'faq' },
       ],
     },
     {
       label: 'Operações',
       items: [
-        { href: NAO_IMPL, label: 'Tickets', icon: Ticket },
-        { href: NAO_IMPL, label: 'Logs de Produtos', icon: FileText },
-        { href: NAO_IMPL, label: 'Notificações', icon: Bell },
-        { href: '/admin/membros', label: 'Membros', icon: Users },
-        { href: NAO_IMPL, label: 'Auditoria', icon: ShieldCheck },
+        { href: NAO_IMPL, label: 'Tickets', icon: Ticket, module: null },
+        { href: NAO_IMPL, label: 'Logs de Produtos', icon: FileText, module: null },
+        { href: NAO_IMPL, label: 'Notificações', icon: Bell, module: null },
+        { href: '/admin/membros', label: 'Membros', icon: Users, module: 'members' },
+        { href: NAO_IMPL, label: 'Auditoria', icon: ShieldCheck, module: null },
       ],
     },
   ];
@@ -65,7 +65,15 @@
     phone: data.adminUser.phone ?? null,
     bio: data.adminUser.bio ?? null,
     avatar_url: data.adminUser.avatar_url ?? null,
+    permissions: data.adminUser.permissions ?? null as Record<string, string[]> | null,
   };
+
+  function canView(module: string | null): boolean {
+    if (!module) return true;
+    if (currentProfile.role === 'owner') return true;
+    const perms = currentProfile.permissions;
+    return Array.isArray(perms?.[module]) && perms[module].includes('v');
+  }
 
   $: pathname = $page.url.pathname;
 
@@ -126,21 +134,24 @@
 
     <nav>
       {#each navGroups as group}
-        <div class="nav-group">
-          <span class="sec-label">{group.label}</span>
-          {#each group.items as item}
-            <a
-              href={item.href}
-              class="nav-item"
-              class:on={isActive(item.href)}
-              aria-current={isActive(item.href) ? 'page' : undefined}
-              on:click={closeSidebar}
-            >
-              <span class="ico"><svelte:component this={item.icon} size={15} /></span>
-              {item.label}
-            </a>
-          {/each}
-        </div>
+        {@const visibleItems = group.items.filter((item) => canView(item.module))}
+        {#if visibleItems.length > 0}
+          <div class="nav-group">
+            <span class="sec-label">{group.label}</span>
+            {#each visibleItems as item}
+              <a
+                href={item.href}
+                class="nav-item"
+                class:on={isActive(item.href)}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                on:click={closeSidebar}
+              >
+                <span class="ico"><svelte:component this={item.icon} size={15} /></span>
+                {item.label}
+              </a>
+            {/each}
+          </div>
+        {/if}
       {/each}
     </nav>
 

@@ -13,6 +13,7 @@ type ProfileData = {
   phone: string | null;
   bio: string | null;
   avatar_url: string | null;
+  permissions: Record<string, string[]> | null;
 };
 
 export const load: LayoutServerLoad = async ({ cookies, locals }) => {
@@ -44,6 +45,7 @@ export const load: LayoutServerLoad = async ({ cookies, locals }) => {
       phone: profile?.phone ?? null,
       bio: profile?.bio ?? null,
       avatar_url: profile?.avatar_url ?? null,
+      permissions: profile?.permissions ?? null,
     },
   };
 };

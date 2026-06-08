@@ -11,6 +11,7 @@
     phone: string | null;
     bio: string | null;
     avatar_url: string | null;
+    permissions: Record<string, string[]> | null;
   };
 
   let {

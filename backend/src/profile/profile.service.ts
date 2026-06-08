@@ -10,9 +10,10 @@ export type ProfileRecord = {
   phone: string | null;
   bio: string | null;
   avatar_url: string | null;
+  permissions: Record<string, string[]> | null;
 };
 
-const SELECT_FIELDS = 'id, name, email, role, display_role, status, phone, bio, avatar_url';
+const SELECT_FIELDS = 'id, name, email, role, display_role, status, phone, bio, avatar_url, permissions';
 
 export async function getMyProfile(userId: string): Promise<ProfileRecord> {
   const supabase = getSupabaseClient();
