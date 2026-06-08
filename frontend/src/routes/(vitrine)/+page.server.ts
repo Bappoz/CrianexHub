@@ -19,11 +19,24 @@ export const load: PageServerLoad = async ({ url, locals, fetch }) => {
     auth: { persistSession: false },
   });
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('products')
-    .select('slug, name_pt, name_en, tagline_pt, tagline_en, category_pt, category_en, image_url')
+    .select(
+      'slug, name_pt, name_en, tagline_pt, tagline_en, category_pt, category_en, image_url, product_url'
+    )
     .eq('published', true)
     .order('display_order');
+
+  if (error) {
+    // Fallback sem product_url caso a migração ainda não tenha sido aplicada
+    const { data: fallback } = await supabase
+      .from('products')
+      .select('slug, name_pt, name_en, tagline_pt, tagline_en, category_pt, category_en, image_url')
+      .eq('published', true)
+      .order('display_order');
+
+    return { products: (fallback ?? []) as HomeProduct[], origin, selectedLang };
+  }
 
   return { products: (data ?? []) as HomeProduct[], origin, selectedLang };
 };

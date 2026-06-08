@@ -5,6 +5,7 @@
   import type { Product } from './contact';
 
   export let products: Product[] = [];
+  export let selectedProduct: string = '';
 
   const API_BASE = env.PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -52,7 +53,7 @@
   let status: SubmitStatus = 'idle';
   let errorMsg = '';
   let rateLimitError = false;
-  let form = defaultForm();
+  let form = { ...defaultForm(), product: selectedProduct };
 
   type ErrorKey = '' | 'required' | 'invalid';
   let errors: { name: ErrorKey; email: ErrorKey; message: ErrorKey } = {

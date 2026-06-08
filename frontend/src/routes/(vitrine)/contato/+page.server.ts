@@ -3,11 +3,12 @@ import { env } from '$env/dynamic/public';
 import type { ServerLoad as PageServerLoad } from '@sveltejs/kit';
 import type { Product } from './contact';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, url: reqUrl }) => {
   const url = env.PUBLIC_SUPABASE_URL;
   const key = env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const selectedProduct = reqUrl.searchParams.get('produto') ?? '';
 
-  if (!url || !key) return { products: [] };
+  if (!url || !key) return { products: [], selectedProduct };
 
   const supabase = createClient(url, key, {
     global: { fetch },
@@ -20,5 +21,5 @@ export const load: PageServerLoad = async ({ fetch }) => {
     .eq('published', true)
     .order('display_order');
 
-  return { products: (data ?? []) as Product[] };
+  return { products: (data ?? []) as Product[], selectedProduct };
 };

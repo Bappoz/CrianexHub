@@ -19,6 +19,7 @@ export type ProductInput = {
   published?: boolean;
   display_order?: number;
   image_url?: string | null;
+  product_url?: string | null;
 };
 
 export type ProductUploadFile = {
@@ -105,6 +106,7 @@ export async function createProduct(input: ProductInput) {
         display_order: displayOrder,
         slug,
         image_url: input.image_url,
+        product_url: input.product_url,
       },
     ])
     .select()
