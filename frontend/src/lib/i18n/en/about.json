@@ -48,6 +48,16 @@
       "n": "02",
       "name": "Ana Melo",
       "role": "CTO & Co-founder — responsible for the Kubernetes platform architecture and the technical evolution of Avali, Pontua and Notifly."
+    },
+    {
+      "n": "03",
+      "name": "Lucas Ferreira",
+      "role": "Head of Product — defines roadmap and prioritization across all three vertical SaaS, bridging market needs with engineering execution."
+    },
+    {
+      "n": "04",
+      "name": "Marina Santos",
+      "role": "Lead Engineer — leads the platform squad, owning CI/CD, observability and the evolution of the Kubernetes infrastructure."
     }
   ],
   "cta": {

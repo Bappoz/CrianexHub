@@ -8,6 +8,7 @@
   $: content = data.aboutContent[$lang] ?? data.aboutContent[data.initialLang];
 
   let jsReady = false;
+  let activePerson = 0;
 
   const DELAYS = [0, 80, 140, 220] as const;
 
@@ -130,13 +131,32 @@
           <h2>{content.peopleTitle}</h2>
         </div>
       </div>
-      <div class="people-row">
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="people-row" onmouseleave={() => (activePerson = 0)}>
         {#each content.people as person, i (person.n)}
-          <div class="person reveal" style="--delay: {DELAYS[i] ?? 0}ms">
-            <span class="n">{person.n}</span>
-            <div class="person-body">
-              <h4>{person.name}</h4>
-              <p>{person.role}</p>
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div
+            class="person reveal"
+            class:is-active={activePerson === i}
+            class:is-dimmed={activePerson !== i}
+            style="--delay: {DELAYS[i] ?? 0}ms"
+            onmouseenter={() => (activePerson = i)}
+          >
+            <div class="person-inner">
+              <div class="person-text">
+                <span class="n">{person.n}</span>
+                <div class="person-body">
+                  <h4>{person.name}</h4>
+                  <p class="person-role">{person.role}</p>
+                </div>
+              </div>
+              <div class="avatar-wrap">
+                <div class="avatar-circle">
+                  <span class="avatar-initials">
+                    {person.name.split(' ').slice(0, 2).map((w) => w[0] ?? '').join('').toUpperCase()}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         {/each}
@@ -189,7 +209,7 @@
     position: relative;
     min-height: 100svh;
     overflow: hidden;
-    background: #f0eef0;
+    background: #ffffff;
   }
 
   .hero-wrap::after {
@@ -199,7 +219,7 @@
     left: 0;
     right: 0;
     height: 320px;
-    background: linear-gradient(to bottom, transparent 0%, rgba(241, 91, 166, 0.06) 100%);
+    background: linear-gradient(to bottom, transparent 0%, rgba(241, 91, 166, 0.06) 96%);
     z-index: 5;
     pointer-events: none;
   }
@@ -444,7 +464,7 @@
   .numbers {
     background: linear-gradient(
       to bottom,
-      rgba(240, 180, 224, 0.07) 0%,
+      rgba(245, 62, 196, 0.07) 0%,
       rgba(255, 255, 255, 0.95) 40%
     );
     margin-left: calc(-1 * var(--pad));
@@ -483,20 +503,48 @@
 
   /* ── People row ──────────────────────────────────────────────────────────── */
   .people-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    overflow: hidden;
+    transform: translateZ(0);
   }
   .person {
-    padding: 36px 48px 36px 0;
+    flex: 1 1 0;
+    min-width: 56px;
+    padding: 36px 36px 36px 0;
     border-right: 1px solid var(--line);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    overflow: hidden;
+    cursor: default;
+    will-change: flex;
+    transition: flex 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .person-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    gap: 24px;
+  }
+  .person-text {
+    flex: 0 0 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .person + .person {
+    padding-left: 36px;
   }
   .person:last-child {
     border-right: none;
-    padding-left: 48px;
     padding-right: 0;
+  }
+  .person.is-active {
+    flex: 3.5 1 0;
+  }
+  .person.is-dimmed {
+    flex: 0.3 1 0;
   }
   .people-row .n {
     font-family: var(--font-mono, monospace);
@@ -505,18 +553,101 @@
     letter-spacing: -0.03em;
     line-height: 1;
     display: block;
+    flex-shrink: 0;
+    transition:
+      font-size 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      color 0.4s ease;
+  }
+  .person.is-active .n {
+    color: var(--pink, #e71f84);
+  }
+  .person.is-dimmed .n {
+    font-size: 26px;
+  }
+  .avatar-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.82);
+    transition:
+      opacity 0.28s ease 0.12s,
+      transform 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s;
+    pointer-events: none;
+  }
+  .person.is-active .avatar-wrap {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .person.is-dimmed .avatar-wrap {
+    opacity: 0;
+    transform: scale(0.82);
+    transition:
+      opacity 0.12s ease,
+      transform 0.15s ease;
+  }
+  .avatar-circle {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: var(--bg-soft, #f4f3f1);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  .avatar-initials {
+    font-family: var(--font-mono, monospace);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    user-select: none;
   }
   .person h4 {
-    font-size: 22px;
-    margin: 8px 0 6px;
+    font-size: 20px;
+    margin: 0;
     letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition:
+      font-size 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      opacity 0.4s ease;
   }
-  .person p {
+  .person.is-dimmed h4 {
+    font-size: 13px;
+    opacity: 0.45;
+  }
+  .person-role {
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--text-muted);
     margin: 0;
-    max-width: 40ch;
+    max-width: 38ch;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.35s ease 0.18s,
+      transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.18s;
+  }
+  .person.is-dimmed .person-role {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease;
   }
 
   /* ── CTA ─────────────────────────────────────────────────────────────────── */
@@ -619,10 +750,69 @@
     .values-grid {
       grid-template-columns: repeat(2, 1fr);
     }
-    /* people-row mantém 2 colunas — sem alteração */
     .cta-banner {
       grid-template-columns: 1fr;
       padding: 28px;
+    }
+  }
+
+  /* ── People row — empilha em telas menores ───────────────────────────────── */
+  @media (max-width: 640px) {
+    .people-row {
+      flex-direction: column;
+    }
+    .person,
+    .person.is-active,
+    .person.is-dimmed {
+      flex: none;
+      min-width: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      padding: 28px 0;
+      transition: none;
+      will-change: auto;
+    }
+    .person + .person {
+      padding-left: 0;
+    }
+    .person:last-child {
+      border-bottom: none;
+      padding-left: 0;
+    }
+    .people-row .n,
+    .person.is-dimmed .n {
+      font-size: 42px;
+      color: var(--text-faint);
+    }
+    .person.is-active .n {
+      color: var(--pink, #e71f84);
+    }
+    .person h4,
+    .person.is-dimmed h4 {
+      font-size: 20px;
+      opacity: 1;
+      white-space: normal;
+    }
+    .avatar-wrap,
+    .person.is-active .avatar-wrap {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      transition: none;
+      justify-content: flex-start;
+    }
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+    }
+    .avatar-initials {
+      font-size: 15px;
+    }
+    .person-role,
+    .person.is-dimmed .person-role {
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
   }
 
@@ -643,20 +833,9 @@
       grid-template-columns: 1fr;
       gap: 20px;
     }
-    .people-row {
-      grid-template-columns: 1fr;
-    }
-    .person {
-      border-right: 0;
-      padding: 24px 0;
-      border-bottom: 1px solid var(--line);
-    }
-    .person:last-child {
-      border-bottom: none;
-      padding-left: 0;
-    }
-    .people-row .n {
-      font-size: 42px;
+    .people-row .n,
+    .person.is-dimmed .n {
+      font-size: 38px;
     }
     .cta-image-wrap {
       min-height: 280px;

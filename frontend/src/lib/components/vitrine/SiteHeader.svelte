@@ -99,12 +99,7 @@
 
       ctx.clearRect(0, 0, GS, GS);
 
-      ctx.beginPath();
-      ctx.arc(GCX, GCY, GR, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(28,28,26,0.05)';
-      ctx.fill();
-
-      ctx.strokeStyle = 'rgba(28,28,26,0.28)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.65)';
       ctx.lineWidth = 0.5;
 
       for (let lat = -60; lat <= 60; lat += 30) {
@@ -136,7 +131,7 @@
 
       ctx.beginPath();
       ctx.arc(GCX, GCY, GR, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(28,28,26,0.55)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
       ctx.lineWidth = 1;
       ctx.stroke();
 
@@ -228,6 +223,8 @@
       <div class="lang-wrap">
         <button
           class="lang-globe"
+          class:is-pt={$lang === 'pt'}
+          class:is-en={$lang === 'en'}
           on:click={toggleLang}
           aria-label={tooltipText}
           title={tooltipText}
@@ -420,6 +417,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
     width: 38px;
     height: 38px;
     border-radius: 50%;
@@ -428,11 +427,58 @@
     cursor: pointer;
     transition:
       border-color 0.2s,
-      background-color 0.2s;
+      filter 0.2s;
     padding: 0;
   }
 
+  .lang-globe::before,
+  .lang-globe::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    transition: opacity 0.38s ease;
+    pointer-events: none;
+  }
+
+  /* Brazil: green top-left → yellow bottom-right */
+  .lang-globe::before {
+    background: linear-gradient(135deg, #007a2e 0%, #009c3b 40%, #e8c200 65%, #ffdf00 100%);
+    opacity: 0;
+  }
+
+  /* USA: navy top-left → red bottom-right */
+  .lang-globe::after {
+    background: linear-gradient(135deg, #2a296a 0%, #a3a1f0 40%, #e59aa5 65%, #b22234 100%);
+    opacity: 0;
+  }
+
+  .lang-globe.is-pt {
+    border-color: transparent;
+  }
+  .lang-globe.is-pt::before {
+    opacity: 1;
+  }
+
+  .lang-globe.is-en {
+    border-color: transparent;
+  }
+  .lang-globe.is-en::after {
+    opacity: 1;
+  }
+
+  .lang-globe canvas {
+    position: relative;
+    z-index: 1;
+  }
+
   .lang-globe:hover {
+    filter: brightness(1.12);
+    border-color: transparent;
+  }
+
+  .lang-globe:not(.is-pt):not(.is-en):hover {
+    filter: none;
     border-color: #9a968e;
     background: color-mix(in srgb, var(--venom) 4%, transparent);
   }

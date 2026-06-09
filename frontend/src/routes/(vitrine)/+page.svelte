@@ -688,13 +688,14 @@
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    padding-bottom: 30px;
   }
   .hero-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
     border-top: 1px solid var(--line);
-    padding-top: 25px;
+    padding-top: 40px;
   }
   .hero-stats > div {
     display: flex;
