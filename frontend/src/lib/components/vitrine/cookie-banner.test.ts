@@ -2,21 +2,25 @@ import { describe, it, expect } from 'vitest';
 import { CONSENT_KEY, cookieI18n, getConsent, setConsent } from './cookie-banner';
 
 describe('cookieI18n', () => {
-  it.each(['pt', 'en'] as const)('%s tem message, accept e reject não-vazios', (locale) => {
-    const c = cookieI18n[locale];
-    expect(c.message).toBeTruthy();
-    expect(c.accept).toBeTruthy();
-    expect(c.reject).toBeTruthy();
-  });
+  it.each(['pt', 'en'] as const)(
+    '%s tem messagePre, linkText, accept e reject não-vazios',
+    (locale) => {
+      const c = cookieI18n[locale];
+      expect(c.messagePre).toBeTruthy();
+      expect(c.linkText).toBeTruthy();
+      expect(c.accept).toBeTruthy();
+      expect(c.reject).toBeTruthy();
+    }
+  );
 
   it('pt e en têm textos de botão distintos', () => {
     expect(cookieI18n.pt.accept).not.toBe(cookieI18n.en.accept);
     expect(cookieI18n.pt.reject).not.toBe(cookieI18n.en.reject);
   });
 
-  it('mensagens são strings não-vazias com pelo menos 10 chars', () => {
-    expect(cookieI18n.pt.message.length).toBeGreaterThan(10);
-    expect(cookieI18n.en.message.length).toBeGreaterThan(10);
+  it('messagePre são strings não-vazias com pelo menos 10 chars', () => {
+    expect(cookieI18n.pt.messagePre.length).toBeGreaterThan(10);
+    expect(cookieI18n.en.messagePre.length).toBeGreaterThan(10);
   });
 });
 

@@ -605,12 +605,6 @@
     overflow: hidden;
     flex-shrink: 0;
   }
-  .avatar-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-  }
   .avatar-initials {
     font-family: var(--font-mono, monospace);
     font-size: 22px;
