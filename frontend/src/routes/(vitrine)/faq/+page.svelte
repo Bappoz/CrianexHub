@@ -4,6 +4,7 @@
   import { lang } from '$lib/stores/lang';
   import type { PageData } from './$types';
   import type { FaqPublicArticle, FaqCategory } from './+page.server';
+  import FaqRate from '$lib/components/vitrine/FaqRate.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -198,15 +199,12 @@
                         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                         {@html resolveBody(article)}
                       </div>
-                      <div class="faq-ratings">
-                        <span class="ratings-label">
-                          {$lang === 'pt' ? 'Esta resposta foi útil?' : 'Was this helpful?'}
-                        </span>
-                        <div class="ratings-btns">
-                          <span class="rating-count">👍 {article.helpful_count}</span>
-                          <span class="rating-count">👎 {article.not_helpful_count}</span>
-                        </div>
-                      </div>
+                      <FaqRate
+                        articleId={article.id}
+                        helpfulCount={article.helpful_count}
+                        notHelpfulCount={article.not_helpful_count}
+                        apiBaseUrl={data.apiBaseUrl}
+                      />
                     </div>
                   {/if}
                 </article>
@@ -465,33 +463,6 @@
   }
   .faq-text :global(li) {
     margin-bottom: 4px;
-  }
-
-  .faq-ratings {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
-  }
-
-  .ratings-label {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .ratings-btns {
-    display: flex;
-    gap: 8px;
-  }
-
-  .rating-count {
-    font-size: 13px;
-    color: var(--text-muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
   }
 
   .empty-state {
