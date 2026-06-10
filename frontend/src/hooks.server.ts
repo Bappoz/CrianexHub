@@ -80,9 +80,4 @@ const adminAuthHandle: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
-export const handle = sequence(
-  securityHeadersHandle,
-  langHandle,
-  adminAuthHandle,
-  i18n.handle()
-);
+export const handle = sequence(securityHeadersHandle, langHandle, adminAuthHandle, i18n.handle());

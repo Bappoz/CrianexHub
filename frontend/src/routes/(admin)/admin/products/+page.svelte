@@ -4,6 +4,8 @@
   import { EllipsisVertical, Pencil, EyeOff, Trash2, Eye } from 'lucide-svelte';
   import { onMount, onDestroy } from 'svelte';
   import { topbarActions } from '$lib/stores/topbar';
+  import { page } from '$app/stores';
+  import { get } from 'svelte/store';
 
   import { apiFetch } from '$lib/api/backend';
   import { tick } from 'svelte';
@@ -55,8 +57,18 @@
     }, 3000);
   }
 
+  $: _prodUser = $page.data?.adminUser;
+  $: canEditProducts =
+    _prodUser?.role === 'owner' || (_prodUser?.permissions?.products ?? []).includes('e');
+  $: canAdminProducts =
+    _prodUser?.role === 'owner' || (_prodUser?.permissions?.products ?? []).includes('a');
+
   onMount(() => {
-    topbarActions.set([{ label: '+ Novo produto', onClick: handleNovoProduto }]);
+    const u = get(page).data?.adminUser;
+    const isAdmin = u?.role === 'owner' || (u?.permissions?.products ?? []).includes('a');
+    if (isAdmin) {
+      topbarActions.set([{ label: '+ Novo produto', onClick: handleNovoProduto }]);
+    }
     return () => topbarActions.set([]);
   });
 
@@ -381,30 +393,38 @@
         <span class="p-time mono">edit. {getTimeAgo(produto.updated_at)}</span>
 
         <!-- Menu -->
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger class="row-menu-btn">
-            <EllipsisVertical size={15} />
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content
-            align="end"
-            class="w-44 bg-[#161619] border-zinc-800 text-zinc-300 rounded-lg shadow-xl p-1"
-          >
-            <DropdownMenu.Item class="p-0">
-              <button type="button" on:click={() => handleEditarProduto(produto)} class="menu-item">
-                <Pencil size={13} /> Editar produto
-              </button>
-            </DropdownMenu.Item>
-            <DropdownMenu.Item class="p-0">
-              <button
-                type="button"
-                on:click={() => handleTogglePublicacao(produto.id, produto.published)}
-                class="menu-item"
-              >
-                <EyeOff size={13} /> Despublicar
-              </button>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
+        {#if canEditProducts || canAdminProducts}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger class="row-menu-btn">
+              <EllipsisVertical size={15} />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content
+              align="end"
+              class="w-44 bg-[#161619] border-zinc-800 text-zinc-300 rounded-lg shadow-xl p-1"
+            >
+              {#if canEditProducts}
+                <DropdownMenu.Item class="p-0">
+                  <button
+                    type="button"
+                    on:click={() => handleEditarProduto(produto)}
+                    class="menu-item"
+                  >
+                    <Pencil size={13} /> Editar produto
+                  </button>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item class="p-0">
+                  <button
+                    type="button"
+                    on:click={() => handleTogglePublicacao(produto.id, produto.published)}
+                    class="menu-item"
+                  >
+                    <EyeOff size={13} /> Despublicar
+                  </button>
+                </DropdownMenu.Item>
+              {/if}
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        {/if}
       </div>
     {/each}
 
@@ -433,40 +453,50 @@
         <span class="pill draft-pill">RASCUNHO</span>
         <span class="p-time mono">edit. {getTimeAgo(produto.updated_at)}</span>
 
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger class="row-menu-btn">
-            <EllipsisVertical size={15} />
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content
-            align="end"
-            class="w-44 bg-[#161619] border-zinc-800 text-zinc-300 rounded-lg shadow-xl p-1"
-          >
-            <DropdownMenu.Item class="p-0">
-              <button type="button" on:click={() => handleEditarProduto(produto)} class="menu-item">
-                <Pencil size={13} /> Editar produto
-              </button>
-            </DropdownMenu.Item>
-            <DropdownMenu.Item class="p-0">
-              <button
-                type="button"
-                on:click={() => handleTogglePublicacao(produto.id, produto.published)}
-                class="menu-item"
-              >
-                <Eye size={13} /> Publicar
-              </button>
-            </DropdownMenu.Item>
-            <DropdownMenu.Separator class="bg-zinc-800/60 my-1" />
-            <DropdownMenu.Item class="p-0" variant="destructive">
-              <button
-                type="button"
-                on:click={() => openDeleteModal(produto.id)}
-                class="menu-item danger"
-              >
-                <Trash2 size={13} /> Excluir
-              </button>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
+        {#if canEditProducts || canAdminProducts}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger class="row-menu-btn">
+              <EllipsisVertical size={15} />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content
+              align="end"
+              class="w-44 bg-[#161619] border-zinc-800 text-zinc-300 rounded-lg shadow-xl p-1"
+            >
+              {#if canEditProducts}
+                <DropdownMenu.Item class="p-0">
+                  <button
+                    type="button"
+                    on:click={() => handleEditarProduto(produto)}
+                    class="menu-item"
+                  >
+                    <Pencil size={13} /> Editar produto
+                  </button>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item class="p-0">
+                  <button
+                    type="button"
+                    on:click={() => handleTogglePublicacao(produto.id, produto.published)}
+                    class="menu-item"
+                  >
+                    <Eye size={13} /> Publicar
+                  </button>
+                </DropdownMenu.Item>
+              {/if}
+              {#if canAdminProducts}
+                {#if canEditProducts}<DropdownMenu.Separator class="bg-zinc-800/60 my-1" />{/if}
+                <DropdownMenu.Item class="p-0" variant="destructive">
+                  <button
+                    type="button"
+                    on:click={() => openDeleteModal(produto.id)}
+                    class="menu-item danger"
+                  >
+                    <Trash2 size={13} /> Excluir
+                  </button>
+                </DropdownMenu.Item>
+              {/if}
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        {/if}
       </div>
     {/each}
   </div>

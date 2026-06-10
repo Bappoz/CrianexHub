@@ -41,7 +41,12 @@ export async function sendWelcomeEmail({ to, name, password }: WelcomeEmailPaylo
   //   html,
   // });
 
-  console.info(`[email] Welcome email pendente para ${to} — ative o mailer para enviar.`);
+  console.info(
+    `[email] Credenciais do novo membro\n` +
+      `  e-mail : ${to}\n` +
+      `  senha  : ${password}\n` +
+      `  (remova este log e ative o mailer antes de ir a produção)`
+  );
 }
 
 function buildWelcomeHtml(name: string, email: string, password: string): string {

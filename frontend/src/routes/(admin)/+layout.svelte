@@ -14,6 +14,9 @@
     X,
     LayoutDashboard,
     ShieldCheck,
+    SidebarClose,
+    SidebarOpen,
+    House,
   } from 'lucide-svelte';
   import type { LayoutData } from './$types';
   import { topbarActions } from '$lib/stores/topbar';
@@ -27,9 +30,9 @@
     {
       label: 'Geral',
       items: [
-        { href: NAO_IMPL, label: 'Dashboard', icon: LayoutDashboard, module: null },
-        { href: NAO_IMPL, label: 'CRM · Leads', icon: Users, module: null },
-        { href: NAO_IMPL, label: 'Financeiro', icon: ChartBar, module: null },
+        { href: NAO_IMPL, label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard' },
+        { href: NAO_IMPL, label: 'CRM · Leads', icon: Users, module: 'crm' },
+        { href: NAO_IMPL, label: 'Financeiro', icon: ChartBar, module: 'finance' },
       ],
     },
     {
@@ -42,16 +45,17 @@
     {
       label: 'Operações',
       items: [
-        { href: NAO_IMPL, label: 'Tickets', icon: Ticket, module: null },
-        { href: NAO_IMPL, label: 'Logs de Produtos', icon: FileText, module: null },
-        { href: NAO_IMPL, label: 'Notificações', icon: Bell, module: null },
+        { href: NAO_IMPL, label: 'Tickets', icon: Ticket, module: 'tickets' },
+        { href: NAO_IMPL, label: 'Logs de Produtos', icon: FileText, module: 'productLogs' },
+        { href: NAO_IMPL, label: 'Notificações', icon: Bell, module: 'notifications' },
         { href: '/admin/membros', label: 'Membros', icon: Users, module: 'members' },
-        { href: NAO_IMPL, label: 'Auditoria', icon: ShieldCheck, module: null },
+        { href: NAO_IMPL, label: 'Auditoria', icon: ShieldCheck, module: 'auditLogs' },
       ],
     },
   ];
 
   let sidebarOpen = false;
+  let sidebarCollapsed = false;
   let profileModalOpen = false;
 
   // local reactive copy so sidebar updates after save without page reload
@@ -68,8 +72,7 @@
     permissions: data.adminUser.permissions ?? (null as Record<string, string[]> | null),
   };
 
-  function canView(module: string | null): boolean {
-    if (!module) return true;
+  function canView(module: string): boolean {
     if (currentProfile.role === 'owner') return true;
     const perms = currentProfile.permissions;
     return Array.isArray(perms?.[module]) && perms[module].includes('v');
@@ -79,6 +82,7 @@
 
   $: activeLabel = (() => {
     if (pathname === NAO_IMPL) return 'Em Desenvolvimento';
+    if (pathname.startsWith('/admin/painel')) return 'Início';
     for (const group of navGroups) {
       for (const item of group.items) {
         if (item.href !== NAO_IMPL && pathname.startsWith(item.href)) return item.label;
@@ -117,7 +121,11 @@
   }
 </script>
 
-<div class="admin-root admin-shell" class:sidebar-open={sidebarOpen}>
+<div
+  class="admin-root admin-shell"
+  class:sidebar-open={sidebarOpen}
+  class:sidebar-collapsed={sidebarCollapsed}
+>
   <button
     class="admin-sidebar-backdrop"
     on:click={closeSidebar}
@@ -127,27 +135,68 @@
   ></button>
 
   <aside class="admin-sidebar" aria-label="Menu de navegação">
-    <a href="/admin" class="brand" on:click={closeSidebar}>
-      <div class="brand-mark"><span>Cx</span></div>
-      Crianex
-    </a>
+    <div class="sidebar-brand-row">
+      {#if !sidebarCollapsed}
+        <a href="/admin" class="brand" on:click={closeSidebar}>
+          <svg viewBox="0 0 90 80" width="22" height="20" aria-hidden="true" class="brand-svg">
+            <polygon fill="#E71F84" points="5,5 33,5 45,37 17,37" />
+            <polygon fill="#66DF7A" points="57,5 85,5 73,37 45,37" />
+            <polygon fill="#FCFCFC" points="17,43 45,43 33,75 5,75" />
+            <polygon fill="#7F3FE5" points="45,43 73,43 85,75 57,75" />
+          </svg>
+          <span class="brand-label">Crianex</span>
+        </a>
+      {/if}
+      <button
+        class="collapse-btn desktop-only"
+        class:collapse-btn-solo={sidebarCollapsed}
+        type="button"
+        title={sidebarCollapsed ? 'Expandir menu' : 'Retrair menu'}
+        aria-label={sidebarCollapsed ? 'Expandir menu' : 'Retrair menu'}
+        on:click={() => (sidebarCollapsed = !sidebarCollapsed)}
+      >
+        {#if sidebarCollapsed}
+          <SidebarOpen size={14} />
+        {:else}
+          <SidebarClose size={14} />
+        {/if}
+      </button>
+    </div>
 
     <nav>
+      <!-- Início — always visible, no module gate -->
+      <a
+        href="/admin/painel"
+        class="nav-item"
+        class:on={pathname.startsWith('/admin/painel')}
+        aria-current={pathname.startsWith('/admin/painel') ? 'page' : undefined}
+        title={sidebarCollapsed ? 'Início' : undefined}
+        on:click={closeSidebar}
+      >
+        <span class="ico"><House size={15} /></span>
+        {#if !sidebarCollapsed}<span>Início</span>{/if}
+      </a>
+
       {#each navGroups as group}
         {@const visibleItems = group.items.filter((item) => canView(item.module))}
         {#if visibleItems.length > 0}
           <div class="nav-group">
-            <span class="sec-label">{group.label}</span>
+            {#if !sidebarCollapsed}
+              <span class="sec-label">{group.label}</span>
+            {:else}
+              <span class="sec-label-dot" aria-hidden="true"></span>
+            {/if}
             {#each visibleItems as item}
               <a
                 href={item.href}
                 class="nav-item"
                 class:on={isActive(item.href)}
                 aria-current={isActive(item.href) ? 'page' : undefined}
+                title={sidebarCollapsed ? item.label : undefined}
                 on:click={closeSidebar}
               >
                 <span class="ico"><svelte:component this={item.icon} size={15} /></span>
-                {item.label}
+                {#if !sidebarCollapsed}<span>{item.label}</span>{/if}
               </a>
             {/each}
           </div>
@@ -160,6 +209,7 @@
       type="button"
       on:click={openProfile}
       aria-label="Abrir meu perfil"
+      title={sidebarCollapsed ? currentProfile.name : undefined}
     >
       <div class="avatar" aria-hidden="true">
         {#if currentProfile.avatar_url}
@@ -168,10 +218,12 @@
           {userInitials}
         {/if}
       </div>
-      <div class="footer-text">
-        <div class="name">{currentProfile.name}</div>
-        <div class="role">{currentProfile.display_role ?? currentProfile.role} · perfil</div>
-      </div>
+      {#if !sidebarCollapsed}
+        <div class="footer-text">
+          <div class="name">{currentProfile.name}</div>
+          <div class="role">{currentProfile.display_role ?? currentProfile.role} · perfil</div>
+        </div>
+      {/if}
     </button>
   </aside>
 
@@ -214,6 +266,26 @@
 </div>
 
 <style>
+  .sidebar-brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+    min-height: 34px;
+  }
+
+  .brand-svg {
+    flex-shrink: 0;
+  }
+
+  /* when solo (no brand link beside it), center the button */
+  .collapse-btn-solo {
+    margin: 0 auto;
+  }
+
   .nav-group {
     display: flex;
     flex-direction: column;
@@ -229,6 +301,43 @@
     text-transform: uppercase;
     color: var(--text-faint);
     padding: 8px 10px 4px;
+  }
+
+  .sec-label-dot {
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: var(--line);
+    margin: 8px auto 4px;
+  }
+
+  .collapse-btn {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text-faint);
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    flex-shrink: 0;
+    padding: 0;
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+
+  .collapse-btn:hover {
+    background: var(--bg-soft);
+    color: var(--text);
+  }
+
+  /* Show collapse button only on desktop (>820px) */
+  @media (min-width: 821px) {
+    .collapse-btn {
+      display: grid;
+    }
   }
 
   .topbar-action-btn {
@@ -281,5 +390,15 @@
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+  }
+
+  /* Hide on mobile (handled by hamburger) */
+  .desktop-only {
+    display: none;
+  }
+  @media (min-width: 821px) {
+    .desktop-only {
+      display: grid;
+    }
   }
 </style>

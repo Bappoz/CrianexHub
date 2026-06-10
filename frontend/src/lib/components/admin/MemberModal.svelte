@@ -37,6 +37,60 @@
     return Object.fromEntries(MODULES.map((m) => [m.id, ['v']]));
   }
 
+  const ROLE_PRESETS: Record<string, Perms> = {
+    Owner: allPerms(),
+    Administrador: allPerms(),
+    Comercial: {
+      dashboard: ['v'],
+      crm: ['v', 'e', 'a'],
+      finance: [],
+      members: [],
+      products: ['v'],
+      faq: ['v'],
+      tickets: ['v', 'e'],
+      productLogs: [],
+      notifications: ['v'],
+      auditLogs: [],
+    },
+    Suporte: {
+      dashboard: ['v'],
+      crm: ['v'],
+      finance: [],
+      members: [],
+      products: ['v'],
+      faq: ['v', 'e', 'a'],
+      tickets: ['v', 'e', 'a'],
+      productLogs: [],
+      notifications: ['v', 'e'],
+      auditLogs: [],
+    },
+    Engenharia: {
+      dashboard: ['v'],
+      crm: [],
+      finance: [],
+      members: [],
+      products: ['v', 'e', 'a'],
+      faq: ['v', 'e', 'a'],
+      tickets: ['v'],
+      productLogs: ['v', 'e', 'a'],
+      notifications: ['v'],
+      auditLogs: ['v'],
+    },
+    Financeiro: {
+      dashboard: ['v', 'e'],
+      crm: ['v'],
+      finance: ['v', 'e', 'a'],
+      members: [],
+      products: ['v'],
+      faq: [],
+      tickets: [],
+      productLogs: [],
+      notifications: [],
+      auditLogs: ['v'],
+    },
+    Auditor: viewPerms(),
+  };
+
   let {
     isOpen = false,
     isEditing = false,
@@ -77,8 +131,7 @@
   function handleRoleChange(e: Event) {
     const r = (e.target as HTMLSelectElement).value;
     displayRole = r;
-    if (r === 'Owner' || r === 'Administrador') perms = allPerms();
-    else if (r === 'Auditor') perms = viewPerms();
+    perms = ROLE_PRESETS[r] ? { ...ROLE_PRESETS[r] } : emptyPerms();
   }
 
   function togglePerm(modId: string, perm: string) {

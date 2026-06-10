@@ -152,26 +152,9 @@ video {
   letter-spacing: -0.02em;
   color: var(--text);
   text-decoration: none;
-  padding: 4px 6px 12px;
-  margin-bottom: 6px;
-  border-bottom: 1px solid var(--line);
-}
-
-.admin-sidebar .brand-mark {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, var(--purple), var(--pink));
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.admin-sidebar .brand-mark span {
-  color: white;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
+  padding: 4px 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .admin-sidebar .nav-item {
@@ -272,6 +255,37 @@ video {
 }
 .admin-sidebar::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Sidebar collapsed (desktop) ─────────────────────────────────────────── */
+.admin-shell.sidebar-collapsed .admin-sidebar {
+  width: 56px;
+  padding: 18px 10px;
+  align-items: center;
+}
+
+.admin-shell.sidebar-collapsed .admin-sidebar .brand {
+  padding: 4px 0 12px;
+  justify-content: center;
+}
+
+.admin-shell.sidebar-collapsed .admin-sidebar .nav-item {
+  padding: 8px;
+  justify-content: center;
+  width: 36px;
+  border-radius: 8px;
+}
+
+.admin-shell.sidebar-collapsed .admin-sidebar .nav-item .ico {
+  width: 16px;
+  height: 16px;
+}
+
+.admin-shell.sidebar-collapsed .admin-sidebar .footer {
+  padding: 6px;
+  justify-content: center;
+  width: 36px;
+  background: transparent;
 }
 
 /* ── Sidebar toggle (hamburger) ───────────────────────────────────────────── */

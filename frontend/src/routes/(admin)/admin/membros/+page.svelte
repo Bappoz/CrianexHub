@@ -4,17 +4,32 @@
   import MemberModal from '$lib/components/admin/MemberModal.svelte';
   import { apiFetch } from '$lib/api/backend';
   import { topbarActions } from '$lib/stores/topbar';
+  import { page } from '$app/stores';
+  import { get } from 'svelte/store';
 
-  let { data } = $props<{ data: { members: Member[]; error?: string; forbidden?: boolean } }>();
+  let { data } = $props<{
+    data: { members: Member[]; currentUserId: string | null; error?: string; forbidden?: boolean };
+  }>();
 
   let members = $state<Member[]>([]);
+  let currentUserId = $state<string | null>(null);
   let loadError = $state<string | undefined>(undefined);
   let forbidden = $state(false);
   $effect(() => {
     members = data.members;
+    currentUserId = data.currentUserId;
     loadError = data.error;
     forbidden = data.forbidden ?? false;
   });
+
+  // ── Permissions ──────────────────────────────────────────
+  const _membersUser = $derived($page.data?.adminUser);
+  const canEditMembers = $derived(
+    _membersUser?.role === 'owner' || (_membersUser?.permissions?.members ?? []).includes('e')
+  );
+  const canAdminMembers = $derived(
+    _membersUser?.role === 'owner' || (_membersUser?.permissions?.members ?? []).includes('a')
+  );
 
   let searchQuery = $state('');
 
@@ -41,7 +56,11 @@
     }, 3000);
   }
 
-  let filteredMembers = $derived(filterMembers(members, 'Todos', 'Todos', searchQuery));
+  // tabela exclui o próprio usuário; stats usam a lista completa
+  let tableMembers = $derived(
+    currentUserId ? members.filter((m) => m.id !== currentUserId) : members
+  );
+  let filteredMembers = $derived(filterMembers(tableMembers, 'Todos', 'Todos', searchQuery));
 
   let totalActive = $derived(members.filter((m) => m.status === 'active').length);
   let totalInactive = $derived(members.filter((m) => m.status === 'inactive').length);
@@ -69,9 +88,8 @@
   );
 
   let activeThisWeek = $derived(
-    members.filter(
-      (m) => m.last_sign_in_at && now - new Date(m.last_sign_in_at).getTime() < MS_7D
-    ).length
+    members.filter((m) => m.last_sign_in_at && now - new Date(m.last_sign_in_at).getTime() < MS_7D)
+      .length
   );
 
   let roleBreakdown = $derived(
@@ -83,7 +101,9 @@
   );
 
   let roleEntries = $derived(
-    Object.entries(roleBreakdown).sort((a, b) => b[1] - a[1]).slice(0, 6)
+    Object.entries(roleBreakdown)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
   );
 
   let activeRatio = $derived(members.length ? Math.round((totalActive / members.length) * 100) : 0);
@@ -201,7 +221,11 @@
   const COL = '44px 1.4fr 1.4fr 130px 100px 80px 40px';
 
   onMount(() => {
-    topbarActions.set([{ label: '+ Cadastrar membro', onClick: openAddModal }]);
+    const u = get(page).data?.adminUser;
+    const isAdmin = u?.role === 'owner' || (u?.permissions?.members ?? []).includes('a');
+    if (isAdmin) {
+      topbarActions.set([{ label: '+ Cadastrar membro', onClick: openAddModal }]);
+    }
   });
   onDestroy(() => {
     topbarActions.set([]);
@@ -217,7 +241,21 @@
     <div class="kpi-grid">
       <div class="kpi">
         <div class="kpi-icon active-icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"
+            ></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path
+              d="M16 3.13a4 4 0 0 1 0 7.75"
+            ></path></svg
+          >
         </div>
         <div class="kpi-body">
           <div class="label">Total de membros</div>
@@ -227,7 +265,19 @@
 
       <div class="kpi">
         <div class="kpi-icon active-icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"
+            ></polyline></svg
+          >
         </div>
         <div class="kpi-body">
           <div class="label">Ativos</div>
@@ -240,7 +290,19 @@
 
       <div class="kpi">
         <div class="kpi-icon inactive-icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"
+            ></line></svg
+          >
         </div>
         <div class="kpi-body">
           <div class="label">Inativos</div>
@@ -250,7 +312,20 @@
 
       <div class="kpi">
         <div class="kpi-icon owner-icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+            ></polygon></svg
+          >
         </div>
         <div class="kpi-body">
           <div class="label">Owners</div>
@@ -353,7 +428,7 @@
   <!-- Content Panel -->
   <main class="panel">
     <div class="panel-head">
-      <h3>{members.length} membros</h3>
+      <h3>{tableMembers.length} membros</h3>
       <span class="grow"></span>
       <div class="admin-search" style="width: 240px;">
         <svg
@@ -397,7 +472,7 @@
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
         <p>Nenhum membro encontrado</p>
-        {#if !searchQuery}
+        {#if !searchQuery && canAdminMembers}
           <div class="empty-actions">
             <button class="btn-add" onclick={openAddModal}>Adicionar membro</button>
           </div>
@@ -457,106 +532,120 @@
 
             <!-- Menu -->
             <span class="actions-cell">
-              <div class="action-wrapper">
-                <button
-                  class="menu-btn"
-                  aria-label="Ações para {member.name}"
-                  onclick={() => (activeMenuId = activeMenuId === member.id ? null : member.id)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
+              {#if canEditMembers || canAdminMembers}
+                <div class="action-wrapper">
+                  <button
+                    class="menu-btn"
+                    aria-label="Ações para {member.name}"
+                    onclick={() => (activeMenuId = activeMenuId === member.id ? null : member.id)}
                   >
-                    <circle cx="12" cy="5" r="1.5"></circle>
-                    <circle cx="12" cy="12" r="1.5"></circle>
-                    <circle cx="12" cy="19" r="1.5"></circle>
-                  </svg>
-                </button>
-
-                {#if activeMenuId === member.id}
-                  <div class="menu-container" role="menu">
-                    <button class="menu-item" role="menuitem" onclick={() => openEditModal(member)}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="menu-ico"
-                      >
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path
-                          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-                        ></path>
-                      </svg>
-                      Editar perfil & permissões
-                    </button>
-
-                    <button class="menu-item" role="menuitem" onclick={() => toggleStatus(member)}>
-                      {#if member.status === 'active'}
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="menu-ico"
-                        >
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                          <line x1="9" y1="9" x2="15" y2="15"></line>
-                          <line x1="15" y1="9" x2="9" y2="15"></line>
-                        </svg>
-                        Inativar membro
-                      {:else}
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="menu-ico"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Reativar
-                      {/if}
-                    </button>
-
-                    <button
-                      class="menu-item danger"
-                      role="menuitem"
-                      onclick={() => startRemoveMember(member)}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="menu-ico"
-                      >
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path
-                          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                        ></path>
-                      </svg>
-                      Remover do painel
-                    </button>
-                  </div>
-                {/if}
-              </div>
+                      <circle cx="12" cy="5" r="1.5"></circle>
+                      <circle cx="12" cy="12" r="1.5"></circle>
+                      <circle cx="12" cy="19" r="1.5"></circle>
+                    </svg>
+                  </button>
+
+                  {#if activeMenuId === member.id}
+                    <div class="menu-container" role="menu">
+                      {#if canEditMembers}
+                        <button
+                          class="menu-item"
+                          role="menuitem"
+                          onclick={() => openEditModal(member)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="menu-ico"
+                          >
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                            ></path>
+                          </svg>
+                          Editar perfil & permissões
+                        </button>
+
+                        <button
+                          class="menu-item"
+                          role="menuitem"
+                          onclick={() => toggleStatus(member)}
+                        >
+                          {#if member.status === 'active'}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="menu-ico"
+                            >
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="9" y1="9" x2="15" y2="15"></line>
+                              <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                            Inativar membro
+                          {:else}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="menu-ico"
+                            >
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Reativar
+                          {/if}
+                        </button>
+                      {/if}
+
+                      {#if canAdminMembers}
+                        <button
+                          class="menu-item danger"
+                          role="menuitem"
+                          onclick={() => startRemoveMember(member)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="menu-ico"
+                          >
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path
+                              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                            ></path>
+                          </svg>
+                          Remover do painel
+                        </button>
+                      {/if}
+                    </div>
+                  {/if}
+                </div>
+              {/if}
             </span>
           </div>
         {/each}
@@ -712,9 +801,18 @@
     flex-shrink: 0;
   }
 
-  .active-icon { background: rgba(16, 185, 129, 0.1); color: var(--green); }
-  .inactive-icon { background: var(--bg-soft); color: var(--text-muted); }
-  .owner-icon { background: rgba(231, 31, 132, 0.1); color: var(--pink); }
+  .active-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+  }
+  .inactive-icon {
+    background: var(--bg-soft);
+    color: var(--text-muted);
+  }
+  .owner-icon {
+    background: rgba(231, 31, 132, 0.1);
+    color: var(--pink);
+  }
 
   .kpi-body {
     flex: 1;
@@ -736,9 +834,15 @@
     line-height: 1;
   }
 
-  .kpi .value.green { color: var(--green); }
-  .kpi .value.pink { color: var(--pink); }
-  .kpi .value.muted { color: var(--text-faint); }
+  .kpi .value.green {
+    color: var(--green);
+  }
+  .kpi .value.pink {
+    color: var(--pink);
+  }
+  .kpi .value.muted {
+    color: var(--text-faint);
+  }
 
   .kpi-bar-wrap {
     height: 3px;
@@ -762,7 +866,9 @@
   }
 
   @media (max-width: 680px) {
-    .insight-grid { grid-template-columns: 1fr; }
+    .insight-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .insight-card {
@@ -807,10 +913,18 @@
     flex-shrink: 0;
   }
 
-  .ir-val.green { color: var(--green); }
-  .ir-val.purple { color: var(--purple); }
-  .ir-val.warn { color: #f59e0b; }
-  .ir-val.muted { color: var(--text-faint); }
+  .ir-val.green {
+    color: var(--green);
+  }
+  .ir-val.purple {
+    color: var(--purple);
+  }
+  .ir-val.warn {
+    color: #f59e0b;
+  }
+  .ir-val.muted {
+    color: var(--text-faint);
+  }
 
   .role-bars {
     display: flex;

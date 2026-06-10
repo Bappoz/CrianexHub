@@ -15,12 +15,8 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
   }
 
   try {
-    const allMembers = await apiFetch<Member[]>('/admin/members', { token });
-    const currentUserId = locals.adminUser?.id;
-    const members = currentUserId
-      ? allMembers.filter((m) => m.id !== currentUserId)
-      : allMembers;
-    return { members };
+    const members = await apiFetch<Member[]>('/admin/members', { token });
+    return { members, currentUserId: locals.adminUser?.id ?? null };
   } catch (err) {
     console.error('[membros load] Failed to fetch members:', err);
     const apiError = err as { status?: number; message?: string };
