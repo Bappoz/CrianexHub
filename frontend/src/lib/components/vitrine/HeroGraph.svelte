@@ -1,45 +1,59 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import {
-    PATH_D, P, LINKS, NODES,
-    tween, easeOutCubic, easeInOutSine,
-  } from './hero-graph-data';
+  import { PATH_D, P, LINKS, NODES, tween, easeOutCubic, easeInOutSine } from './hero-graph-data';
 
   let svgRoot: SVGSVGElement;
 
   onMount(() => {
-    const path   = svgRoot.querySelector<SVGPathElement>('.g-path');
-    const dots   = svgRoot.querySelectorAll<SVGCircleElement>('.g-dot');
-    const focal  = svgRoot.querySelector<SVGCircleElement>('.g-focal');
-    const glow   = svgRoot.querySelector<SVGCircleElement>('.g-glow');
+    const path = svgRoot.querySelector<SVGPathElement>('.g-path');
+    const dots = svgRoot.querySelectorAll<SVGCircleElement>('.g-dot');
+    const focal = svgRoot.querySelector<SVGCircleElement>('.g-focal');
+    const glow = svgRoot.querySelector<SVGCircleElement>('.g-glow');
     if (!path || !focal || !glow) return;
 
     const cancels: (() => void)[] = [];
     const len = path.getTotalLength();
-    path.style.strokeDasharray  = String(len);
+    path.style.strokeDasharray = String(len);
     path.style.strokeDashoffset = String(len);
 
     // Draw path
-    cancels.push(tween({
-      from: len, to: 0, dur: 1200, delay: 250, ease: easeOutCubic,
-      onUpdate: v => { path.style.strokeDashoffset = String(v); },
-    }));
+    cancels.push(
+      tween({
+        from: len,
+        to: 0,
+        dur: 1200,
+        delay: 250,
+        ease: easeOutCubic,
+        onUpdate: (v) => {
+          path.style.strokeDashoffset = String(v);
+        },
+      })
+    );
 
     // Pop dots with stagger
     dots.forEach((d, i) => {
       const targetR = d.getAttribute('stroke') !== 'none' ? 2.4 : 1.5;
-      cancels.push(tween({
-        from: 0, to: targetR, dur: 320, delay: 370 + i * 45, ease: easeOutCubic,
-        onUpdate: v => d.setAttribute('r', String(v)),
-      }));
+      cancels.push(
+        tween({
+          from: 0,
+          to: targetR,
+          dur: 320,
+          delay: 370 + i * 45,
+          ease: easeOutCubic,
+          onUpdate: (v) => d.setAttribute('r', String(v)),
+        })
+      );
     });
 
     // Focal travels back and forth in loop
     const travel = (dir: boolean) => {
       const c = tween({
-        from: dir ? 0 : len, to: dir ? len : 0,
-        dur: 5400, delay: 300, ease: easeInOutSine,
-        onUpdate: v => {
+        from: dir ? 0 : len,
+        to: dir ? len : 0,
+        dur: 5400,
+        delay: 300,
+        ease: easeInOutSine,
+        onUpdate: (v) => {
           const pt = path.getPointAtLength(v);
           focal.setAttribute('cx', String(pt.x));
           focal.setAttribute('cy', String(pt.y));
@@ -52,7 +66,7 @@
     };
     travel(true);
 
-    return () => cancels.forEach(c => c());
+    return () => cancels.forEach((c) => c());
   });
 </script>
 
@@ -98,8 +112,16 @@
       </g>
 
       <!-- Glow + focal dot (travelling) -->
-      <circle class="g-glow"  r="5.0" cx={P[0]![0]} cy={P[0]![1]} fill="#e71f84" opacity="0.18" />
-      <circle class="g-focal" r="2.5" cx={P[0]![0]} cy={P[0]![1]} fill="#e71f84" stroke="#fcfcfc" stroke-width="0.7" />
+      <circle class="g-glow" r="5.0" cx={P[0]![0]} cy={P[0]![1]} fill="#e71f84" opacity="0.18" />
+      <circle
+        class="g-focal"
+        r="2.5"
+        cx={P[0]![0]}
+        cy={P[0]![1]}
+        fill="#e71f84"
+        stroke="#fcfcfc"
+        stroke-width="0.7"
+      />
     </g>
   </svg>
 </div>
@@ -120,9 +142,17 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(.g-path)  { stroke-dashoffset: 0 !important; }
-    :global(.g-dot)   { r: 1.6 !important; }
-    :global(.g-glow)  { opacity: 0 !important; }
-    :global(.g-focal) { r: 1.7 !important; }
+    :global(.g-path) {
+      stroke-dashoffset: 0 !important;
+    }
+    :global(.g-dot) {
+      r: 1.6 !important;
+    }
+    :global(.g-glow) {
+      opacity: 0 !important;
+    }
+    :global(.g-focal) {
+      r: 1.7 !important;
+    }
   }
 </style>

@@ -1,8 +1,16 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
   import {
-    PATH_D, P, LINKS, NODES, CX, CY,
-    tween, easeOutCubic, easeInOutExpo, lerp,
+    PATH_D,
+    P,
+    LINKS,
+    NODES,
+    CX,
+    CY,
+    tween,
+    easeOutCubic,
+    easeInOutExpo,
+    lerp,
   } from './hero-graph-data';
 
   // `reveal` → remove data-intro e mostra conteúdo enquanto overlay ainda visível
@@ -19,34 +27,54 @@
   let logoVisible = false;
 
   onMount(() => {
-    const path  = svgRoot.querySelector<SVGPathElement>('.g-path');
-    const dots  = svgRoot.querySelectorAll<SVGCircleElement>('.g-dot');
+    const path = svgRoot.querySelector<SVGPathElement>('.g-path');
+    const dots = svgRoot.querySelectorAll<SVGCircleElement>('.g-dot');
     const focal = svgRoot.querySelector<SVGCircleElement>('.g-focal');
-    const glow  = svgRoot.querySelector<SVGCircleElement>('.g-glow');
-    const pov   = svgRoot.querySelector<SVGGElement>('.g-pov');
-    if (!path || !focal || !glow || !pov) { dispatch('reveal'); dispatch('done'); return; }
+    const glow = svgRoot.querySelector<SVGCircleElement>('.g-glow');
+    const pov = svgRoot.querySelector<SVGGElement>('.g-pov');
+    if (!path || !focal || !glow || !pov) {
+      dispatch('reveal');
+      dispatch('done');
+      return;
+    }
 
     const cancels: (() => void)[] = [];
     const len = path.getTotalLength();
-    path.style.strokeDasharray  = String(len);
+    path.style.strokeDasharray = String(len);
     path.style.strokeDashoffset = String(len);
-    dots.forEach(d => d.setAttribute('r', '0'));
+    dots.forEach((d) => d.setAttribute('r', '0'));
 
     const cam = (s: number, fx: number, fy: number) => {
       pov.setAttribute('transform', `translate(${CX - s * fx} ${CY - s * fy}) scale(${s})`);
     };
 
     // 1. Path se desenha
-    cancels.push(tween({ from: len, to: 0, dur: 1250, delay: 250, ease: easeOutCubic,
-      onUpdate: v => { path.style.strokeDashoffset = String(v); },
-    }));
+    cancels.push(
+      tween({
+        from: len,
+        to: 0,
+        dur: 1250,
+        delay: 250,
+        ease: easeOutCubic,
+        onUpdate: (v) => {
+          path.style.strokeDashoffset = String(v);
+        },
+      })
+    );
 
     // 2. Dots pipocam
     dots.forEach((d, i) => {
       const targetR = d.getAttribute('stroke') !== 'none' ? 2.4 : 1.5;
-      cancels.push(tween({ from: 0, to: targetR, dur: 340, delay: 380 + i * 42, ease: easeOutCubic,
-        onUpdate: v => d.setAttribute('r', String(v)),
-      }));
+      cancels.push(
+        tween({
+          from: 0,
+          to: targetR,
+          dur: 340,
+          delay: 380 + i * 42,
+          ease: easeOutCubic,
+          onUpdate: (v) => d.setAttribute('r', String(v)),
+        })
+      );
     });
 
     const setFocal = (x: number, y: number) => {
@@ -59,14 +87,21 @@
     const endFocus = path.getPointAtLength(len);
 
     // 3. Focal percorre o path e a camera acompanha o mesmo ponto
-    cancels.push(tween({ from: 0, to: len, dur: 2050, delay: 200, ease: easeInOutExpo,
-      onUpdate: (v, t) => {
-        const pt = path.getPointAtLength(v);
-        const s = lerp(SCALE0, 1.0, t);
-        setFocal(pt.x, pt.y);
-        cam(s, pt.x, pt.y);
-      },
-    }));
+    cancels.push(
+      tween({
+        from: 0,
+        to: len,
+        dur: 2050,
+        delay: 200,
+        ease: easeInOutExpo,
+        onUpdate: (v, t) => {
+          const pt = path.getPointAtLength(v);
+          const s = lerp(SCALE0, 1.0, t);
+          setFocal(pt.x, pt.y);
+          cam(s, pt.x, pt.y);
+        },
+      })
+    );
 
     const logoTimer = setTimeout(() => {
       logoVisible = true;
@@ -76,19 +111,26 @@
     const revealTimer = setTimeout(() => dispatch('reveal'), 3450);
 
     // 5b. Recuo 1.0→0.82 + fade overlay → done
-    cancels.push(tween({ from: 0, to: 1, dur: 780, delay: 3550, ease: easeOutCubic,
-      onUpdate: t => {
-        const s = lerp(1.0, 0.82, t);
-        const fx = lerp(endFocus.x, CX, t);
-        const fy = lerp(endFocus.y, CY, t);
-        cam(s, fx, fy);
-        if (overlayEl) overlayEl.style.opacity = String(1 - t);
-      },
-      onComplete: () => dispatch('done'),
-    }));
+    cancels.push(
+      tween({
+        from: 0,
+        to: 1,
+        dur: 780,
+        delay: 3550,
+        ease: easeOutCubic,
+        onUpdate: (t) => {
+          const s = lerp(1.0, 0.82, t);
+          const fx = lerp(endFocus.x, CX, t);
+          const fy = lerp(endFocus.y, CY, t);
+          cam(s, fx, fy);
+          if (overlayEl) overlayEl.style.opacity = String(1 - t);
+        },
+        onComplete: () => dispatch('done'),
+      })
+    );
 
     return () => {
-      cancels.forEach(c => c());
+      cancels.forEach((c) => c());
       clearTimeout(logoTimer);
       clearTimeout(revealTimer);
     };
@@ -136,8 +178,16 @@
         {/each}
       </g>
 
-      <circle class="g-glow"  r="5.0" cx={P[0]![0]} cy={P[0]![1]} fill="#e71f84" opacity="0.18" />
-      <circle class="g-focal" r="2.5" cx={P[0]![0]} cy={P[0]![1]} fill="#e71f84" stroke="#fcfcfc" stroke-width="0.7" />
+      <circle class="g-glow" r="5.0" cx={P[0]![0]} cy={P[0]![1]} fill="#e71f84" opacity="0.18" />
+      <circle
+        class="g-focal"
+        r="2.5"
+        cx={P[0]![0]}
+        cy={P[0]![1]}
+        fill="#e71f84"
+        stroke="#fcfcfc"
+        stroke-width="0.7"
+      />
 
       <g transform={`translate(${LOGO_POINT[0]} ${LOGO_POINT[1]})`}>
         <g class="g-logo" class:g-logo--show={logoVisible}>
@@ -156,7 +206,13 @@
     </g>
   </svg>
 
-  <button class="intro-skip" onclick={() => { dispatch('reveal'); dispatch('done'); }}>
+  <button
+    class="intro-skip"
+    onclick={() => {
+      dispatch('reveal');
+      dispatch('done');
+    }}
+  >
     pular intro
   </button>
 </div>
@@ -210,7 +266,9 @@
     padding: 8px 18px;
     cursor: pointer;
     z-index: 1;
-    transition: border-color 0.2s, color 0.2s;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
   }
   .intro-skip:hover {
     border-color: #7f3fe5;
@@ -237,7 +295,11 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .intro-overlay { display: none !important; }
-    .g-logo--show { animation: none; }
+    .intro-overlay {
+      display: none !important;
+    }
+    .g-logo--show {
+      animation: none;
+    }
   }
 </style>

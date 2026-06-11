@@ -1206,7 +1206,7 @@ video {
    no evento "reveal" da IntroOverlay (~2050ms, antes do fade).
 */
 html[data-intro]::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   background: #fcfcfc;

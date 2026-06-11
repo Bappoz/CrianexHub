@@ -15,8 +15,7 @@
   // ── Intro overlay ──────────────────────────────
   // Inicializa ANTES do primeiro render no cliente para não haver flash.
   // No servidor (SSR) fica false (sessionStorage não existe).
-  const forceIntro =
-    browser && new URLSearchParams(window.location.search).get('intro') === '1';
+  const forceIntro = browser && new URLSearchParams(window.location.search).get('intro') === '1';
   let showIntro = browser && (forceIntro || !sessionStorage.getItem('crianex-intro-seen'));
 
   // ── Hero accent cycling ──────────────────────
@@ -50,7 +49,9 @@
 
     // Se não tem intro, dispara o reveal do headline imediatamente
     if (!showIntro) {
-      setTimeout(() => { headlineVisible = true; }, 120);
+      setTimeout(() => {
+        headlineVisible = true;
+      }, 120);
     } else {
       sessionStorage.setItem('crianex-intro-seen', '1');
     }
@@ -81,7 +82,9 @@
     document.documentElement.removeAttribute('data-intro');
     // Mostra o conteúdo enquanto a overlay ainda está visível por cima
     showIntro = false; // remove hidden do page-fade
-    setTimeout(() => { headlineVisible = true; }, 80);
+    setTimeout(() => {
+      headlineVisible = true;
+    }, 80);
   }
 
   function onIntroDone() {
@@ -92,9 +95,7 @@
   // Divide uma frase em palavras com índice global para stagger
   function splitWords(parts: string[]): { word: string; idx: number }[][] {
     let globalIdx = 0;
-    return parts.map(part =>
-      part.split(' ').map(word => ({ word, idx: globalIdx++ }))
-    );
+    return parts.map((part) => part.split(' ').map((word) => ({ word, idx: globalIdx++ })));
   }
 
   $: wordParts = splitWords(t.h1Parts[$lang]);
@@ -208,31 +209,27 @@
             {t.eyebrow[$lang]}
           </div>
 
-          <h1 class="display" aria-label="{t.h1Parts[$lang].join(' ')}">
+          <h1 class="display" aria-label={t.h1Parts[$lang].join(' ')}>
             <!-- Linha 0: palavras normais -->
-            {#each (wordParts[0] ?? []) as { word, idx }}
-              <span
-                class="word"
-                class:visible={headlineVisible}
-                style="--d: {idx * 55}ms;"
-              >{word}</span>{' '}
+            {#each wordParts[0] ?? [] as { word, idx }}
+              <span class="word" class:visible={headlineVisible} style="--d: {idx * 55}ms;"
+                >{word}</span
+              >{' '}
             {/each}
             <!-- Linha 1: acento roxo -->
             <span class="underline">
-              <span class="swatch" style="background: {ACCENT_COLORS[accentIdx]};"></span
-              >{#each (wordParts[1] ?? []) as { word, idx }}<span
+              <span class="swatch" style="background: {ACCENT_COLORS[accentIdx]};"
+              ></span>{#each wordParts[1] ?? [] as { word, idx }}<span
                   class="word"
                   class:visible={headlineVisible}
-                  style="--d: {idx * 55}ms;"
-                >{word}</span>{' '}{/each}
+                  style="--d: {idx * 55}ms;">{word}</span
+                >{' '}{/each}
             </span>
             <!-- Linha 2: palavras finais -->
-            {#each (wordParts[2] ?? []) as { word, idx }, wi}
-              <span
-                class="word"
-                class:visible={headlineVisible}
-                style="--d: {idx * 55}ms;"
-              >{word}</span>{#if wi < (wordParts[2]?.length ?? 1) - 1}{' '}{/if}
+            {#each wordParts[2] ?? [] as { word, idx }, wi}
+              <span class="word" class:visible={headlineVisible} style="--d: {idx * 55}ms;"
+                >{word}</span
+              >{#if wi < (wordParts[2]?.length ?? 1) - 1}{' '}{/if}
             {/each}
           </h1>
 

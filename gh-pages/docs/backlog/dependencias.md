@@ -70,8 +70,8 @@ graph LR
 
 ## Legenda
 
-| Elemento        | Significado                                                 |
-| --------------- | ----------------------------------------------------------- |
-| Bloco roxo      | Feature pai — issue de especificação da CP                  |
-| Bloco rosa      | Dependência externa ao backlog de issues                    |
+| Elemento        | Significado                                                                                                      |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Bloco roxo      | Feature pai — issue de especificação da CP                                                                       |
+| Bloco rosa      | Dependência externa ao backlog de issues                                                                         |
 | `→` seta sólida | Bloqueio parcial ou total — destino não inicia antes que uma implementação específica da issue seja implementada |

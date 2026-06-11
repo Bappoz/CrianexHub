@@ -168,7 +168,6 @@ _Evidências a serem adicionadas._
 | Partial Validation | —    | ⬜        | —          |
 | Formal Validation  | —    | ⬜        | —          |
 
-
 #### Observações
 
 - RLS do Supabase opera como segunda camada de autorização; validação de `role = owner` no Express é a primeira — defesa em profundidade intencional.
@@ -489,7 +488,6 @@ _Evidências a serem adicionadas._
 | Partial Validation | —    | ⬜        | —          |
 | Formal Validation  | —    | ⬜        | —          |
 
-
 #### Observações
 
 - Rate limit de 5 req/IP/10min implementado via `express-rate-limit` como middleware, antes de qualquer validação de payload — bloqueia bots antes de tocar no banco.
@@ -634,8 +632,6 @@ _Evidências a serem adicionadas._
 | ------------------ | ---- | --------- | ---------- |
 | Partial Validation | —    | ⬜        | —          |
 | Formal Validation  | —    | ⬜        | —          |
-
-
 
 #### Observações
 
@@ -782,7 +778,6 @@ _Evidências a serem adicionadas._
 | ------------------ | ---- | --------- | ---------- |
 | Partial Validation | —    | ⬜        | —          |
 | Formal Validation  | —    | ⬜        | —          |
-
 
 #### Observações
 

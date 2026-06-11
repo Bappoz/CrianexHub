@@ -187,7 +187,7 @@ Todas as features abaixo atingiram o _Definition of Ready (DoR)_. Os critérios 
 | 2   | **Dado** que o JWT expirou, **Quando** o owner acessa o painel, **Então** o sistema tenta `refreshSession()`; se bem-sucedido continua; se falhar, redireciona para `/admin/login` sem renderizar dados          | RF10         |
 | 3   | **Dado** que a requisição chega sem token válido ou sem `role = owner`, **Quando** o middleware intercepta, **Então** bloqueia com 401/403 e redireciona para `/admin/login`                                     | RF10 · RNF01 |
 | 4   | **Dado** que o painel carregou e o owner opera qualquer seção, **Quando** a requisição chega ao backend, **Então** a resposta é entregue em ≤ 2 segundos                                                         | RNF03        |
-| 5   | **Dado** que um usuário autenticado abre o modal de perfil, **Quando** altera seus dados pessoais ou senha, **Então** o sistema persiste as alterações do próprio perfil e exibe confirmação sem sair do painel   | RF48         |
+| 5   | **Dado** que um usuário autenticado abre o modal de perfil, **Quando** altera seus dados pessoais ou senha, **Então** o sistema persiste as alterações do próprio perfil e exibe confirmação sem sair do painel  | RF48         |
 
 #### F11 — Gerenciar membros da Crianex
 
@@ -228,14 +228,14 @@ Todas as features abaixo atingiram o _Definition of Ready (DoR)_. Os critérios 
 
 #### F14 — Formulário de contato
 
-| #   | Critério de Aceite (BDD)                                                                                                                                                        | RF / RNF             |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| 1   | **Dado** que o visitante preenche o formulário corretamente e clica "Enviar", **Quando** a API processa, **Então** persiste em transação ACID e exibe alerta de sucesso em ≤ 2s | RF27 · RNF02 · RNF06 |
-| 2   | **Dado** que o formulário excede o rate limit (5 req/IP/10min), **Quando** a API intercepta, **Então** retorna 429 e a interface exibe "Tente novamente mais tarde"             | RNF10                |
-| 3   | **Dado** que ocorre falha inesperada no banco durante inserção, **Quando** o backend detecta, **Então** executa ROLLBACK completo sem registro parcial                          | RNF06                |
+| #   | Critério de Aceite (BDD)                                                                                                                                                             | RF / RNF             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| 1   | **Dado** que o visitante preenche o formulário corretamente e clica "Enviar", **Quando** a API processa, **Então** persiste em transação ACID e exibe alerta de sucesso em ≤ 2s      | RF27 · RNF02 · RNF06 |
+| 2   | **Dado** que o formulário excede o rate limit (5 req/IP/10min), **Quando** a API intercepta, **Então** retorna 429 e a interface exibe "Tente novamente mais tarde"                  | RNF10                |
+| 3   | **Dado** que ocorre falha inesperada no banco durante inserção, **Quando** o backend detecta, **Então** executa ROLLBACK completo sem registro parcial                               | RNF06                |
 | 4   | **Dado** que o visitante precisa consentir com o tratamento de dados, **Quando** marca o aceite LGPD no formulário, **Então** o envio fica habilitado e o consentimento é registrado | RF49 · RNF11         |
-| 5   | **Dado** que o visitante acessa o rodapé da vitrine, **Quando** clica nas políticas de privacidade ou cookies, **Então** as páginas de conformidade são exibidas sem autenticação | RF51 · RNF11         |
-| 6   | **Dado** que o visitante acessa a vitrine pela primeira vez, **Quando** escolhe aceitar ou recusar cookies, **Então** a preferência é persistida e respeitada nos acessos seguintes | RF55 · RNF11         |
+| 5   | **Dado** que o visitante acessa o rodapé da vitrine, **Quando** clica nas políticas de privacidade ou cookies, **Então** as páginas de conformidade são exibidas sem autenticação    | RF51 · RNF11         |
+| 6   | **Dado** que o visitante acessa a vitrine pela primeira vez, **Quando** escolhe aceitar ou recusar cookies, **Então** a preferência é persistida e respeitada nos acessos seguintes  | RF55 · RNF11         |
 
 #### F15 — Página institucional
 
@@ -246,7 +246,7 @@ Todas as features abaixo atingiram o _Definition of Ready (DoR)_. Os critérios 
 | 3   | **Dado** que a página é acessada por bot de indexação, **Quando** renderiza via SSR, **Então** o HTML inicial contém h1, textos e metadados Open Graph sem depender de JS      | RNF04 · RNF21        |
 | 4   | **Dado** que visitante sem autenticação acessa `/sobre`, **Quando** o servidor processa, **Então** nenhum guard intercepta — conteúdo exibido normalmente                      | RNF20                |
 | 5   | **Dado** que o visitante abre um produto publicado, **Quando** acessa `/produtos/[slug]`, **Então** visualiza os detalhes completos do produto SaaS sem autenticação           | RF50 · RNF04         |
-| 6   | **Dado** que o visitante já definiu preferência de cookies, **Quando** retorna à vitrine, **Então** o sistema mantém a escolha sem solicitar novo consentimento                | RF52                |
+| 6   | **Dado** que o visitante já definiu preferência de cookies, **Quando** retorna à vitrine, **Então** o sistema mantém a escolha sem solicitar novo consentimento                | RF52                 |
 
 ---
 
