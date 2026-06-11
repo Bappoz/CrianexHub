@@ -1,4 +1,5 @@
 import type { PageServerLoad } from './$types';
+import { env } from '$env/dynamic/public';
 
 export type FaqCategory = {
   id: string;
@@ -25,6 +26,7 @@ export const load: PageServerLoad = async ({ url, locals, fetch }) => {
   const backendUrl = process.env['BACKEND_URL'] ?? 'http://localhost:3000';
   const categorySlug = url.searchParams.get('categoria') ?? undefined;
   const origin = url.origin;
+  const apiBaseUrl = env.PUBLIC_API_BASE_URL ?? '';
   const selectedLang = locals.lang ?? 'pt';
 
   let articles: FaqPublicArticle[] = [];
@@ -63,5 +65,6 @@ export const load: PageServerLoad = async ({ url, locals, fetch }) => {
     activeCategory: categorySlug ?? null,
     origin,
     selectedLang,
+    apiBaseUrl,
   };
 };
