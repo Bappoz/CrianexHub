@@ -888,7 +888,21 @@ video {
 }
 .admin-modal.wide {
   max-width: 960px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.admin-modal.wide form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.admin-modal.wide .admin-modal-body {
+  flex: 1;
+  overflow-y: auto;
+}
+.admin-modal.wide .admin-modal-foot {
+  flex-shrink: 0;
 }
 @keyframes crx-modalIn {
   from {
