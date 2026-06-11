@@ -17,9 +17,9 @@
 
   const t = {
     label: { pt: 'FOI ÚTIL?', en: 'WAS THIS HELPFUL?' },
+    rated: { pt: 'Avaliado', en: 'Rated' },
     yes: { pt: '✓ Sim', en: '✓ Yes' },
     no: { pt: '✗ Não', en: '✗ No' },
-    thanks: { pt: 'Obrigado pelo feedback!', en: 'Thanks for your feedback!' },
   };
 
   let rated = $state<'y' | 'n' | null>(null);
@@ -36,7 +36,7 @@
   });
 
   async function submitRating(rating: 'y' | 'n') {
-    if (rated || submitting) return;
+    if (submitting) return;
     submitting = true;
 
     try {
@@ -50,12 +50,15 @@
 
       const data = await res.json();
 
-      if (data.totals) {
-        apiTotals = data.totals;
-      }
+      if (data.totals) apiTotals = data.totals;
 
-      rated = rating;
-      sessionStorage.setItem(STORAGE_PREFIX + articleId, rating);
+      if (data.action === 'cancelled') {
+        rated = null;
+        sessionStorage.removeItem(STORAGE_PREFIX + articleId);
+      } else {
+        rated = rating;
+        sessionStorage.setItem(STORAGE_PREFIX + articleId, rating);
+      }
     } catch {
       // Falha silenciosa
     } finally {
@@ -65,17 +68,15 @@
 </script>
 
 <div class="faq-rate">
-  {#if rated}
-    <span class="rate-label thanks">{t.thanks[$lang]}</span>
-  {:else}
-    <span class="rate-label">{t.label[$lang]}</span>
-  {/if}
+  <span class="rate-label" class:has-rated={rated !== null}>
+    {rated !== null ? t.rated[$lang] : t.label[$lang]}
+  </span>
 
   <div class="rate-buttons">
     <button
       class="rate-btn good"
       class:on={rated === 'y'}
-      disabled={rated !== null && rated !== 'y'}
+      disabled={submitting}
       aria-pressed={rated === 'y'}
       onclick={() => submitRating('y')}
     >
@@ -84,7 +85,7 @@
     <button
       class="rate-btn bad"
       class:on={rated === 'n'}
-      disabled={rated !== null && rated !== 'n'}
+      disabled={submitting}
       aria-pressed={rated === 'n'}
       onclick={() => submitRating('n')}
     >
@@ -117,12 +118,8 @@
     color: var(--text-faint);
   }
 
-  .rate-label.thanks {
-    color: var(--green, #10b981);
-    text-transform: none;
-    letter-spacing: normal;
-    font-family: inherit;
-    font-size: 13px;
+  .rate-label.has-rated {
+    color: var(--text-muted);
   }
 
   .rate-buttons {

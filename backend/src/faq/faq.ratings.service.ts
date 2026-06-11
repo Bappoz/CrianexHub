@@ -13,9 +13,11 @@ export type RatingTotals = {
   not_helpful: number;
 };
 
+export type RatingAction = 'created' | 'changed' | 'cancelled';
+
 export type RatingResult =
-  | { success: true; totals: RatingTotals }
-  | { success: false; already_rated: true; totals: RatingTotals };
+  | { success: true; action: RatingAction; totals: RatingTotals }
+  | { success: false; error: string };
 
 function buildSessionHash(ip: string, userAgent: string): string {
   const dateString = new Date().toDateString();
@@ -54,42 +56,73 @@ export async function submitRating(input: RatingInput): Promise<RatingResult> {
   if (articleError) throw articleError;
   if (!article) throw Object.assign(new Error('Artigo não encontrado.'), { code: 'NOT_FOUND' });
 
-  // 2. Check for duplicate rating
+  const art = article as { helpful_count: number; not_helpful_count: number };
+
+  // 2. Check for existing rating
   const { data: existing, error: checkError } = await supabase
     .from('faq_ratings')
-    .select('id')
+    .select('id, rating')
     .eq('article_id', input.article_id)
     .eq('session_hash', session_hash)
     .maybeSingle();
 
   if (checkError) throw checkError;
 
-  if (existing) {
-    const totals = await getArticleTotals(input.article_id);
-    return { success: false, already_rated: true, totals };
+  if (!existing) {
+    // No prior rating — insert and increment
+    const { error: insertError } = await supabase
+      .from('faq_ratings')
+      .insert([{ article_id: input.article_id, session_hash, rating: input.rating }]);
+    if (insertError) throw insertError;
+
+    const field = input.rating === 'y' ? 'helpful_count' : 'not_helpful_count';
+    const { error: updateError } = await supabase
+      .from('faq_articles')
+      .update({ [field]: (input.rating === 'y' ? art.helpful_count : art.not_helpful_count) + 1 })
+      .eq('id', input.article_id);
+    if (updateError) throw updateError;
+
+    return { success: true, action: 'created', totals: await getArticleTotals(input.article_id) };
   }
 
-  // 3. Insert rating
-  const { error: insertError } = await supabase
+  const prev = existing as { id: string; rating: string };
+
+  if (prev.rating === input.rating) {
+    // Same button clicked — cancel (delete rating, decrement counter)
+    const { error: deleteError } = await supabase.from('faq_ratings').delete().eq('id', prev.id);
+    if (deleteError) throw deleteError;
+
+    const field = input.rating === 'y' ? 'helpful_count' : 'not_helpful_count';
+    const current = input.rating === 'y' ? art.helpful_count : art.not_helpful_count;
+    const { error: updateError } = await supabase
+      .from('faq_articles')
+      .update({ [field]: Math.max(0, current - 1) })
+      .eq('id', input.article_id);
+    if (updateError) throw updateError;
+
+    return { success: true, action: 'cancelled', totals: await getArticleTotals(input.article_id) };
+  }
+
+  // Different button — change rating, swap counters
+  const { error: updateRatingError } = await supabase
     .from('faq_ratings')
-    .insert([{ article_id: input.article_id, session_hash, rating: input.rating }]);
+    .update({ rating: input.rating })
+    .eq('id', prev.id);
+  if (updateRatingError) throw updateRatingError;
 
-  if (insertError) throw insertError;
-
-  // 4. Increment counter atomically
-  const counterField = input.rating === 'y' ? 'helpful_count' : 'not_helpful_count';
-  const currentValue =
-    input.rating === 'y'
-      ? (article as { helpful_count: number }).helpful_count
-      : (article as { not_helpful_count: number }).not_helpful_count;
-
+  const oldField = prev.rating === 'y' ? 'helpful_count' : 'not_helpful_count';
+  const newField = input.rating === 'y' ? 'helpful_count' : 'not_helpful_count';
   const { error: updateError } = await supabase
     .from('faq_articles')
-    .update({ [counterField]: currentValue + 1 })
+    .update({
+      [oldField]: Math.max(
+        0,
+        (prev.rating === 'y' ? art.helpful_count : art.not_helpful_count) - 1
+      ),
+      [newField]: (input.rating === 'y' ? art.helpful_count : art.not_helpful_count) + 1,
+    })
     .eq('id', input.article_id);
-
   if (updateError) throw updateError;
 
-  const totals = await getArticleTotals(input.article_id);
-  return { success: true, totals };
+  return { success: true, action: 'changed', totals: await getArticleTotals(input.article_id) };
 }

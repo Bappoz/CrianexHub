@@ -32,11 +32,7 @@ export const load: PageServerLoad = async ({ url, locals, fetch }) => {
   let articles: FaqPublicArticle[] = [];
 
   try {
-    const apiUrl = categorySlug
-      ? `${backendUrl}/api/public/faq/articles?categoria=${encodeURIComponent(categorySlug)}`
-      : `${backendUrl}/api/public/faq/articles`;
-
-    const res = await fetch(apiUrl);
+    const res = await fetch(`${backendUrl}/api/public/faq/articles`);
     if (res.ok) {
       articles = await res.json();
     }

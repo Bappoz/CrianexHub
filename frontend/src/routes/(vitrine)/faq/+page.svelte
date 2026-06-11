@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { lang } from '$lib/stores/lang';
   import type { PageData } from './$types';
@@ -34,7 +33,7 @@
   };
 
   // ── State ────────────────────────────────────────
-  let activeCategory = $derived($page.url.searchParams.get('categoria'));
+  let activeCategory = $state<string | null>(data.activeCategory);
   let expandedId = $state<string | null>(null);
 
   // ── Derived data ─────────────────────────────────
@@ -61,13 +60,15 @@
   }
 
   function selectCategory(slug: string | null) {
+    activeCategory = slug;
+    expandedId = null;
     const params = new URLSearchParams($page.url.searchParams);
     if (slug) {
       params.set('categoria', slug);
     } else {
       params.delete('categoria');
     }
-    goto(`?${params.toString()}`, { replaceState: true, noScroll: true });
+    history.replaceState(null, '', `?${params.toString()}`);
   }
 
   function toggleExpand(id: string) {
