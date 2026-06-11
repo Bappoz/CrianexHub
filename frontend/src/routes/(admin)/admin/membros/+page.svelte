@@ -56,11 +56,7 @@
     }, 3000);
   }
 
-  // tabela exclui o próprio usuário; stats usam a lista completa
-  let tableMembers = $derived(
-    currentUserId ? members.filter((m) => m.id !== currentUserId) : members
-  );
-  let filteredMembers = $derived(filterMembers(tableMembers, 'Todos', 'Todos', searchQuery));
+  let filteredMembers = $derived(filterMembers(members, 'Todos', 'Todos', searchQuery));
 
   let totalActive = $derived(members.filter((m) => m.status === 'active').length);
   let totalInactive = $derived(members.filter((m) => m.status === 'inactive').length);
@@ -110,6 +106,11 @@
 
   async function toggleStatus(member: Member) {
     const newStatus = member.status === 'active' ? 'inactive' : 'active';
+    if (newStatus === 'inactive' && member.id === currentUserId) {
+      showToast('Você não pode inativar a sua própria conta.', 'error');
+      activeMenuId = null;
+      return;
+    }
     try {
       await apiFetch(`/admin/members/${member.id}/status`, {
         method: 'PATCH',
@@ -428,7 +429,7 @@
   <!-- Content Panel -->
   <main class="panel">
     <div class="panel-head">
-      <h3>{tableMembers.length} membros</h3>
+      <h3>{members.length} membros</h3>
       <span class="grow"></span>
       <div class="admin-search" style="width: 240px;">
         <svg
