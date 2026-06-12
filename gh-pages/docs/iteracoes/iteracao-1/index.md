@@ -25,23 +25,23 @@ A entrega da unidade 2 ocorreu dia 19 de maio de 2026. Nossa iteração encerrou
 
 ## Cerimônias e Reuniões (FDD + Kanban)
 
-| Data       | Cerimônia                                                  | Participantes                                   | Ata                                                            |
-| ---------- | ---------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------- |
-| 10/05/2026 | **Domain Modeling & Iteration Replenishment & Commitment** | Lucas, Heitor, Hugo, Otávio (Cliente)           | [Ver ata](./atas/2026-05-10.md)                                |
-| 11/05/2026 | **Feature Discovery & Slicing**                            | Lucas, Heitor, Hugo, Philipe, Leonardo          | [Ver ata](./atas/2026-05-11.md)                                |
-| 17/05/2026 | **Technical Design Review**                                | Lucas, Heitor, Philipe, Hugo, Leonardo, Camille | [Ver ata](./atas/2026-05-17.md)                                |
+| Data       | Cerimônia                                                  | Participantes                                   | Ata                             |
+| ---------- | ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------- |
+| 10/05/2026 | **Domain Modeling & Iteration Replenishment & Commitment** | Lucas, Heitor, Hugo, Otávio (Cliente)           | [Ver ata](./atas/2026-05-10.md) |
+| 11/05/2026 | **Feature Discovery & Slicing**                            | Lucas, Heitor, Hugo, Philipe, Leonardo          | [Ver ata](./atas/2026-05-11.md) |
+| 17/05/2026 | **Technical Design Review**                                | Lucas, Heitor, Philipe, Hugo, Leonardo, Camille | [Ver ata](./atas/2026-05-17.md) |
 
 ---
 
 ## Evidências e Validação
 
-| #   | Evidência                          | Descrição                                                                                     | Link                                          |
-| --- | ---------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| 1   | Design Técnico                     | Diagramas leves, feature cards, glossário de domínio e diagrama de domínio produzidos na TDR | [Ver detalhes →](./evidencias/design-tecnico.md) |
-| 2   | Features Entregues (F09–F18)       | Diagramas de sequência, critérios de aceite atendidos e screenshots por feature               | [Ver detalhes →](./features-entregues.md)     |
-| 3   | Protótipo de Alta Fidelidade       | Protótipo interativo em HTML produzido antes do desenvolvimento                               | [Ver detalhes →](./evidencias/prototipo.md)   |
-| 4   | Validação Parcial do Cliente       | Vídeo compilado das sessões de validação parcial com o cliente + feedbacks registrados        | [Ver detalhes →](./validacao/partial.md)      |
-| 5   | Validação Formal do Cliente        | Reunião formal de aceite com o cliente Otávio                                                 | [Ver detalhes →](./validacao/formal.md)       |
+| #   | Evidência                    | Descrição                                                                                    | Link                                             |
+| --- | ---------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1   | Design Técnico               | Diagramas leves, feature cards, glossário de domínio e diagrama de domínio produzidos na TDR | [Ver detalhes →](./evidencias/design-tecnico.md) |
+| 2   | Features Entregues (F09–F18) | Diagramas de sequência, critérios de aceite atendidos e screenshots por feature              | [Ver detalhes →](./features-entregues.md)        |
+| 3   | Protótipo de Alta Fidelidade | Protótipo interativo em HTML produzido antes do desenvolvimento                              | [Ver detalhes →](./evidencias/prototipo.md)      |
+| 4   | Validação Parcial do Cliente | Vídeo compilado das sessões de validação parcial com o cliente + feedbacks registrados       | [Ver detalhes →](./validacao/partial.md)         |
+| 5   | Validação Formal do Cliente  | Reunião formal de aceite com o cliente Otávio                                                | [Ver detalhes →](./validacao/formal.md)          |
 
 ---
 

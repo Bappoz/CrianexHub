@@ -28,6 +28,6 @@ O vídeo abaixo reúne todas as gravações das sessões de Partial Client Valid
 
 > _Registre abaixo os feedbacks coletados nas sessões de validação parcial._
 
-| # | Data | Feature(s) | Feedback | Tipo | Ação Tomada |
-| - | ---- | ---------- | -------- | ---- | ----------- |
-|   |      |            |          |      |             |
+| #   | Data | Feature(s) | Feedback | Tipo | Ação Tomada |
+| --- | ---- | ---------- | -------- | ---- | ----------- |
+|     |      |            |          |      |             |
