@@ -5,7 +5,7 @@
 
 ## Iteration Goal
 
-Ao fim da IT1: (1) qualquer visitante sem autenticação navega pela vitrine pública, visualiza o catálogo de produtos SaaS publicados, consulta informações institucionais e canais de contato da Crianex; (2) um administrador autenticado cadastra, edita, publica e despublica produtos e gerencia usuários via painel seguro; e (3) visitantes consultam e avaliam artigos do FAQ categorizados — tudo em layout responsivo verificado em mobile (≥ 375 px) e desktop (≥ 1 280 px), com Formal Client Validation aprovada por Otavio.
+Ao fim da IT1: (1) qualquer visitante navega pela vitrine pública, visualiza o catálogo de produtos SaaS e consulta informações institucionais e de contato; (2) um administrador autenticado gerencia produtos, membros e FAQ via painel seguro; e (3) visitantes consultam e avaliam artigos do FAQ — com Formal Client Validation aprovada pelo cliente.
 
 ## Observações
 
