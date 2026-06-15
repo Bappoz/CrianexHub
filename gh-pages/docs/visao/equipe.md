@@ -9,6 +9,7 @@
 | 1.2    | 03/05/2026 | Atualização da composição da equipe                                                                                            | Lucas A. Zanetti |
 | 1.3    | 05/05/2026 | Seções 6.2–6.6 reescritas: metodologia FDD + fluxogramas de validação e Kanban                                                 | Lucas A. Zanetti |
 | 1.4    | 06/06/2026 | Separação de cerimônias únicas e iterativas; distinção Replenishment Macro/Micro; correção das Etapas FDD nas tabelas semanais | Lucas A. Zanetti |
+| 1.5    | 15/06/2026 | Correção de sintaxe na tabela 6.4 (texto colado ao separador de cabeçalho removido)                                           | Heitor Macedo Ricardo |
 
 ---
 

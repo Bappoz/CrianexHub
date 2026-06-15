@@ -12,6 +12,7 @@
 | 1.5    | 10/06/2026 | RF08 marcado como concluído; RF49 inserido; RF49→RF50, RF50→RF51 renumerados; RF52–RF53 adicionados; refs cruzadas atualizadas | Lucas A. Zanetti   | Hugo Freitas Silva    |
 | 1.6    | 14/06/2026 | Alterações referentes aos ajustes sugeridos pelo professor, acerca de relações 1:1 (um para um)                                | Hugo Freitas Silva | Lucas A. Zanetti      |
 | 1.7    | 15/06/2026 | Substituição de emojis por badges; coluna INVEST com nowrap                                                                    | Lucas A. Zanetti   | Hugo Freitas Silva    |
+| 1.8    | 15/06/2026 | Badges IT2 em F07/F08/F19/F20/F21; título OEs corrigido; RF44/45→F23, RF46/47→F07; bidirecionalidade RNF03/09/22; RNFs de F21 e F23 | Heitor Macedo Ricardo | —                |
 
 ---
 

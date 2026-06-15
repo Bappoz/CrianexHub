@@ -5,6 +5,7 @@
 | Versão | Data       | Descrição         | Autor(es)      |
 | ------ | ---------- | ----------------- | -------------- |
 | 1.0    | 15/06/2026 | Criação da página | Equipe Crianex |
+| 1.1    | 15/06/2026 | Substituição da tabela "O Que Planejamos Entregar" por versão com 5 colunas, legenda OBJ1/OBJ2 e hiperlinks | Heitor Macedo Ricardo |
 
 ---
 
