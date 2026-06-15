@@ -160,7 +160,7 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-facultativo"><span class="cc-num">4</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">5</span></div>
       <!-- Semana 2 — Abr 6 a 12 -->
-      <div class="cc-cell cc-facultativo"><span class="cc-num">6</span><span class="cc-event">Domain Modeling Workshop</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">6</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">7</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">8</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">9</span><span class="cc-event">Documentanção para a U1</span></div>
@@ -178,10 +178,10 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <!-- Semana 4 — Abr 20 a 26 -->
       <div class="cc-cell cc-facultativo"><span class="cc-num">20</span></div>
       <div class="cc-cell cc-feriado"><span class="cc-num">21</span><span class="cc-event">Tiradentes</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">22</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">22</span><span class="cc-event">Domain Modeling Workshop</span><span class="cc-event">Iteration Replenishment Macro</span><span class="cc-event">Commitment</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">23</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">24</span><span class="cc-event">Feature Discovery Session</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">25</span><span class="cc-event">Replenishment Macro</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">24</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">25</span><span class="cc-event">Feature Discovery Session</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">26</span></div>
       <!-- Semana 5 — Abr 27 a Mai 3 -->
       <div class="cc-cell cc-facultativo"><span class="cc-num">27</span><span class="cc-event">Prep IT1</span></div>
@@ -232,7 +232,7 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-it1"><span class="cc-num">10</span></div>
       <!-- Semana 3 — Mai 11 a 17 -->
       <div class="cc-cell cc-it1"><span class="cc-num">11</span><span class="cc-event">Kanban Build (dependências)</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">12</span><span class="cc-event">Kanban Build (arquitetura)</span</div>
+      <div class="cc-cell cc-it1"><span class="cc-num">12</span><span class="cc-event">Kanban Build (arquitetura)</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">13</span>
       <span class="cc-event">Kanban Build (Issues Github)</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">14</span><span class="cc-event">Midweek Sync</span></div>

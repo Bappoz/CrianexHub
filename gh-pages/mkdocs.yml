@@ -6,6 +6,7 @@ docs_dir: docs
 theme:
   name: cinder
   favicon: assets/logo.png
+  disable_nav_previous_next: true
 
 plugins:
   - search:
@@ -51,6 +52,7 @@ nav:
       - 'Unidade 1':
           - 'Resumo — Evidências': iteracoes/unidade-1/index.md
           - 'Ata — 09/04/2026': iteracoes/unidade-1/atas/2026-04-09.md
+          - 'Ata Domain Modeling, Replenishment Macro e Commitment — 22/04/2026': iteracoes/unidade-1/atas/2026-04-22.md
       - 'IT1 — Vitrine Pública':
           - 'Resumo': iteracoes/iteracao-1/index.md
           - 'Features Entregues': iteracoes/iteracao-1/features-entregues.md
@@ -63,7 +65,6 @@ nav:
           - 'Resultados V&V': iteracoes/iteracao-1/vv.md
           - 'Atas de Reunião':
               - 'Ata Compromisso das correções — 01/05/2026': iteracoes/iteracao-1/atas/2026-05-01.md
-              - 'Ata Domain Modeling Iteration Replenishment & Commitment — 10/05/2026': iteracoes/iteracao-1/atas/2026-05-10.md
               - 'Ata Feature Discovery Session — 11/05/2026': iteracoes/iteracao-1/atas/2026-05-11.md
               - 'Ata Refinamento Requisitos — 14/05/2026': iteracoes/iteracao-1/atas/2026-05-14.md
               - 'Ata Technical Design Review — 17/05/2026': iteracoes/iteracao-1/atas/2026-05-17.md
@@ -88,9 +89,10 @@ nav:
   - Arquitetura:
       - 'Arquitetura': arquitetura/index.md
       - 'Roles': arquitetura/roles.md
-  - Apresentação:
-      - 'Unidade 1': apresentacao/unidade-1.md
-      - 'Unidade 2': apresentacao/unidade-2.md
-      - 'Unidade 3': apresentacao/unidade-3.md
-    # - "Unidade 4": apresentacao/unidade-4.md
+  - Entregas:
+      - 'Visão Geral': entregas/index.md
+      - 'Unidade 1': entregas/unidade-1.md
+      - 'Unidade 2': entregas/unidade-2.md
+      - 'Unidade 3': entregas/unidade-3.md
+      - 'Unidade 4': entregas/unidade-4.md
   - 'Referências': referencias.md
