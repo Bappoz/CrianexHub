@@ -64,7 +64,6 @@ sequenceDiagram
 
 #### Evidências de Funcionamento
 
-
 ---
 
 #### Validação do Cliente
@@ -694,9 +693,9 @@ sequenceDiagram
 
 #### Validação do Cliente
 
-| Tipo               | Data       | Resultado | Observação                                                                                                                          |
-| ------------------ | ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Partial Validation | —          | ⬜        | —                                                                                                                                   |
+| Tipo               | Data       | Resultado | Observação                                                                                                                         |
+| ------------------ | ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Partial Validation | —          | ⬜        | —                                                                                                                                  |
 | Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — fluxo de publicação e despublicação demonstrado como parte integrante da gestão de FAQ (CP6 aprovado em bloco) |
 
 #### Observações
@@ -769,9 +768,9 @@ sequenceDiagram
 
 #### Validação do Cliente
 
-| Tipo               | Data       | Resultado | Observação                                                                                                                                     |
-| ------------------ | ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial Validation | —          | ⬜        | —                                                                                                                                              |
+| Tipo               | Data       | Resultado | Observação                                                                                                                                         |
+| ------------------ | ---------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial Validation | —          | ⬜        | —                                                                                                                                                  |
 | Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — FAQ categorizado por produto com avaliação de utilidade pelo usuário citado explicitamente na ata como entregue (CP6 aprovado) |
 
 #### Observações
