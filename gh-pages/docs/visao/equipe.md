@@ -68,7 +68,7 @@ Cada ferramenta tem escopo exclusivo — o que vai para o Miro não vai para o D
 Realizadas **uma única vez** antes da primeira iteração de construção. Correspondem às Etapas 1–3 do FDD e produzem os artefatos que servem de insumo para todas as iterações seguintes.
 
 | Cerimônia | Formato | Quando | Participantes | Duração est. |
-| --------------------------------- | ------- | ------------ | --------------------------- | ------------ |lc-facultativo
+| --------------------------------- | ------- | ------------ | --------------------------- | ------------ |
 | **Domain Modeling Workshop** | Reunião | Antes da IT1 | PM, Chief Architect, Otavio | ~3h |
 | **Feature Discovery Session** | Reunião | Antes da IT1 | Equipe (sem cliente) | ~1h |
 | **Iteration Replenishment Macro** | Reunião | Antes da IT1 | PM, CPs, Otavio | ~1h |

@@ -32,7 +32,7 @@ O escopo acadêmico compreende a execução das seguintes atividades de ER, orga
 | **Gerenciamento de Mudanças**  | Rastreabilidade entre OEs → CPs → Funcionalidades, versionamento via Git e registro em histórico de revisão em cada artefato                                                                                                              |
 | **Documentação de Requisitos** | Artefatos publicados e versionados via GitHub Pages (MkDocs Material), cobrindo visão do produto, backlog priorizado, cronograma orientado a valor e atas de reunião                                                                      |
 
-O produto objeto deste processo de ER é a **Crianex Hub**: plataforma administrativa centralizada composta por painel de gestão interno e vitrine digital bilíngue (PT/EN), desenvolvida para a Software House B2B Crianex. Os requisitos derivam diretamente dos cinco Objetivos Específicos (OEs) levantados junto aos clientes reais e se materializam nas quinze Características de Produto (CPs) que compõem o backlog do projeto.
+O produto objeto deste processo de ER é a **Crianex Hub**: plataforma administrativa centralizada composta por painel de gestão interno e vitrine digital bilíngue (PT/EN), desenvolvida para a Software House B2B Crianex. Os requisitos derivam diretamente dos três Objetivos Específicos (OEs) levantados junto aos clientes reais e se materializam nas nove Características de Produto (CPs) que compõem o backlog do projeto.
 
 ---
 

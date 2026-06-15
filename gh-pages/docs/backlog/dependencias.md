@@ -16,7 +16,7 @@ Rastreabilidade visual entre as features de cada iteração. Use este mapa para:
 
 ---
 
-## IT1 — Vitrine Pública (28/04 – 25/05)
+## IT1 — Vitrine Pública (28/04 – 07/06)
 
 Dependências entre as features comprometidas na IT1. Cada nó é a issue pai de especificação da feature. Vale ressaltar que essa depedência é lógica e não técnica, ou seja, não é necessário uma feature inteira completa para iniciar outras, mas algumas implementações dentro da issue devem ser implementados para liberar a proxima Feature. Esse bloqueio e dependências é especificado em cada sub-issue das features.
 
@@ -56,13 +56,13 @@ graph LR
 
 ---
 
-## IT2 — Lead Capture (26/05 – 18/06)
+## IT2 — Lead Capture (08/06 – 28/06)
 
 > Mapa de dependências a ser preenchido ao início da iteração.
 
 ---
 
-## IT3 — Núcleo Operacional (19/06 – 07/07)
+## IT3 — Núcleo Operacional (29/06 – 05/07)
 
 > Mapa de dependências a ser preenchido ao início da iteração.
 
