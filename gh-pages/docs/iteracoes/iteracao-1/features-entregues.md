@@ -149,10 +149,10 @@ _Evidências a serem adicionadas._
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                              |
+| ------------------ | ---------- | --------- | --------------------------------------------------------------------------------------- |
+| Partial Validation | 15/06/2026 | ✅        | CEO elogiou as telas enviadas, incluindo o dashboard de admin; estrutura e UX aprovadas |
+| Formal Validation  | —          | ⬜        | —                                                                                       |
 
 #### Observações
 
@@ -236,10 +236,10 @@ _Evidências a serem adicionadas._
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                             |
+| ------------------ | ---------- | --------- | -------------------------------------------------------------------------------------- |
+| Partial Validation | 15/06/2026 | ✅        | CEO revisou as telas enviadas ("demais partes"); estrutura e fluxo do painel aprovados |
+| Formal Validation  | —          | ⬜        | —                                                                                      |
 
 #### Observações
 
@@ -322,10 +322,10 @@ _Evidências a serem adicionadas._
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                           |
+| ------------------ | ---------- | --------- | ------------------------------------------------------------------------------------ |
+| Partial Validation | 15/06/2026 | ✅        | CEO elogiou a vitrine de produtos enviada; estrutura e apresentação visual aprovadas |
+| Formal Validation  | —          | ⬜        | —                                                                                    |
 
 #### Observações
 
@@ -395,10 +395,10 @@ _Evidências a serem adicionadas._
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                     |
+| ------------------ | ---------- | --------- | ------------------------------------------------------------------------------ |
+| Partial Validation | 15/06/2026 | ✅        | CEO revisou as telas enviadas ("demais partes"); controles do painel aprovados |
+| Formal Validation  | —          | ⬜        | —                                                                              |
 
 #### Observações
 
