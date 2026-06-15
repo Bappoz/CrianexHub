@@ -6,11 +6,13 @@
     helpfulCount,
     notHelpfulCount,
     apiBaseUrl = '',
+    showCounts = true,
   } = $props<{
     articleId: string;
     helpfulCount: number;
     notHelpfulCount: number;
     apiBaseUrl?: string;
+    showCounts?: boolean;
   }>();
 
   const STORAGE_PREFIX = 'faq_rated_';
@@ -93,10 +95,12 @@
     </button>
   </div>
 
-  <div class="rate-counts">
-    <span class="rating-count">👍 {totals.helpful}</span>
-    <span class="rating-count">👎 {totals.not_helpful}</span>
-  </div>
+  {#if showCounts}
+    <div class="rate-counts">
+      <span class="rating-count">👍 {totals.helpful}</span>
+      <span class="rating-count">👎 {totals.not_helpful}</span>
+    </div>
+  {/if}
 </div>
 
 <style>

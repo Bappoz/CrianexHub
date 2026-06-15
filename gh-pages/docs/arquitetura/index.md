@@ -19,8 +19,7 @@ A arquitetura adotada é **Monolito Modular** — uma aplicação Express.js com
 
 1. **Prazo:** ~1,5 meses de desenvolvimento ativo, 3 iterações de entrega, 6 desenvolvedores com WIP limit de 2 por Class Owner — overhead de orquestração de microsserviços é incompatível com essa cadência.
 2. **Latência:** RNF02 e RNF03 exigem resposta ≤ 2s em 95% das requisições; a comunicação intra-processo do monolito elimina a latência de rede entre serviços.
-3. **Integridade ACID:** RNF06 exige consistência transacional na captação de leads; transações distribuídas (padrão Saga) adicionariam complexidade sem benefício no escopo atual.
-4. **Superfície de segurança:** RNF07 (OWASP Top 10) é mais simples de cumprir com um único ponto de entrada e RLS centralizado no banco, em vez de múltiplos endpoints independentes.
+3. **Superfície de segurança:** RNF07 (OWASP Top 10) é mais simples de cumprir com um único ponto de entrada e RLS centralizado no banco, em vez de múltiplos endpoints independentes.
 
 A estrutura modular garante que, se necessário no futuro, módulos possam ser extraídos como microsserviços sem refatoração estrutural — o desacoplamento lógico já está preservado.
 
@@ -274,7 +273,6 @@ O projeto Crianex Hub possui as seguintes restrições e requisitos não-funcion
 
 - **Prazo:** ~10 semanas de desenvolvimento, 3 iterações de entrega, 6 desenvolvedores operando com WIP limit de 2 por Class Owner (metodologia FDD + Scrumban Enxuto).
 - **RNF02 e RNF03:** Tempo de resposta ≤ 2s em 95% das requisições, tanto na vitrine pública quanto na área administrativa.
-- **RNF06:** Integridade transacional ACID obrigatória na captação de leads (inserção atômica de lead + evento de notificação).
 - **RNF07:** Conformidade com OWASP Top 10 — minimizar superfície de ataque e pontos de falha de autenticação/autorização.
 - **Infra:** Kubernetes disponível apenas na fase pós-venda; durante o desenvolvimento, o ambiente é Docker Compose local.
 
@@ -293,7 +291,6 @@ A alternativa de microsserviços foi avaliada e rejeitada pelos seguintes motivo
 | Critério                    | Problema com Microsserviços                                                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Latência (RNF02, RNF03)** | Comunicação inter-serviço via HTTP/gRPC adiciona latência de rede não controlável, tornando difícil garantir ≤ 2s em 95% das requisições sem camada de cache adicional.      |
-| **ACID (RNF06)**            | Transações distribuídas exigem o padrão Saga ou Two-Phase Commit — complexidade desproporcional ao escopo do projeto e com risco real de inconsistência eventual.            |
 | **Segurança (RNF07)**       | Múltiplos endpoints independentes ampliam a superfície de ataque. Cada serviço precisa de sua própria validação JWT, aumentando o risco de lacunas de autorização.           |
 | **Prazo e capacidade**      | Service mesh, service discovery, múltiplos Dockerfiles, comunicação assíncrona (mensageria) e observabilidade distribuída são inviáveis em 10 semanas com 6 desenvolvedores. |
 
@@ -394,7 +391,6 @@ Row Level Security no PostgreSQL garante isolamento de dados mesmo em acessos di
 | Express modular — chamada local, sem rede inter-serviço | RNF03               | Latência intra-processo (< 1ms) em vez de HTTP entre serviços; resposta admin ≤ 2s garantida            |
 | Supabase Auth + JWT + cookie `httpOnly`                 | RNF01, RNF07        | Isolamento da rota `/admin` via middleware; cookie `httpOnly` mitiga XSS (OWASP A07)                    |
 | RLS no PostgreSQL                                       | RNF07               | Controle de acesso no nível do banco elimina privilege escalation mesmo em falhas de aplicação          |
-| Transação única PostgreSQL via Supabase                 | RNF06               | ACID nativo sem saga; inserção atômica de lead + notificação sem risco de inconsistência                |
 | Shadcn/ui + design tokens (Tailwind)                    | RNF12               | Componentes responsivos por padrão; uma codebase para mobile, tablet e desktop                          |
 | Monorepo TypeScript com `packages/shared`               | RNF16, RNF17        | Stack obrigatória preservada; tipos compartilhados reduzem superfície de bug; cobertura unificada       |
 | Kubernetes + réplicas Express (pós-venda)               | RNF14               | Escala horizontal do backend sem alterações de código; orquestração via cluster gerenciado pela Crianex |

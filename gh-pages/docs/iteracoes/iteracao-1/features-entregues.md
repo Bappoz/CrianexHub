@@ -64,19 +64,6 @@ sequenceDiagram
 
 #### Evidências de Funcionamento
 
-**Tela de Login**
-
-![Página de login com campos de e-mail e senha](./images/F09.1.png)
-
----
-
-**Autenticação de Dois Fatores (2FA)**
-
-Após inserir as credenciais, o usuário escaneia o QR Code no aplicativo autenticador e digita o código TOTP gerado.
-
-![QR Code exibido para configuração do 2FA](./images/F09.2.png)
-
-![Tela de inserção do código 2FA](./images/F09.3.png)
 
 ---
 
@@ -85,7 +72,7 @@ Após inserir as credenciais, o usuário escaneia o QR Code no aplicativo autent
 | Tipo               | Data | Resultado | Observação |
 | ------------------ | ---- | --------- | ---------- |
 | Partial Validation | —    | ✅        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Formal Validation  | —    | ✅        | —          |
 
 #### Observações
 
@@ -269,7 +256,7 @@ _Evidências a serem adicionadas._
 
 > **Issues:** [#55](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/55)  
 > **RFs cobertos:** RF21, RF22, RF23  
-> **RNFs cobertos:** RNF02, RNF06, RNF21
+> **RNFs cobertos:** RNF02, RNF21
 
 #### Diagrama de Sequência Formal
 
@@ -324,12 +311,11 @@ sequenceDiagram
 
 | Critério (BDD)                                                                 | RF / RNF        | Status |
 | ------------------------------------------------------------------------------ | --------------- | ------ |
-| Admin cadastra produto → persistido em transação ACID → apto para publicação   | RF21 · RNF06    | ⬜     |
+| Admin cadastra produto → persistido em transação ACID → apto para publicação   | RF21            | ⬜     |
 | Admin edita produto → dados substituídos no banco sem intervenção de dev       | RF22            | ⬜     |
 | Admin remove produto → excluído do catálogo e ausente na vitrine imediatamente | RF23            | ⬜     |
 | Requisição sem autorização → 401/403 sem executar operação no banco            | RF21–23 · RNF01 | ⬜     |
 | Vitrine pública renderiza via SSR → apenas `published = true` em ≤ 2s sem JS   | RNF02 · RNF21   | ⬜     |
-| Falha no banco → ROLLBACK completo sem registro parcial                        | RNF06           | ⬜     |
 
 #### Evidências de Funcionamento
 
@@ -423,11 +409,11 @@ _Evidências a serem adicionadas._
 
 ---
 
-### F14 — Formulário de contato
+### F14 — Formulário de contato / Captação de Leads
 
 > **Issues:** [#61](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/61)  
 > **RFs cobertos:** RF27  
-> **RNFs cobertos:** RNF06, RNF10
+> **RNFs cobertos:** RNF10
 
 #### Diagrama de Sequência Formal
 
@@ -445,7 +431,7 @@ sequenceDiagram
     EX->>RL: verifica limite (5 req / IP / 10 min — RNF10)
     RL-->>EX: permitido
     EX->>EX: valida campos obrigatórios
-    EX->>DB: BEGIN — INSERT INTO leads (nome, email, mensagem) — COMMIT (ACID — RNF06)
+    EX->>DB: BEGIN — INSERT INTO leads (nome, email, mensagem) — COMMIT
     DB-->>EX: ok
     EX-->>SK: 200 { success: true }
     SK-->>V: alerta visual de sucesso (≤ 2s — RNF02)
@@ -458,7 +444,7 @@ sequenceDiagram
     EX-->>SK: 429 Too Many Requests
     SK-->>V: "Tente novamente mais tarde"
 
-    Note over V,DB: Falha no banco — rollback (RNF06)
+    Note over V,DB: Falha no banco — rollback
     V->>SK: POST { payload válido }
     SK->>EX: POST /api/public/contact
     EX->>RL: permitido
@@ -471,22 +457,23 @@ sequenceDiagram
 
 #### Critérios de Aceite Atendidos
 
-| Critério (BDD)                                                               | RF / RNF             | Status |
-| ---------------------------------------------------------------------------- | -------------------- | ------ |
-| Formulário válido → persistido em transação ACID → alerta de sucesso em ≤ 2s | RF27 · RNF02 · RNF06 | ⬜     |
-| Rate limit excedido (5 req/IP/10min) → 429 + "Tente novamente mais tarde"    | RNF10                | ⬜     |
-| Falha no banco → ROLLBACK completo sem registro parcial                      | RNF06                | ⬜     |
+| Critério (BDD)                                                               | RF / RNF     | Status |
+| ---------------------------------------------------------------------------- | ------------ | ------ |
+| Formulário válido → persistido em transação ACID → alerta de sucesso em ≤ 2s | RF27 · RNF02 | ⬜     |
+| Rate limit excedido (5 req/IP/10min) → 429 + "Tente novamente mais tarde"    | RNF10        | ⬜     |
 
 #### Evidências de Funcionamento
 
-_Evidências a serem adicionadas._
+<div style="width: 100%; max-width: 900px; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+  <iframe style="width: 100%; aspect-ratio: 16/9; display: block;" src="https://www.youtube.com/embed/TPlJ5Rc_A0Y" title="F14 — Formulário de contato / Captação de Leads" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                                                                                                               |
+| ------------------ | ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Partial Validation | —          | ⬜        | —                                                                                                                                                                        |
+| Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — formulário demonstrado com campo de aceite da política de privacidade (LGPD); funcionalidade de envio de e-mail confirmada como pronta para ativação |
 
 #### Observações
 
@@ -541,14 +528,16 @@ sequenceDiagram
 
 #### Evidências de Funcionamento
 
-_Evidências a serem adicionadas._
+<div style="width: 100%; max-width: 900px; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+  <iframe style="width: 100%; aspect-ratio: 16/9; display: block;" src="https://www.youtube.com/embed/V_yoDcOjwwk" title="F15 — Página institucional (Sobre a Crianex)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                                                                                                         |
+| ------------------ | ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Partial Validation | —          | ⬜        | —                                                                                                                                                                  |
+| Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — seção "Sobre" com animações e perfis da equipe elogiada; sugestão de importar imagens de capa diretamente dos sites dos produtos (ação futura) |
 
 #### Observações
 
@@ -624,14 +613,16 @@ sequenceDiagram
 
 #### Evidências de Funcionamento
 
-_Evidências a serem adicionadas._
+<div style="width: 100%; max-width: 900px; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+  <iframe style="width: 100%; aspect-ratio: 16/9; display: block;" src="https://www.youtube.com/embed/J9IcxHe_BSA" title="F16 — CRUD de artigos de FAQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                                                     |
+| ------------------ | ---------- | --------- | -------------------------------------------------------------------------------------------------------------- |
+| Partial Validation | —          | ⬜        | —                                                                                                              |
+| Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — gestão de categorias e artigos em PT/EN associados a produtos demonstrada e aprovada (CP6) |
 
 #### Observações
 
@@ -697,14 +688,16 @@ sequenceDiagram
 
 #### Evidências de Funcionamento
 
-_Evidências a serem adicionadas._
+<div style="width: 100%; max-width: 900px; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+  <iframe style="width: 100%; aspect-ratio: 16/9; display: block;" src="https://www.youtube.com/embed/mhMDfnUBIsA" title="F17 — Publicar/despublicar artigo de FAQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                                                                          |
+| ------------------ | ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Partial Validation | —          | ⬜        | —                                                                                                                                   |
+| Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — fluxo de publicação e despublicação demonstrado como parte integrante da gestão de FAQ (CP6 aprovado em bloco) |
 
 #### Observações
 
@@ -770,14 +763,16 @@ sequenceDiagram
 
 #### Evidências de Funcionamento
 
-_Evidências a serem adicionadas._
+<div style="width: 100%; max-width: 900px; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+  <iframe style="width: 100%; aspect-ratio: 16/9; display: block;" src="https://www.youtube.com/embed/LSAqq9nKBYY" title="F18 — Avaliação de artigos de FAQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 #### Validação do Cliente
 
-| Tipo               | Data | Resultado | Observação |
-| ------------------ | ---- | --------- | ---------- |
-| Partial Validation | —    | ⬜        | —          |
-| Formal Validation  | —    | ⬜        | —          |
+| Tipo               | Data       | Resultado | Observação                                                                                                                                     |
+| ------------------ | ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial Validation | —          | ⬜        | —                                                                                                                                              |
+| Formal Validation  | 07/06/2026 | ✅        | Aprovado pelo CEO — FAQ categorizado por produto com avaliação de utilidade pelo usuário citado explicitamente na ata como entregue (CP6 aprovado) |
 
 #### Observações
 

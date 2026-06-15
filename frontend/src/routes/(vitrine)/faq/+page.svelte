@@ -81,6 +81,26 @@
   let pageDesc = $derived(t.pageDesc[$lang]);
   let ogLocale = $derived($lang === 'en' ? 'en_US' : 'pt_BR');
   let canonicalUrl = $derived(data.origin + '/faq');
+
+  let faqSchema = $derived({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.grouped
+      .flatMap((g) => g.articles)
+      .filter((a) => a.body_pt?.trim())
+      .map((a) => {
+        const rawBody = $lang === 'en' && a.body_en?.trim() ? a.body_en : a.body_pt;
+        return {
+          '@type': 'Question',
+          name: $lang === 'en' && a.title_en?.trim() ? a.title_en : a.title_pt,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: rawBody?.replace(/<[^>]*>/g, '').trim() ?? '',
+          },
+        };
+      })
+      .filter((q) => q.acceptedAnswer.text),
+  });
 </script>
 
 <svelte:head>
@@ -93,6 +113,7 @@
   <meta property="og:description" content={pageDesc} />
   <meta property="og:locale" content={ogLocale} />
   <link rel="canonical" href={canonicalUrl} />
+  {@html `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>`}
 </svelte:head>
 
 <div class="page-fade faq-page">
@@ -206,6 +227,7 @@
                         helpfulCount={article.helpful_count}
                         notHelpfulCount={article.not_helpful_count}
                         apiBaseUrl={data.apiBaseUrl}
+                        showCounts={false}
                       />
                     </div>
                   {/if}
