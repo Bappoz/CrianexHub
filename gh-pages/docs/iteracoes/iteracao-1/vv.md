@@ -2,6 +2,9 @@
 
 Registro formal das mudanças de processo, escopo e achados de verificação identificados durante e após a IT1. As alterações de backlog aqui documentadas **ainda não foram aplicadas na tabela de rastreabilidade** — ficam registradas para atualização futura.
 
+- **Estratégia:** Verificação
+- **Técnica:** Análise de rastreabilidade e Inspeção
+
 > **Legenda:** ✅ Aplicado no backlog · ⏳ Pendente de aplicação · 🔴 Achado crítico · ⚠️ Achado de atenção
 
 ---
