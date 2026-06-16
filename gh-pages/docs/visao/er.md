@@ -85,7 +85,7 @@ As duas últimas etapas do FDD são executadas **a cada iteração**, para cada 
 
 No início de cada iteração, as features do escopo são refinadas tecnicamente antes de qualquer linha de código ser escrita. Essa etapa produz os critérios de aceite, o design técnico e o compromisso formal da equipe com o objetivo da iteração.
 
-#### Cerimônia 1 — Iteration Replenishment + Commitment
+#### Cerimônia 1 — Iteration Replenishment Micro + Commitment
 
 A Iteration Replenishment seleciona as features candidatas para a iteração corrente com base no IP e na capacidade da equipe. O Iteration Commitment formaliza o compromisso da equipe e do cliente com o Iteration Goal — uma frase única e demonstrável que sintetiza o valor a ser entregue.
 

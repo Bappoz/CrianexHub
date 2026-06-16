@@ -9,6 +9,13 @@
 
 ---
 
+### Links das Ferramentas Usadas
+
+| Ferramenta                   | Link                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------ |
+| **Miro** (board principal)   | [Acessar board](https://miro.com/app/board/uXjVGl991V0=/?share_link_id=878597873452) |
+| **GitHub Projects (Kanban)** | [Acessar board](https://github.com/orgs/mdsreq-fga-unb/projects/96)                  |
+
 ## Engenharia de Requisitos
 
 MARSICANO, George. **Requisitos de Software: Comunicação é tudo!** Versão 1.1. Draft. Brasília: Universidade de Brasília, 2026.
