@@ -2,14 +2,14 @@
 
 ## Histórico de Revisão
 
-| Versão | Data       | Descrição                                                                                                                      | Autor(es)        |
-| ------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| 1.0    | 11/04/2026 | Criação das seções 6.1 a 6.6                                                                                                   | Lucas A. Zanetti |
-| 1.1    | 13/04/2026 | Revisão das seções 6.1 a 6.6                                                                                                   | Equipe Crianex   |
-| 1.2    | 03/05/2026 | Atualização da composição da equipe                                                                                            | Lucas A. Zanetti |
-| 1.3    | 05/05/2026 | Seções 6.2–6.6 reescritas: metodologia FDD + fluxogramas de validação e Kanban                                                 | Lucas A. Zanetti |
-| 1.4    | 06/06/2026 | Separação de cerimônias únicas e iterativas; distinção Replenishment Macro/Micro; correção das Etapas FDD nas tabelas semanais | Lucas A. Zanetti |
-| 1.5    | 15/06/2026 | Correção de sintaxe na tabela 6.4 (texto colado ao separador de cabeçalho removido)                                           | Heitor Macedo Ricardo |
+| Versão | Data       | Descrição                                                                                                                      | Autor(es)             |
+| ------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| 1.0    | 11/04/2026 | Criação das seções 6.1 a 6.6                                                                                                   | Lucas A. Zanetti      |
+| 1.1    | 13/04/2026 | Revisão das seções 6.1 a 6.6                                                                                                   | Equipe Crianex        |
+| 1.2    | 03/05/2026 | Atualização da composição da equipe                                                                                            | Lucas A. Zanetti      |
+| 1.3    | 05/05/2026 | Seções 6.2–6.6 reescritas: metodologia FDD + fluxogramas de validação e Kanban                                                 | Lucas A. Zanetti      |
+| 1.4    | 06/06/2026 | Separação de cerimônias únicas e iterativas; distinção Replenishment Macro/Micro; correção das Etapas FDD nas tabelas semanais | Lucas A. Zanetti      |
+| 1.5    | 15/06/2026 | Correção de sintaxe na tabela 6.4 (texto colado ao separador de cabeçalho removido)                                            | Heitor Macedo Ricardo |
 
 ---
 
@@ -68,11 +68,11 @@ Cada ferramenta tem escopo exclusivo — o que vai para o Miro não vai para o D
 
 Realizadas **uma única vez** antes da primeira iteração de construção. Correspondem às Etapas 1–3 do FDD e produzem os artefatos que servem de insumo para todas as iterações seguintes.
 
-| Cerimônia | Formato | Quando | Participantes | Duração est. |
+| Cerimônia                         | Formato | Quando       | Participantes               | Duração est. |
 | --------------------------------- | ------- | ------------ | --------------------------- | ------------ |
-| **Domain Modeling Workshop** | Reunião | Antes da IT1 | PM, Chief Architect, Otavio | ~3h |
-| **Feature Discovery Session** | Reunião | Antes da IT1 | Equipe (sem cliente) | ~1h |
-| **Iteration Replenishment Macro** | Reunião | Antes da IT1 | PM, CPs, Otavio | ~1h |
+| **Domain Modeling Workshop**      | Reunião | Antes da IT1 | PM, Chief Architect, Otavio | ~3h          |
+| **Feature Discovery Session**     | Reunião | Antes da IT1 | Equipe (sem cliente)        | ~1h          |
+| **Iteration Replenishment Macro** | Reunião | Antes da IT1 | PM, CPs, Otavio             | ~1h          |
 
 > **Nota:** Devido correções de urgência ao modelo FDD implementado à partir do feedback do professor George, tanto _Feature Discovery Session_ como _Iteration Replenishment Macro_ foram feitas no ínicio da Iteração 1, uma vez que já haviamos iniciado.
 

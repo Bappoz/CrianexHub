@@ -2,9 +2,10 @@
 
 ## Histórico de Revisão
 
-| Versão | Data       | Descrição                                                        | Autor(es)        |
-| ------ | ---------- | ---------------------------------------------------------------- | ---------------- |
-| 1.0    | 18/05/2026 | Extração das seções 6.4–6.6 de equipe.md para documento dedicado | Lucas A. Zanetti |
+| Versão | Data       | Descrição                                                        | Autor(es) |
+| ------ | ---------- | ---------------------------------------------------------------- | --------- |
+| 1.0    | 18/05/2026 | Extração das seções 6.4–6.6 de equipe.md para documento dedicado | Lucas     |
+| 1.1    | 15/06/2026 | Correção do processo de DoR e DoD                                | Camile    |
 
 ---
 
@@ -46,6 +47,7 @@ _Figura 1 — Fluxo de validação: Partial (assíncrona, contínua por feature)
     - [ ] Dependências identificadas; bloqueantes resolvidos
     - [ ] Class Owner designado e linkada à Feature parent e à CP de origem
     - [ ] Protótipo revisado pelo cliente da tela respectiva à feature
+    - [ ] Notas de design técnico e especificação da solução elaboradas pelo Chief Programmer (Technical Design Review concluída)
     - [ ] Ao menos um critério de segurança ou usabilidade identificado (RLS, validação de input, autenticação, SEO, bilingue)
 
 ### Definition of Done (DoD)
@@ -60,6 +62,7 @@ _Figura 1 — Fluxo de validação: Partial (assíncrona, contínua por feature)
     - [ ] Migration de banco aplicada em staging sem erros (se existir)
     - [ ] Sem vulnerabilidades críticas no SAST/linting de segurança
     - [ ] Validação parcial registrada pelo cliente na issue (ou agendada para próxima validação formal)
+    - [ ] Matriz de rastreabilidade atualizada para refletir o incremento entregue
     - [ ] Documentação atualizada se houve mudança de contrato, comportamento ou arquitetura
     - [ ] Issue movida para Done no GitHub Projects
 
@@ -93,15 +96,15 @@ _Figura 2 — Fluxo Kanban: progressão linear obrigatória com desvio via Block
 
 ### Critérios de Transição
 
-| De → Para                     | Critério de avanço                                                                    | Quem move                       |
-| ----------------------------- | ------------------------------------------------------------------------------------- | ------------------------------- |
-| **Backlog → Ready**           | Critérios de aceite escritos; design aprovado; dependências resolvidas (DoR atendido) | Class Owner ou Chief Programmer |
-| **Ready → In Progress**       | Class Owner inicia; WIP limit verificado                                              | Class Owner que pega            |
-| **In Progress → Review**      | PR aberto (`closes #N`); CI verde; auto-revisão feita                                 | Class Owner autor               |
-| **Review → Validation**       | PR aprovado por outro Class Owner; merge realizado                                    | Revisor após approve            |
-| **Validation → Done**         | Otavio aprovou na Partial Client Validation; checklist marcado                        | Responsável por Validação       |
-| **\* → Blocked**              | Bloqueio externo identificado; comentário com motivo na issue                         | Quem identificou                |
-| **Blocked → coluna anterior** | Bloqueio resolvido                                                                    | Quem desbloqueou                |
+| De → Para                     | Critério de avanço                                                                                                       | Quem move                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| **Backlog → Ready**           | Critérios de aceite escritos; design aprovado; Technical Design Review concluída; dependências resolvidas (DoR atendido) | Class Owner ou Chief Programmer |
+| **Ready → In Progress**       | Class Owner inicia; WIP limit verificado                                                                                 | Class Owner que pega            |
+| **In Progress → Review**      | PR aberto (`closes #N`); CI verde; auto-revisão feita                                                                    | Class Owner autor               |
+| **Review → Validation**       | PR aprovado por outro Class Owner; merge realizado                                                                       | Revisor após approve            |
+| **Validation → Done**         | Otavio aprovou na Partial Client Validation; checklist marcado; matriz de rastreabilidade atualizada                     | Responsável por Validação       |
+| **\* → Blocked**              | Bloqueio externo identificado; comentário com motivo na issue                                                            | Quem identificou                |
+| **Blocked → coluna anterior** | Bloqueio resolvido                                                                                                       | Quem desbloqueou                |
 
 ### Regras invioláveis
 

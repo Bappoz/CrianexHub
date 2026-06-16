@@ -2,10 +2,10 @@
 
 ## Histórico de Revisão
 
-| Versão | Data       | Descrição                                                                                        | Autor(es)        |
-| ------ | ---------- | ------------------------------------------------------------------------------------------------ | ---------------- |
-| 1.0    | 06/06/2026 | Segmentação por iteração; remoção do mapa completo de sub-issues; adição de placeholders IT2/IT3 | Lucas A. Zanetti |
-| 1.1    | 15/06/2026 | Atualização das datas: IT1 (28/04–07/06), IT2 (08/06–28/06), IT3 (29/06–05/07)                  | Heitor Macedo Ricardo |
+| Versão | Data       | Descrição                                                                                        | Autor(es)             |
+| ------ | ---------- | ------------------------------------------------------------------------------------------------ | --------------------- |
+| 1.0    | 06/06/2026 | Segmentação por iteração; remoção do mapa completo de sub-issues; adição de placeholders IT2/IT3 | Lucas A. Zanetti      |
+| 1.1    | 15/06/2026 | Atualização das datas: IT1 (28/04–07/06), IT2 (08/06–28/06), IT3 (29/06–05/07)                   | Heitor Macedo Ricardo |
 
 ---
 

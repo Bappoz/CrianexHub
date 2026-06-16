@@ -2,9 +2,9 @@
 
 ## Histórico de Revisão
 
-| Versão | Data       | Descrição         | Autor(es)      |
-| ------ | ---------- | ----------------- | -------------- |
-| 1.0    | 15/06/2026 | Criação da página | Equipe Crianex |
+| Versão | Data       | Descrição                                                                                                   | Autor(es)             |
+| ------ | ---------- | ----------------------------------------------------------------------------------------------------------- | --------------------- |
+| 1.0    | 15/06/2026 | Criação da página                                                                                           | Equipe Crianex        |
 | 1.1    | 15/06/2026 | Substituição da tabela "O Que Planejamos Entregar" por versão com 5 colunas, legenda OBJ1/OBJ2 e hiperlinks | Heitor Macedo Ricardo |
 
 ---
@@ -39,16 +39,16 @@ A Unidade 3 cobriu a execução completa da IT1 — do início do desenvolviment
 OBJ1 — Verificação e Validação de requisitos  
 OBJ2 — Organização e Atualização de requisitos
 
-| Entregável exigido (PDF) | Como a equipe atendeu | Objetivo(s) | Evidência (link) | Status |
-| --- | --- | --- | --- | --- |
-| Visão de Produto e Projeto atualizada | Sincronização Visão × backlog (3 OEs / 9 CPs) | OBJ2 | [Home](../index.md) · [Visão 1–7](../visao/cenario.md) | ✅ |
-| Backlog atualizado | IT2 Replenishment + Commitment; backlog congelado da IT1 | OBJ2 | [Rastreabilidade](../backlog/rastreabilidade.md) · [Priorização](../backlog/priorizacao.md) · [Dependências](../backlog/dependencias.md) | ✅ |
-| MVP (evidências) | Kanban Build F09–F18 + vídeos por feature | OBJ1 | [Features Entregues IT1](../iteracoes/iteracao-1/features-entregues.md) | ✅ |
-| DoR e DoD | Critérios verificáveis + fluxo Kanban + gestão de mudanças | OBJ1 + OBJ2 | [Visão](../visao/er.md) · [7 · DoR e DoD](../visao/dor-dod.md) | ✅ |
-| Rastreabilidade atualizada | Matriz OE→CP→Feature→RF→RNF→RN→Validação | OBJ2 | [Backlog](../backlog/priorizacao.md) · [Rastreabilidade](../backlog/rastreabilidade.md) | ✅ |
-| Evidências de execução de ESw e ER | Atas, Partial + Formal Validation, Artifact Closure, registro V&V | OBJ1 + OBJ2 | [Atas IT1](../iteracoes/iteracao-1/atas/2026-06-14.md) · [Atas IT2](../iteracoes/iteracao-2/atas/2026-06-15.md) · [V&V IT1](../iteracoes/iteracao-1/vv.md) | ✅ |
-| Site do Projeto (GitPages) | Documentação MkDocs versionada | — (meio) | [Todo o site](../index.md) | ✅ |
-| Vídeo de apresentação | Gravação 15/06/2026 | — (formato) | [Entrega — Unidade 3](unidade-3.md) | 🔄 publicar |
+| Entregável exigido (PDF)              | Como a equipe atendeu                                             | Objetivo(s) | Evidência (link)                                                                                                                                           | Status      |
+| ------------------------------------- | ----------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Visão de Produto e Projeto atualizada | Sincronização Visão × backlog (3 OEs / 9 CPs)                     | OBJ2        | [Home](../index.md) · [Visão 1–7](../visao/cenario.md)                                                                                                     | ✅          |
+| Backlog atualizado                    | IT2 Replenishment + Commitment; backlog congelado da IT1          | OBJ2        | [Rastreabilidade](../backlog/rastreabilidade.md) · [Priorização](../backlog/priorizacao.md) · [Dependências](../backlog/dependencias.md)                   | ✅          |
+| MVP (evidências)                      | Kanban Build F09–F18 + vídeos por feature                         | OBJ1        | [Features Entregues IT1](../iteracoes/iteracao-1/features-entregues.md)                                                                                    | ✅          |
+| DoR e DoD                             | Critérios verificáveis + fluxo Kanban + gestão de mudanças        | OBJ1 + OBJ2 | [Visão](../visao/er.md) · [7 · DoR e DoD](../visao/dor-dod.md)                                                                                             | ✅          |
+| Rastreabilidade atualizada            | Matriz OE→CP→Feature→RF→RNF→RN→Validação                          | OBJ2        | [Backlog](../backlog/priorizacao.md) · [Rastreabilidade](../backlog/rastreabilidade.md)                                                                    | ✅          |
+| Evidências de execução de ESw e ER    | Atas, Partial + Formal Validation, Artifact Closure, registro V&V | OBJ1 + OBJ2 | [Atas IT1](../iteracoes/iteracao-1/atas/2026-06-14.md) · [Atas IT2](../iteracoes/iteracao-2/atas/2026-06-15.md) · [V&V IT1](../iteracoes/iteracao-1/vv.md) | ✅          |
+| Site do Projeto (GitPages)            | Documentação MkDocs versionada                                    | — (meio)    | [Todo o site](../index.md)                                                                                                                                 | ✅          |
+| Vídeo de apresentação                 | Gravação 15/06/2026                                               | — (formato) | [Entrega — Unidade 3](unidade-3.md)                                                                                                                        | 🔄 publicar |
 
 ---
 
