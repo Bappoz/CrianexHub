@@ -1,18 +1,14 @@
 # IT2 — Design Técnico
 
-Artefatos produzidos durante a fase de **Technical Design Review (TDR)** da IT2, aplicando a **Formalização Seletiva**: diagramas leves e acordos de arquitetura para mitigar riscos antes do desenvolvimento, seguidos de validação com os stakeholders.
+## Histórico de Revisão
+
+| Versão | Data       | Descrição                                                   | Autor(es)             |
+| ------ | ---------- | ----------------------------------------------------------- | --------------------- |
+| 1.0    | 15/06/2026 | Criação do documento com artefatos do TDR da IT2            | Heitor Macedo Ricardo |
 
 ---
 
-## Artefatos de Domain Modeling
-
-### Glossário de Domínio
-
-_A ser adicionado._
-
-### Diagrama de Domínio
-
-_A ser adicionado._
+Artefatos produzidos durante a fase de **Technical Design Review (TDR)** da IT2, aplicando **Formalização Seletiva**: diagramas leves e Feature Cards por feature, para mitigar riscos antes do desenvolvimento.
 
 ---
 
@@ -20,94 +16,62 @@ _A ser adicionado._
 
 ### CP1 — CRM Interno de Clientes
 
-#### F19 — Gerenciar clientes e leads
+#### F19 — Gerenciar clientes e leads para organização do relacionamento comercial
 
 **Diagrama Leve**
 
-_A ser adicionado._
+![Diagrama leve F19](../images/F19-diagrama-leve.svg)
 
 **Feature Card**
 
-_A ser adicionado._
+![Feature Card F19](../images/featurecard19.png)
 
 ---
 
-#### F20 — Gerenciar colunas do funil
+#### F20 — Gerenciar colunas do funil para personalização do processo comercial
 
 **Diagrama Leve**
 
-_A ser adicionado._
+![Diagrama leve F20](../images/F20-diagrama-leve.svg)
 
 **Feature Card**
 
-_A ser adicionado._
+![Feature Card F20](../images/featurecard20.png)
 
 ---
 
-#### F21 — Gerenciar cards do CRM
+#### F21 — Registrar interações comerciais para rastreamento do relacionamento
 
 **Diagrama Leve**
 
-_A ser adicionado._
+![Diagrama leve F21](../images/F21-diagrama-leve.svg)
 
 **Feature Card**
 
-_A ser adicionado._
-
----
-
-#### F22 — Registrar interações comerciais
-
-**Diagrama Leve**
-
-_A ser adicionado._
-
-**Feature Card**
-
-_A ser adicionado._
+![Feature Card F21](../images/featurecard21.png)
 
 ---
 
 ### CP9 — Sistema de Notificações no Sistema
 
-#### F25 — Exibir histórico de notificações
+#### F07 — Acompanhar histórico e status de notificações
 
 **Diagrama Leve**
 
-_A ser adicionado._
+![Diagrama leve F07](../images/F07-diagrama-leve.svg)
 
 **Feature Card**
 
-_A ser adicionado._
+![Feature Card F07](../images/featurecard07.png)
 
 ---
 
-#### F26 — Controlar estado das notificações
+#### F08 — Gerenciar templates de notificações
 
 **Diagrama Leve**
 
-_A ser adicionado._
+![Diagrama leve F08](../images/F08-diagrama-leve.svg)
 
 **Feature Card**
 
-_A ser adicionado._
-
----
-
-#### F27 — Gerenciar templates de notificações
-
-**Diagrama Leve**
-
-_A ser adicionado._
-
-**Feature Card**
-
-_A ser adicionado._
-
----
-
-## Validação pelo Cliente (Domain Expert)
-
-| Feedback Recebido | Aprovação | Ação Tomada |
-| ----------------- | --------- | ----------- |
-| —                 | —         | —           |
+![Feature Card F08](../images/featurecard08.png)
