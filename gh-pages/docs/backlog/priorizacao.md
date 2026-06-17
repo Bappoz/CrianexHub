@@ -123,7 +123,7 @@ A matriz posiciona cada feature no plano Valor × Esforço. O quadrante superior
 | F14 | Exibir canais de contato na Vitrine                                          | CP4 | OE2 | 50  | 20  | 2,5  | Q1        | <span class="badge badge--green">MVP</span>    |
 | F10 | Permitir acesso ao painel administrativo para gerenciamento da plataforma    | CP5 | OE2 | 50  | 21  | 2,38 | Q1        | <span class="badge badge--green">MVP</span>    |
 | F07 | Acompanhar histórico e status de notificações                                | CP9 | OE3 | 39  | 22  | 1,77 | Q1        | <span class="badge badge--green">MVP</span>    |
-| F08 | Gerenciar templates de notificações                                          | CP9 | OE3 | 22  | 12  | 1,83 | Q1        | <span class="badge badge--yellow">IT2\*</span> |
+| F08 | Gerenciar templates de notificações                                          | CP9 | OE3 | 21  | 16  | 1,31 | Q1        | <span class="badge badge--yellow">IT2\*</span> |
 | F22 | Acessar tickets para acompanhamento dos atendimentos                         | CP8 | OE3 | 25  | 19  | 1,31 | Q2        | <span class="badge badge--gray">Fora</span>    |
 | F23 | Gerenciar tickets para manutenção da operação de suporte                     | CP8 | OE3 | 20  | 18  | 1,11 | Q2        | <span class="badge badge--gray">Fora</span>    |
 | F06 | Gerar relatórios financeiros para exportação de dados                        | CP7 | OE1 | 22  | 22  | 1,00 | Q2        | <span class="badge badge--gray">Fora</span>    |
