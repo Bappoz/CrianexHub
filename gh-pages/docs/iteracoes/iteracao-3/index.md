@@ -1,8 +1,11 @@
 # IT3 — Núcleo Operacional
 
-**Período previsto:**
-**Status:** 🕐 Planejada
+**Período previsto:** Pós-disciplina (data a definir)
+**Status:** <span class="badge badge--gray">Pausada</span>
 **Meta:**
+
+!!! warning "Iteração pausada — adiamento do calendário acadêmico (18/06/2026)"
+O professor adiou o prazo final da disciplina e a Unidade 4 passa a ser a última entrega do semestre. Não há mais janela de tempo dentro da disciplina para iniciar a IT3 — ela fica pausada e só será executada, se for o caso, **pós-disciplina**. Detalhes em [Resultados V&V da IT2](../iteracao-2/vv.md) e em [5.2/5.6 do Cronograma](../../visao/cronograma.md#52-roadmap-de-iteracoes).
 
 ---
 
@@ -50,12 +53,7 @@ Esta seção será preenchida durante e ao final da IT4.
 
 | US  | Feature                             | Critério | Validado por | Data |
 | --- | ----------------------------------- | -------- | ------------ | ---- |
-| —   | F-12 — CRUD produtos admin          | —        | —            | —    |
-| —   | F-13 — Publicar/despublicar produto | —        | —            | —    |
-| —   | F-14 — Consultar FAQ (visitante)    | —        | —            | —    |
-| —   | F-15 — Gerenciar FAQ (admin)        | —        | —            | —    |
-| —   | F-20 — Formulário de contato        | —        | —            | —    |
-| —   | F-21 — Notificação de novo lead     | —        | —            | —    |
+| —   |                                     | —        | —            | —    |
 
 ### Validação pelo Cliente / Professor
 

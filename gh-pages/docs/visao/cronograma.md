@@ -14,6 +14,7 @@
 | 1.7    | 06/05/2026 | Adição de CP14 (Portal do Cliente) na iteração Pós-venda                                               | Lucas A. Zanetti |
 | 1.8    | 06/06/2026 | Substituição da imagem por fluxograma Mermaid corrigido (modelo FDD sem Modelar/Descobrir/Especificar) | Lucas A. Zanetti |
 | 1.9    | 07/06/2026 | Adição da seção 5.6 — Calendário (abril–julho) com iterações, cerimônias e eventos da disciplina       | Lucas A. Zanetti |
+| 1.10   | 18/06/2026 | Adiamento do prazo de entrega da disciplina: Unidade 4 passa a ser a última entrega (sem unidade intermediária adicional), IT3 pausada/pós-disciplina, IT2 estendida até 30/06 e calendário de junho/julho atualizado | Equipe Crianex   |
 
 ---
 
@@ -56,9 +57,13 @@ O quadro abaixo apresenta os ciclos de trabalho planejados, organizados por **Va
 
 | Iteração | Status | Período         | Valor de Negócio                                  | CPs                                                                                                                                                   | Iteration Goal                                                                                                                                                                                                                                                                                                                                                | Validação                                                                                |
 | -------- | ------ | --------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **IT1**  | ✅     | 28/04 até 07/06 | **Vitrine Pública**                               | [CP4](solucao.md#características-do-produto-cp) · [CP5](solucao.md#características-do-produto-cp) · [CP6](solucao.md#características-do-produto-cp)   | Ao fim da IT1: (1) qualquer visitante navega pela vitrine pública, visualiza o catálogo de produtos SaaS e consulta informações institucionais e de contato; (2) um administrador autenticado gerencia produtos, membros e FAQ via painel seguro; e (3) visitantes consultam e avaliam artigos do FAQ — com Formal Client Validation aprovada pelo cliente. " | Partial Validation contínua. Formal Validation com demo focada em conversão e navegação. |
-| **IT2**  | 🔄     | 08/06 até 28/06 | **Lead Capture**                                  | [CP1](solucao.md#características-do-produto-cp) · [CP8](solucao.md#características-do-produto-cp) · [CP9](solucao.md#características-do-produto-cp)   | "Leads de novos visitantes são capturados via formulário público e registrados automaticamente no CRM; dúvidas comuns são resolvidas pelo FAQ sem abertura de ticket; e receitas por produto são controladas centralmente com exportação de relatórios."                                                                                                      | Validação ponta a ponta: lead submetido no formulário aparece como card no CRM;          |
-| **IT3**  | ⏳     | 29/06 até 07/07 | **Núcleo Operacional** _(extra · não priorizada)_ | [CP2](solucao.md#características-do-produto-cp) · [CP3](solucao.md#características-do-produto-cp) · [CP7](solucao.md#características-do-produto-cp) · | "A equipe interna acessa o CRM Kanban, o Dashboard Executivo e o painel de logs unificados a partir de um único ponto de autenticação."                                                                                                                                                                                                                       | Validação do cruzamento de logs e tickets; métricas operacionais com os sócios.          |
+| **IT1**  | <span class="badge badge--green">Concluída</span>     | 28/04 até 07/06 | **Vitrine Pública**                               | [CP4](solucao.md#características-do-produto-cp) · [CP5](solucao.md#características-do-produto-cp) · [CP6](solucao.md#características-do-produto-cp)   | Ao fim da IT1: (1) qualquer visitante navega pela vitrine pública, visualiza o catálogo de produtos SaaS e consulta informações institucionais e de contato; (2) um administrador autenticado gerencia produtos, membros e FAQ via painel seguro; e (3) visitantes consultam e avaliam artigos do FAQ — com Formal Client Validation aprovada pelo cliente. " | Partial Validation contínua. Formal Validation com demo focada em conversão e navegação. |
+| **IT2**  | <span class="badge badge--blue">Em andamento</span>     | 08/06 até 30/06 | **Lead Capture**                                  | [CP1](solucao.md#características-do-produto-cp) · [CP8](solucao.md#características-do-produto-cp) · [CP9](solucao.md#características-do-produto-cp)   | "Leads de novos visitantes são capturados via formulário público e registrados automaticamente no CRM; dúvidas comuns são resolvidas pelo FAQ sem abertura de ticket; e receitas por produto são controladas centralmente com exportação de relatórios."                                                                                                      | Validação ponta a ponta: lead submetido no formulário aparece como card no CRM;          |
+| **IT3**  | <span class="badge badge--gray">Pausada</span>     | Pós-disciplina (data a definir) | **Núcleo Operacional** _(extra · não priorizada)_ | [CP2](solucao.md#características-do-produto-cp) · [CP3](solucao.md#características-do-produto-cp) · [CP7](solucao.md#características-do-produto-cp) · | "A equipe interna acessa o CRM Kanban, o Dashboard Executivo e o painel de logs unificados a partir de um único ponto de autenticação."                                                                                                                                                                                                                       | Validação do cruzamento de logs e tickets; métricas operacionais com os sócios.          |
+
+> **Nota — adiamento do calendário acadêmico (18/06/2026):** o professor adiou o prazo final da disciplina. A Unidade 4 passa a ser a última entrega acadêmica do semestre (não há mais nenhuma unidade entre a Unidade 4 e o que já foi entregue até aqui). Como consequência, a **IT3 — Núcleo Operacional** fica **pausada**: não há mais janela de tempo dentro da disciplina para executá-la — ela só será iniciada, se for o caso, **pós-disciplina**. Detalhes do registro de mudança em [Resultados V&V da IT2](../iteracoes/iteracao-2/vv.md).
+
+> **Por que tão poucas iterações?** O FDD adotado neste projeto trabalha com **iterações longas** (3 a 4 semanas cada), e não com sprints curtos de 1-2 semanas como no Scrum. Por isso o roadmap tem apenas duas ou três iterações no semestre — cada uma é internamente organizada por semana (ver [5.3 Cadência Semanal](#53-cadencia-semanal-de-uma-iteracao)), mas o ciclo completo de Planning → Design → Build → Validação só se fecha no fim de cada iteração.
 
 ---
 
@@ -126,7 +131,7 @@ Cada iteração só é considerada **encerrada** quando todos os critérios abai
 
 Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina e feriados (abril–julho/2026).
 
-> A **IT3 — Núcleo Operacional** é uma iteração com requisitos **não priorizada**: seram executadas pós disciplina.
+> A **IT3 — Núcleo Operacional** está **pausada** desde o adiamento do prazo final da disciplina (18/06/2026): não há mais data prevista neste calendário, podendo ser executada **pós-disciplina** (ver nota em [5.2 Roadmap de Iterações](#52-roadmap-de-iteracoes)).
 
 === "Abril"
 
@@ -162,29 +167,29 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-facultativo"><span class="cc-num">7</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">8</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">9</span><span class="cc-event">Documentanção para a U1</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">10</span><span class="cc-event">Documentanção para a U1</span></div>
-      <div class="cc-cell cc-gravacao"><span class="cc-num">11</span><span class="cc-event">Gravação Vídeo U1</span></div>
-      <div class="cc-cell cc-gravacao"><span class="cc-num">12</span><span class="cc-event">Gravação Vídeo U1</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">10</span></div>
+      <div class="cc-cell cc-gravacao"><span class="cc-num">11</span><span class="cc-event"><a href="../../entregas/unidade-1/">Gravação Vídeo U1</a></span></div>
+      <div class="cc-cell cc-gravacao"><span class="cc-num">12</span><span class="cc-event"><a href="../../entregas/unidade-1/">Gravação Vídeo U1</a></span></div>
       <!-- Semana 3 — Abr 13 a 19 -->
       <div class="cc-cell cc-entrega"><span class="cc-num">13</span><span class="cc-event">Entrega Unidade 1</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">14</span><span class="cc-event">Apresentações U1</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">15</span><span class="cc-event">Apresentações U1</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">16</span><span class="cc-event">Apresentações U1</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">17</span><span class="cc-event">Correções U1</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">17</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/atas/ata_compromisso_correcoes">Correções U1</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">18</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">19</span></div>
       <!-- Semana 4 — Abr 20 a 26 -->
       <div class="cc-cell cc-facultativo"><span class="cc-num">20</span></div>
       <div class="cc-cell cc-feriado"><span class="cc-num">21</span><span class="cc-event">Tiradentes</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">22</span><span class="cc-event">Domain Modeling Workshop</span><span class="cc-event">Iteration Replenishment Macro</span><span class="cc-event">Commitment</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">22</span><span class="cc-event">Domain Modeling Workshop</a></span><span class="cc-event">Iteration Replenishment Macro</a></span><span class="cc-event">Commitment</a></span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">23</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">24</span></div>
-      <div class="cc-cell cc-facultativo"><span class="cc-num">25</span><span class="cc-event">Feature Discovery Session</span></div>
+      <div class="cc-cell cc-facultativo"><span class="cc-num">25</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/atas/ata_feature_discovery">Feature Discovery Session</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">26</span></div>
       <!-- Semana 5 — Abr 27 a Mai 3 -->
       <div class="cc-cell cc-facultativo"><span class="cc-num">27</span><span class="cc-event">Prep IT1</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">28</span><span class="cc-event">IT1 Início</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">29</span><span class="cc-event">Replenishment Micro</span><span class="cc-event">Commitment</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">28</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/">IT1 Início</a></span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">29</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/atas/ata_replenishment_micro_commitment/">Replenishment Micro</a></span><span class="cc-event"><a href="../../iteracoes/iteracao-1/atas/ata_replenishment_micro_commitment/">Commitment</a></span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">30</span></div>
       <div class="cc-cell cc-outro"><span class="cc-num">1</span></div>
       <div class="cc-cell cc-outro"><span class="cc-num">2</span></div>
@@ -226,7 +231,7 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-it1"><span class="cc-num">6</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">7</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">8</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">9</span><span class="cc-event">Technical Design Review</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">9</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/atas/ata_technical_design_review/">Technical Design Review</a></span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">10</span></div>
       <!-- Semana 3 — Mai 11 a 17 -->
       <div class="cc-cell cc-it1"><span class="cc-num">11</span><span class="cc-event">Kanban Build (dependências)</span></div>
@@ -238,20 +243,20 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-entrega"><span class="cc-num">16</span><span class="cc-event">Documentação de evidências para a U2</span></div>
       <div class="cc-cell cc-gravacao"><span class="cc-num">17</span><span class="cc-event">Rajustes finais no Pages</span></div>
       <!-- Semana 4 — Mai 18 a 24 -->
-      <div class="cc-cell cc-gravacao"><span class="cc-num">18</span><span class="cc-event">Gravação Vídeo U2</span></div>
+      <div class="cc-cell cc-gravacao"><span class="cc-num">18</span><span class="cc-event"><a href="../../entregas/unidade-2/">Gravação Vídeo U2</a></span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">19</span><span class="cc-event">Apresentações U2</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">20</span><span class="cc-event">Apresentações U2</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">21</span><span class="cc-event">Apresentações U2</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">22</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">23</span><span class="cc-event">Kanban Build</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">23</span><span class="cc-event">Kanban Build</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/validacao/partial">Partial Client Validation</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">24</span></div>
       <!-- Semana 5 — Mai 25 a 31 -->
       <div class="cc-cell cc-it1"><span class="cc-num">25</span><span class="cc-event">Feature Build Consolidation</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">26</span><span class="cc-event">Kanban Build</span><span class="cc-event">Midweek Sync</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">26</span><span class="cc-event">Kanban Build</span><span class="cc-event">Midweek Sync</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/validacao/partial">Partial Client Validation</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">27</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">28</span><span class="cc-event">Kanban Build</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">28</span><span class="cc-event">Kanban Build</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/validacao/partial">Partial Client Validation</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">29</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">30</span><span class="cc-event">Kanban Build</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">30</span><span class="cc-event">Kanban Build</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/validacao/partial">Partial Client Validation</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">31</span></div>
     </div>
     </div>
@@ -261,7 +266,6 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
     <div class="calendar-legend">
       <div class="legend-item"><span class="legend-color lc-it1"></span> IT1 — Vitrine Pública</div>
       <div class="legend-item"><span class="legend-color lc-it2"></span> IT2 — Lead Capture</div>
-      <div class="legend-item"><span class="legend-color lc-it3"></span> IT3 — Núcleo Operacional (extra)</div>
       <div class="legend-item"><span class="legend-color lc-apresentacao"></span> Apresentações</div>
       <div class="legend-item"><span class="legend-color lc-gravacao"></span> Gravação de Vídeo</div>
       <div class="legend-item"><span class="legend-color lc-feriado"></span> Feriado</div>
@@ -279,23 +283,23 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-header">Sáb</div>
       <div class="cc-cell cc-header">Dom</div>
       <!-- Semana 1 — Jun 1 a 7 -->
-      <div class="cc-cell cc-it1"><span class="cc-num">1</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">1</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/validacao/partial">Partial Client Validation</span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">2</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">3</span><span class="cc-event">Formal Client Validation</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">3</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/validacao/formal/">Formal Client Validation</a></span></div>
       <div class="cc-cell cc-feriado"><span class="cc-num">4</span><span class="cc-event">Corpus Christi</span></div>
       <div class="cc-cell cc-facultativo"><span class="cc-num">5</span><span class="cc-event">Ponto Facultativo</span></div>
-      <div class="cc-cell cc-it1"><span class="cc-num">6</span><span class="cc-event">Iteration Artifact Closure</span></div>
+      <div class="cc-cell cc-it1"><span class="cc-num">6</span><span class="cc-event"><a href="../../iteracoes/iteracao-1/atas/ata_artifact_closure/">Iteration Artifact Closure</a></span></div>
       <div class="cc-cell cc-it1"><span class="cc-num">7</span><span class="cc-event">Fim IT1</span></div>
       <!-- Semana 2 — Jun 8 a 14 -->
-      <div class="cc-cell cc-it2"><span class="cc-num">8</span><span class="cc-event">IT2 Início</span></div>
-      <div class="cc-cell cc-it2"><span class="cc-num">9</span><span class="cc-event">Replenishment Micro</span><span class="cc-event">Commitment</span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">8</span><span class="cc-event"><a href="../../iteracoes/iteracao-2/">IT2 Início</a></span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">9</span><span class="cc-event"><a href="../../iteracoes/iteracao-2/atas/reuniao_commitment/">Replenishment Micro</a></span><span class="cc-event"><a href="../../iteracoes/iteracao-2/atas/reuniao_commitment/">Commitment</a></span></div>
       <div class="cc-cell cc-it2"><span class="cc-num">10</span></div>
-      <div class="cc-cell cc-it2"><span class="cc-num">11</span><span class="cc-event">Technical Design Review</span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">11</span><span class="cc-event"><a href="../../iteracoes/iteracao-2/atas/reuniao_TDR2/">Technical Design Review</a></span></div>
       <div class="cc-cell cc-it2"><span class="cc-num">12</span></div>
       <div class="cc-cell cc-it2"><span class="cc-num">13</span><span class="cc-event">Documentações para a U3</span></div>
       <div class="cc-cell cc-it2"><span class="cc-num">14</span><span class="cc-event">Documentação para a U3</span></div>
       <!-- Semana 3 — Jun 15 a 21 -->
-      <div class="cc-cell cc-gravacao"><span class="cc-num">15</span><span class="cc-event">Gravação Vídeo U3</span></div>
+      <div class="cc-cell cc-gravacao"><span class="cc-num">15</span><span class="cc-event"><a href="../../entregas/unidade-3/">Gravação Vídeo U3</a></span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">16</span><span class="cc-event">Apresentações U3</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">17</span><span class="cc-event">Apresentações U3</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">18</span><span class="cc-event">Apresentações U3</span></div>
@@ -308,11 +312,11 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <div class="cc-cell cc-it2"><span class="cc-num">24</span><span class="cc-event">Kanban Build</span><span class="cc-event">Midweek Sync</span></div>
       <div class="cc-cell cc-it2"><span class="cc-num">25</span><span class="cc-event">Kanban Build</span></div>
       <div class="cc-cell cc-it2"><span class="cc-num">26</span><span class="cc-event">Feature Build Consolidation</span></div>
-      <div class="cc-cell cc-it2"><span class="cc-num">27</span><span class="cc-event">Partial Client Validation</span><span class="cc-event">Formal Client Validation</span></div>
-      <div class="cc-cell cc-it2"><span class="cc-num">28</span><span class="cc-event">Iteration Artifact Closure</span><span class="cc-event">Fim IT2</span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">27</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">28</span><span class="cc-event">Kanban Build (ajustes finais)</span></div>
       <!-- Semana 5 — Jun 29 a Jul 5 -->
-      <div class="cc-cell cc-it3"><span class="cc-num">29</span><span class="cc-event">IT3 Início (extra)</span><span class="cc-event">Replenishment Micro</span><span class="cc-event">Commitment</span></div>
-      <div class="cc-cell cc-it3"><span class="cc-num">30</span><span class="cc-event">Technical Design Review</span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">29</span><span class="cc-event"><a href="../../iteracoes/iteracao-2/validacao/formal/">Formal Client Validation</a></span></div>
+      <div class="cc-cell cc-it2"><span class="cc-num">30</span><span class="cc-event"><a href="../../iteracoes/iteracao-2/">Iteration Artifact Closure</a></span><span class="cc-event">Fim IT2</span></div>
       <div class="cc-cell cc-outro"><span class="cc-num">1</span></div>
       <div class="cc-cell cc-outro"><span class="cc-num">2</span></div>
       <div class="cc-cell cc-outro"><span class="cc-num">3</span></div>
@@ -324,7 +328,6 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
 === "Julho"
 
     <div class="calendar-legend">
-      <div class="legend-item"><span class="legend-color lc-it3"></span> IT3 — Núcleo Operacional (extra)</div>
       <div class="legend-item"><span class="legend-color lc-entrega"></span> Entrega (disciplina)</div>
       <div class="legend-item"><span class="legend-color lc-apresentacao"></span> Apresentações</div>
       <div class="legend-item"><span class="legend-color lc-gravacao"></span> Gravação de Vídeo</div>
@@ -344,22 +347,22 @@ Consolidação temporal de iterações, cerimônias FDD, entregas da disciplina 
       <!-- Semana 1 — Jun 29 a Jul 5 -->
       <div class="cc-cell cc-outro"><span class="cc-num">29</span></div>
       <div class="cc-cell cc-outro"><span class="cc-num">30</span></div>
-      <div class="cc-cell cc-it3"><span class="cc-num">1</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it3"><span class="cc-num">2</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it3"><span class="cc-num">3</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it3"><span class="cc-num">4</span><span class="cc-event">Kanban Build</span></div>
-      <div class="cc-cell cc-it3"><span class="cc-num">5</span><span class="cc-event">Feature Build Consolidation</span><span class="cc-event">Partial Client Validation</span></div>
+      <div class="cc-cell cc-gravacao"><span class="cc-num">1</span><span class="cc-event"><a href="../../entregas/unidade-4/">Gravação Vídeo U4</a></span><span class="cc-event">Preparação de Slides</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">2</span><span class="cc-event">Apresentações U4</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">3</span><span class="cc-event">Apresentações U4</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">4</span><span class="cc-event">Apresentações U4</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">5</span><span class="cc-event">Apresentações U4</span></div>
       <!-- Semana 2 — Jul 6 a 12 -->
-      <div class="cc-cell cc-gravacao"><span class="cc-num">6</span><span class="cc-event">Gravação Vídeo U4</span></div>
-      <div class="cc-cell cc-apresentacao"><span class="cc-num">7</span><span class="cc-event">Apresentações U4</span><span class="cc-event">Iteration Artifact Closure</span><span class="cc-event">Fim IT3</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">6</span><span class="cc-event">Apresentações U4</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">7</span><span class="cc-event">Apresentações U4</span></div>
       <div class="cc-cell cc-apresentacao"><span class="cc-num">8</span><span class="cc-event">Apresentações U4</span></div>
-      <div class="cc-cell cc-apresentacao"><span class="cc-num">9</span><span class="cc-event">Apresentações U4</span></div>
+      <div class="cc-cell cc-apresentacao"><span class="cc-num">9</span><span class="cc-event">Apresentações U4</span><span class="cc-event">Fim Unidade 4</span></div>
       <div class="cc-cell cc-vazio"><span class="cc-num">10</span></div>
       <div class="cc-cell cc-vazio"><span class="cc-num">11</span></div>
       <div class="cc-cell cc-vazio"><span class="cc-num">12</span></div>
       <!-- Semana 3 — Jul 13 a 19 -->
       <div class="cc-cell cc-vazio"><span class="cc-num">13</span></div>
-      <div class="cc-cell cc-vazio"><span class="cc-num">14</span></div>
+      <div class="cc-cell cc-entrega"><span class="cc-num">14</span><span class="cc-event">Prova Final da Disciplina</span></div>
       <div class="cc-cell cc-vazio"><span class="cc-num">15</span></div>
       <div class="cc-cell cc-vazio"><span class="cc-num">16</span></div>
       <div class="cc-cell cc-vazio"><span class="cc-num">17</span></div>

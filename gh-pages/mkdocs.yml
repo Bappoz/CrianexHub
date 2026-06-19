@@ -52,7 +52,6 @@ nav:
       - 'Unidade 1':
           - 'Resumo — Evidências': iteracoes/unidade-1/index.md
           - 'Ata — 09/04/2026': iteracoes/unidade-1/atas/2026-04-09.md
-          - 'Ata Domain Modeling, Replenishment Macro e Commitment — 22/04/2026': iteracoes/unidade-1/atas/2026-04-22.md
       - 'IT1 — Vitrine Pública':
           - 'Resumo': iteracoes/iteracao-1/index.md
           - 'Features Entregues': iteracoes/iteracao-1/features-entregues.md
@@ -64,11 +63,12 @@ nav:
               - 'Formal Client Validation': iteracoes/iteracao-1/validacao/formal.md
           - 'Resultados V&V': iteracoes/iteracao-1/vv.md
           - 'Atas de Reunião':
-              - 'Ata Compromisso das correções — 01/05/2026': iteracoes/iteracao-1/atas/2026-05-01.md
-              - 'Ata Feature Discovery Session — 11/05/2026': iteracoes/iteracao-1/atas/2026-05-11.md
-              - 'Ata Refinamento Requisitos — 14/05/2026': iteracoes/iteracao-1/atas/2026-05-14.md
-              - 'Ata Technical Design Review — 17/05/2026': iteracoes/iteracao-1/atas/2026-05-17.md
-              - 'Ata Artifact Closure — 14/06/2026': iteracoes/iteracao-1/atas/2026-06-14.md
+              - 'Ata Compromisso das correções — 01/05/2026': iteracoes/iteracao-1/atas/ata_compromisso_correcoes.md
+              - 'Ata Replenishment Micro e Commitment — 10/05/2026': iteracoes/iteracao-1/atas/ata_replenishment_micro_commitment.md
+              - 'Ata Feature Discovery Session — 11/05/2026': iteracoes/iteracao-1/atas/ata_feature_discovery_session.md
+              - 'Ata Refinamento Requisitos — 14/05/2026': iteracoes/iteracao-1/atas/ata_refinamento_requisitos.md
+              - 'Ata Technical Design Review — 17/05/2026': iteracoes/iteracao-1/atas/ata_technical_design_review.md
+              - 'Ata Artifact Closure — 14/06/2026': iteracoes/iteracao-1/atas/ata_artifact_closure.md
       - 'IT2 — Lead Capture':
           - 'Resumo': iteracoes/iteracao-2/index.md
           - 'Features Entregues': iteracoes/iteracao-2/features-entregues.md
@@ -77,7 +77,7 @@ nav:
           - 'Validação':
               - 'Partial Client Validation': iteracoes/iteracao-2/validacao/partial.md
               - 'Formal Client Validation': iteracoes/iteracao-2/validacao/formal.md
-          # - 'Resultados V&V': iteracoes/iteracao-2/vv.md
+          - 'Resultados V&V': iteracoes/iteracao-2/vv.md
           - 'Atas de Reunião':
               - 'Ata Iteration 2 Replenishment Micro e Commitment': iteracoes/iteracao-2/atas/reuniao_commitment.md
               - 'Technical Design Review IT2': iteracoes/iteracao-2/atas/reuniao_TDR2.md

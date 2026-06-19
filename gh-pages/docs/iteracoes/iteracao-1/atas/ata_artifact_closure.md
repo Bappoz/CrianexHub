@@ -53,9 +53,9 @@ Priorização corrigida de _bottom-up_ para _top-down_, atendendo ao apontamento
 
 | Item                        | Status                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------- |
-| PBB e BDD                   | ✅ Confirmado que o professor não irá avaliar nestas metodologias nesta entrega |
-| DoR / DoD                   | ⚠️ Necessitam pequenos ajustes pela integrante Camille                          |
-| GitHub Pages (documentação) | ⚠️ Atualizar com novos diagramas de sequência simplificados da IT2              |
+| PBB e BDD                   | <span class="badge badge--green">Confirmado</span> Professor não irá avaliar nestas metodologias nesta entrega |
+| DoR / DoD                   | <span class="badge badge--yellow">Atenção</span> Necessitam pequenos ajustes pela integrante Camille                          |
+| GitHub Pages (documentação) | <span class="badge badge--yellow">Atenção</span> Atualizar com novos diagramas de sequência simplificados da IT2              |
 
 ---
 

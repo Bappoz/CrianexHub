@@ -34,14 +34,14 @@ A Unidade 1 cobriu a fase de elicitação e definição do projeto: entender o c
 
 | #   | Artefato / Entregável                                                    | Status |
 | --- | ------------------------------------------------------------------------ | ------ |
-| 1   | Documento de Visão — Cenário e problema do cliente                       | ✅     |
-| 2   | Documento de Visão — Solução proposta (OEs, CPs, Value Matrix)           | ✅     |
-| 3   | Documento de Visão — Estratégias e posicionamento de produto             | ✅     |
-| 4   | Documento de Visão — Engenharia de Requisitos (metodologia FDD + Kanban) | ✅     |
-| 5   | Documento de Visão — Cronograma de iterações com roadmap                 | ✅     |
-| 6   | Documento de Visão — Equipe, papéis FDD e cadência de cerimônias         | ✅     |
-| 7   | Documento de Visão — DoR e DoD formalizados                              | ✅     |
-| 8   | Vídeo de apresentação gravado e entregue                                 | ✅     |
+| 1   | Documento de Visão — Cenário e problema do cliente                       | <span class="badge badge--green">Concluído</span>     |
+| 2   | Documento de Visão — Solução proposta (OEs, CPs, Value Matrix)           | <span class="badge badge--green">Concluído</span>     |
+| 3   | Documento de Visão — Estratégias e posicionamento de produto             | <span class="badge badge--green">Concluído</span>     |
+| 4   | Documento de Visão — Engenharia de Requisitos (metodologia FDD + Kanban) | <span class="badge badge--green">Concluído</span>     |
+| 5   | Documento de Visão — Cronograma de iterações com roadmap                 | <span class="badge badge--green">Concluído</span>     |
+| 6   | Documento de Visão — Equipe, papéis FDD e cadência de cerimônias         | <span class="badge badge--green">Concluído</span>     |
+| 7   | Documento de Visão — DoR e DoD formalizados                              | <span class="badge badge--green">Concluído</span>     |
+| 8   | Vídeo de apresentação gravado e entregue                                 | <span class="badge badge--green">Concluído</span>     |
 
 ---
 

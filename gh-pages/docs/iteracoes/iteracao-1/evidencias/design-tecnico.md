@@ -258,10 +258,10 @@ Artefato gerado a partir da **Domain Modeling** do FDD em reunião com os stakeh
 
 | Feedback Recebido                                                                   | Aprovação   | Ação Tomada                                                                                           |
 | ----------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------- |
-| Formato de priorização muito claro — motivo de cada item priorizado está explícito  | ✅ Elogio   | Mantido                                                                                               |
-| Features (RFs agrupados) não estão ordenados por prioridade — ao contrário dos RNFs | ✅ Correção | Tabela de Features reordenada por IP decrescente em [priorizacao.md](../../../backlog/priorizacao.md) |
-| Ausência de flag ou coluna indicando o que entra no MVP                             | ✅ Adição   | Coluna **MVP** adicionada nas tabelas de Features e RNFs (✅ Q1 = Alta / ❌ Q2 em diante)             |
-| Dificuldade de leitura de algumas tabelas no GitHub Pages                           | ✅ Registro | Tabelas revisadas                                                                                     |
+| Formato de priorização muito claro — motivo de cada item priorizado está explícito  | <span class="badge badge--green">Elogio</span>   | Mantido                                                                                               |
+| Features (RFs agrupados) não estão ordenados por prioridade — ao contrário dos RNFs | <span class="badge badge--green">Correção</span> | Tabela de Features reordenada por IP decrescente em [priorizacao.md](../../../backlog/priorizacao.md) |
+| Ausência de flag ou coluna indicando o que entra no MVP                             | <span class="badge badge--green">Adição</span>   | Coluna **MVP** adicionada nas tabelas de Features e RNFs (<span class="badge badge--green">Q1 = Alta</span> / <span class="badge badge--gray">Q2 em diante</span>)             |
+| Dificuldade de leitura de algumas tabelas no GitHub Pages                           | <span class="badge badge--green">Registro</span> | Tabelas revisadas                                                                                     |
 
 ### Feedback sobre o Protótipo
 

@@ -39,3 +39,45 @@
     init();
   }
 })();
+
+(function () {
+  function initLightbox() {
+    var images = document.querySelectorAll('.crianex-figure img');
+    if (!images.length) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'crianex-lightbox';
+    overlay.innerHTML = '<span class="crianex-lightbox-close">✕</span><img class="crianex-lightbox-img" alt="">';
+    document.body.appendChild(overlay);
+
+    var overlayImg = overlay.querySelector('.crianex-lightbox-img');
+
+    function close() {
+      overlay.classList.remove('open');
+    }
+
+    images.forEach(function (img) {
+      img.classList.add('crianex-zoomable');
+      img.addEventListener('click', function () {
+        overlayImg.src = img.currentSrc || img.src;
+        overlayImg.alt = img.alt || '';
+        overlay.classList.add('open');
+      });
+    });
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlayImg) return;
+      close();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLightbox);
+  } else {
+    initLightbox();
+  }
+})();

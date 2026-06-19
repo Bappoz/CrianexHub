@@ -1,7 +1,7 @@
 # IT1 — Vitrine Pública
 
 **Período:** 28/04/2026 – 07/06/2026  
-**Status:** ✅ Concluída
+**Status:** <span class="badge badge--green">Concluída</span>
 
 ## Iteration Goal
 
@@ -27,13 +27,13 @@ A entrega da unidade 2 ocorreu dia 19 de maio de 2026. Nossa iteração encerrou
 
 | Data       | Cerimônia                                                  | Participantes                                   | Ata                             |
 | ---------- | ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------- |
-| 29/04/2026 | **Domain Modeling & Iteration Replenishment & Commitment** | Lucas, Heitor, Hugo, Otávio (Cliente)           | [Ver ata](./atas/2026-05-10.md) |
-| 09/05/2026 | **Feature Discovery & Slicing**                            | Lucas, Heitor, Hugo, Philipe, Leonardo          | [Ver ata](./atas/2026-05-11.md) |
+| 29/04/2026 | **Domain Modeling & Iteration Replenishment & Commitment** | Lucas, Heitor, Hugo, Otávio (Cliente)           | [Ver ata](./atas/ata_replenishment_micro_commitment.md) |
+| 09/05/2026 | **Feature Discovery & Slicing**                            | Lucas, Heitor, Hugo, Philipe, Leonardo          | [Ver ata](./atas/ata_feature_discovery_session.md) |
 | 14/05/2026 | **Midweek Sync**                                           | Lucas, Heitor, Philipe, Hugo, Leonardo, Camille | Assíncrono                      |
-| 17/05/2026 | **Technical Design Review**                                | Lucas, Heitor, Philipe, Hugo, Leonardo, Camille | [Ver ata](./atas/2026-05-17.md) |
+| 17/05/2026 | **Technical Design Review**                                | Lucas, Heitor, Philipe, Hugo, Leonardo, Camille | [Ver ata](./atas/ata_technical_design_review.md) |
 | 25/05/2026 | **Feature Build Consolidation**                            | Lucas, Philipe, Heitor, Hugo                    | Optado por fazer assíncrono     |
 | 26/05/2026 | **Midweek Sync**                                           | Lucas, Heitor, Philipe, Hugo, Leonardo, Camille | Assíncrono                      |
-| 06/06/2026 | **Artifact Closure — Unidade 3**                           | Lucas, Philipe, Heitor, Hugo, Camile            | [Ver ata](./atas/2026-06-14.md) |
+| 06/06/2026 | **Artifact Closure — Unidade 3**                           | Lucas, Philipe, Heitor, Hugo, Camile            | [Ver ata](./atas/ata_artifact_closure.md) |
 
 ---
 

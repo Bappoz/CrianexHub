@@ -41,14 +41,14 @@ OBJ2 — Organização e Atualização de requisitos
 
 | Entregável exigido (PDF)              | Como a equipe atendeu                                             | Objetivo(s) | Evidência (link)                                                                                                                                           | Status      |
 | ------------------------------------- | ----------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| Visão de Produto e Projeto atualizada | Sincronização Visão × backlog (3 OEs / 9 CPs)                     | OBJ2        | [Home](../index.md) · [Visão 1–7](../visao/cenario.md)                                                                                                     | ✅          |
-| Backlog atualizado                    | IT2 Replenishment + Commitment; backlog congelado da IT1          | OBJ2        | [Rastreabilidade](../backlog/rastreabilidade.md) · [Priorização](../backlog/priorizacao.md) · [Dependências](../backlog/dependencias.md)                   | ✅          |
-| MVP (evidências)                      | Kanban Build F09–F18 + vídeos por feature                         | OBJ1        | [Features Entregues IT1](../iteracoes/iteracao-1/features-entregues.md)                                                                                    | ✅          |
-| DoR e DoD                             | Critérios verificáveis + fluxo Kanban + gestão de mudanças        | OBJ1 + OBJ2 | [Visão](../visao/er.md) · [7 · DoR e DoD](../visao/dor-dod.md)                                                                                             | ✅          |
-| Rastreabilidade atualizada            | Matriz OE→CP→Feature→RF→RNF→RN→Validação                          | OBJ2        | [Backlog](../backlog/priorizacao.md) · [Rastreabilidade](../backlog/rastreabilidade.md)                                                                    | ✅          |
-| Evidências de execução de ESw e ER    | Atas, Partial + Formal Validation, Artifact Closure, registro V&V | OBJ1 + OBJ2 | [Atas IT1](../iteracoes/iteracao-1/atas/2026-06-14.md) · [Atas IT2](../iteracoes/iteracao-2/atas/2026-06-15.md) · [V&V IT1](../iteracoes/iteracao-1/vv.md) | ✅          |
-| Site do Projeto (GitPages)            | Documentação MkDocs versionada                                    | — (meio)    | [Todo o site](../index.md)                                                                                                                                 | ✅          |
-| Vídeo de apresentação                 | Gravação 15/06/2026                                               | — (formato) | [Entrega — Unidade 3](unidade-3.md)                                                                                                                        | 🔄 publicar |
+| Visão de Produto e Projeto atualizada | Sincronização Visão × backlog (3 OEs / 9 CPs)                     | OBJ2        | [Home](../index.md) · [Visão 1–7](../visao/cenario.md)                                                                                                     | <span class="badge badge--green">Concluído</span>          |
+| Backlog atualizado                    | IT2 Replenishment + Commitment; backlog congelado da IT1          | OBJ2        | [Rastreabilidade](../backlog/rastreabilidade.md) · [Priorização](../backlog/priorizacao.md) · [Dependências](../backlog/dependencias.md)                   | <span class="badge badge--green">Concluído</span>          |
+| MVP (evidências)                      | Kanban Build F09–F18 + vídeos por feature                         | OBJ1        | [Features Entregues IT1](../iteracoes/iteracao-1/features-entregues.md)                                                                                    | <span class="badge badge--green">Concluído</span>          |
+| DoR e DoD                             | Critérios verificáveis + fluxo Kanban + gestão de mudanças        | OBJ1 + OBJ2 | [Visão](../visao/er.md) · [7 · DoR e DoD](../visao/dor-dod.md)                                                                                             | <span class="badge badge--green">Concluído</span>          |
+| Rastreabilidade atualizada            | Matriz OE→CP→Feature→RF→RNF→RN→Validação                          | OBJ2        | [Backlog](../backlog/priorizacao.md) · [Rastreabilidade](../backlog/rastreabilidade.md)                                                                    | <span class="badge badge--green">Concluído</span>          |
+| Evidências de execução de ESw e ER    | Atas, Partial + Formal Validation, Artifact Closure, registro V&V | OBJ1 + OBJ2 | [Atas IT1](../iteracoes/iteracao-1/atas/ata_artifact_closure.md) · [Atas IT2](../iteracoes/iteracao-2/atas/reuniao_TDR2.md) · [V&V IT1](../iteracoes/iteracao-1/vv.md) | <span class="badge badge--green">Concluído</span>          |
+| Site do Projeto (GitPages)            | Documentação MkDocs versionada                                    | — (meio)    | [Todo o site](../index.md)                                                                                                                                 | <span class="badge badge--green">Concluído</span>          |
+| Vídeo de apresentação                 | Gravação 15/06/2026                                               | — (formato) | [Entrega — Unidade 3](unidade-3.md)                                                                                                                        | <span class="badge badge--blue">Publicar</span> |
 
 ---
 
@@ -60,9 +60,9 @@ A IT1 foi concluída com Formal Client Validation realizada em 07/06/2026. Todas
 
 | CP  | Característica                           | Features                | Status      |
 | --- | ---------------------------------------- | ----------------------- | ----------- |
-| CP4 | Vitrine Pública de Produtos SaaS         | F12, F13                | ✅ Aprovado |
-| CP5 | Painel de Gerenciamento do Administrador | F09, F10, F11           | ✅ Aprovado |
-| CP6 | FAQ e Base de Conhecimentos por Produto  | F14, F15, F16, F17, F18 | ✅ Aprovado |
+| CP4 | Vitrine Pública de Produtos SaaS         | F12, F13                | <span class="badge badge--green">Aprovado</span> |
+| CP5 | Painel de Gerenciamento do Administrador | F09, F10, F11           | <span class="badge badge--green">Aprovado</span> |
+| CP6 | FAQ e Base de Conhecimentos por Produto  | F14, F15, F16, F17, F18 | <span class="badge badge--green">Aprovado</span> |
 
 O registro completo das features entregues, com vídeos de evidência e validações, está em: [Features Entregues IT1](../iteracoes/iteracao-1/features-entregues.md)
 
@@ -71,7 +71,7 @@ O registro completo das features entregues, com vídeos de evidência e validaç
 | Cerimônia                            | Data       | Registro                                                                 |
 | ------------------------------------ | ---------- | ------------------------------------------------------------------------ |
 | Formal Client Validation IT1         | 03/06/2026 | [Formal Validation IT1](../iteracoes/iteracao-1/validacao/formal.md)     |
-| Artifact Closure IT1                 | 06/06/2026 | [Ata Artifact Closure](../iteracoes/iteracao-1/atas/2026-06-14.md)       |
+| Artifact Closure IT1                 | 06/06/2026 | [Ata Artifact Closure](../iteracoes/iteracao-1/atas/ata_artifact_closure.md)       |
 | IT2 Replenishment Micro + Commitment | 09/06/2026 | [Ata IT2 Commitment](../iteracoes/iteracao-2/atas/reuniao_commitment.md) |
 | Technical Design Review              | 11/06/2026 | [Technical Design Review](../iteracoes/iteracao-2/atas/reuniao_TDR2.md)  |
 
