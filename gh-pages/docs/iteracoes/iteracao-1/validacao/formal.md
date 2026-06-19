@@ -85,11 +85,11 @@ Registro da reunião formal de aceite realizada com o cliente (CEO da Crianex) a
 
 | Item Validado                          | Status | Observação               |
 | -------------------------------------- | ------ | ------------------------ |
-| Vitrine Pública (CP4)                  | ✅     | Aprovado pelo CEO        |
-| Painel de Gerenciamento Admin (CP5)    | ✅     | Aprovado pelo CEO        |
-| FAQ e Base de Conhecimentos (CP6)      | ✅     | Aprovado pelo CEO        |
-| Layout responsivo mobile (≥ 375 px)    | ✅     | Validado na demonstração |
-| Layout responsivo desktop (≥ 1 280 px) | ✅     | Validado na demonstração |
+| Vitrine Pública (CP4)                  | <span class="badge badge--green">Aprovado</span>     | Aprovado pelo CEO        |
+| Painel de Gerenciamento Admin (CP5)    | <span class="badge badge--green">Aprovado</span>     | Aprovado pelo CEO        |
+| FAQ e Base de Conhecimentos (CP6)      | <span class="badge badge--green">Aprovado</span>     | Aprovado pelo CEO        |
+| Layout responsivo mobile (≥ 375 px)    | <span class="badge badge--green">Aprovado</span>     | Validado na demonstração |
+| Layout responsivo desktop (≥ 1 280 px) | <span class="badge badge--green">Aprovado</span>     | Validado na demonstração |
 
 ---
 

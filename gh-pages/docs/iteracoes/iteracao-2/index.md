@@ -1,7 +1,7 @@
 # IT2 — Lead Capture
 
 **Período:** 08/06/2026 – 28/06/2026  
-**Status:** 🔄 Em andamento
+**Status:** <span class="badge badge--blue">Em andamento</span>
 
 ## Iteration Goal
 

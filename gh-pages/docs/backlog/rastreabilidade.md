@@ -40,6 +40,25 @@
 | OE2 | Aumentar a visibilidade do portfólio de projetos no mercado B2B | CP4, CP5, CP6  |
 | OE3 | Centralizar a gestão de Leads e clientes                        | CP1, CP8, CP9  |
 
+### Fluxo de Rastreabilidade — OE2
+
+Exportação visual do mapa completo de rastreabilidade vinculado ao **OE2** (Aumentar a visibilidade do portfólio de projetos no mercado B2B): CPs → Features → RFs → RNFs.
+
+<figure class="crianex-figure">
+  <img src="../images/CP5.png" alt="Mapa de rastreabilidade do OE2 — CP5">
+  <figcaption>Figura — Rastreabilidade completa do OE2 - CP5. Fonte: Elaborado pelos autores (2026).</figcaption>
+</figure>
+
+<figure class="crianex-figure">
+  <img src="../images/CP4.png" alt="Mapa de rastreabilidade do OE2 — CP4">
+  <figcaption>Figura — Rastreabilidade completa do OE2 - CP4. Fonte: Elaborado pelos autores (2026).</figcaption>
+</figure>
+
+<figure class="crianex-figure">
+  <img src="../images/CP6.png" alt="Mapa de rastreabilidade do OE2 — CP6">
+  <figcaption>Figura — Rastreabilidade completa do OE2 - CP6. Fonte: Elaborado pelos autores (2026).</figcaption>
+</figure>
+
 ---
 
 ## Características do Produto (CPs)

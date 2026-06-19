@@ -55,12 +55,12 @@ sequenceDiagram
 
 | Critério (BDD)                                                                              | RF / RNF     | Status |
 | ------------------------------------------------------------------------------------------- | ------------ | ------ |
-| Login com credenciais válidas → Supabase Auth gera sessão JWT → redirect `/admin/dashboard` | RF08         | ✅     |
-| MFA ativo → código TOTP solicitado antes de emitir sessão                                   | RF08 · RNF08 | ✅     |
-| Credenciais inválidas → 401 + mensagem genérica sem expor detalhes internos                 | RF08         | ✅     |
-| Logout → `signOut()` + invalida `refresh_token` + limpa cookie + redirect `/admin/login`    | RF09         | ✅     |
-| Acesso a `/admin` sem sessão → redirect `/admin/login` sem renderizar dados do painel       | RF09 · RNF01 | ✅     |
-| Tempo de autenticação ≤ 2s                                                                  | RNF03        | ✅     |
+| Login com credenciais válidas → Supabase Auth gera sessão JWT → redirect `/admin/dashboard` | RF08         | <span class="badge badge--green">Atende</span>     |
+| MFA ativo → código TOTP solicitado antes de emitir sessão                                   | RF08 · RNF08 | <span class="badge badge--green">Atende</span>     |
+| Credenciais inválidas → 401 + mensagem genérica sem expor detalhes internos                 | RF08         | <span class="badge badge--green">Atende</span>     |
+| Logout → `signOut()` + invalida `refresh_token` + limpa cookie + redirect `/admin/login`    | RF09         | <span class="badge badge--green">Atende</span>     |
+| Acesso a `/admin` sem sessão → redirect `/admin/login` sem renderizar dados do painel       | RF09 · RNF01 | <span class="badge badge--green">Atende</span>     |
+| Tempo de autenticação ≤ 2s                                                                  | RNF03        | <span class="badge badge--green">Atende</span>     |
 
 #### Evidências de Funcionamento
 
@@ -74,8 +74,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação |
 | ------------------ | ----- | --------- | ---------- |
-| Partial Validation | 23/05 | ✅        | —          |
-| Formal Validation  | 03/06 | ✅        | —          |
+| Partial Validation | 23/05 | <span class="badge badge--green">Atende</span>        | —          |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | —          |
 
 #### Observações
 
@@ -142,10 +142,10 @@ sequenceDiagram
 
 | Critério (BDD)                                                                                              | RF / RNF     | Status |
 | ----------------------------------------------------------------------------------------------------------- | ------------ | ------ |
-| JWT válido com `role = owner` → RLS filtra por `auth.uid()` + `auth.role()` → painel renderizado sem reload | RF10 · RNF09 | ⬜     |
-| JWT expirado → `refreshSession()` tentado; se falhar, redirect `/admin/login` sem renderizar dados          | RF10         | ⬜     |
-| Token inválido ou sem `role = owner` → 401/403 + redirect `/admin/login` sem expor estrutura                | RF10 · RNF01 | ⬜     |
-| Operação no painel → resposta entregue em ≤ 2s em condições normais                                         | RNF03        | ⬜     |
+| JWT válido com `role = owner` → RLS filtra por `auth.uid()` + `auth.role()` → painel renderizado sem reload | RF10 · RNF09 | <span class="badge badge--gray">Pendente</span>     |
+| JWT expirado → `refreshSession()` tentado; se falhar, redirect `/admin/login` sem renderizar dados          | RF10         | <span class="badge badge--gray">Pendente</span>     |
+| Token inválido ou sem `role = owner` → 401/403 + redirect `/admin/login` sem expor estrutura                | RF10 · RNF01 | <span class="badge badge--gray">Pendente</span>     |
+| Operação no painel → resposta entregue em ≤ 2s em condições normais                                         | RNF03        | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -157,8 +157,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                              |
 | ------------------ | ----- | --------- | --------------------------------------------------------------------------------------- |
-| Partial Validation | 23/05 | ✅        | CEO elogiou as telas enviadas, incluindo o dashboard de admin; estrutura e UX aprovadas |
-| Formal Validation  | 03/06 | ✅        | —                                                                                       |
+| Partial Validation | 23/05 | <span class="badge badge--green">Atende</span>        | CEO elogiou as telas enviadas, incluindo o dashboard de admin; estrutura e UX aprovadas |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | —                                                                                       |
 
 #### Observações
 
@@ -227,14 +227,14 @@ sequenceDiagram
 
 | Critério (BDD)                                                                                   | RF / RNF     | Status |
 | ------------------------------------------------------------------------------------------------ | ------------ | ------ |
-| Owner cadastra novo membro → `createUser()` + insert em `profiles` → lista atualizada sem reload | RF12         | ⬜     |
-| Email duplicado → erro informativo sem criar registro duplicado                                  | RF12         | ⬜     |
-| Owner edita dados de membro → RLS valida `role = owner` → persiste sem reload                    | RF11 · RNF09 | ⬜     |
-| Edição sem `role = owner` → bloqueio 403 pelo RLS sem persistir nada                             | RF11 · RNF09 | ⬜     |
-| Owner inativa membro → `active = false` + lista atualizada sem reload                            | RF13         | ⬜     |
-| Owner tenta inativar a própria conta → operação bloqueada com mensagem de erro                   | RF13         | ⬜     |
-| Owner remove membro → `deleteUser()` + remoção de `profiles` → lista atualizada sem reload       | RF14         | ⬜     |
-| Owner tenta remover a própria conta → bloqueado (ao menos um owner ativo garantido)              | RF14         | ⬜     |
+| Owner cadastra novo membro → `createUser()` + insert em `profiles` → lista atualizada sem reload | RF12         | <span class="badge badge--gray">Pendente</span>     |
+| Email duplicado → erro informativo sem criar registro duplicado                                  | RF12         | <span class="badge badge--gray">Pendente</span>     |
+| Owner edita dados de membro → RLS valida `role = owner` → persiste sem reload                    | RF11 · RNF09 | <span class="badge badge--gray">Pendente</span>     |
+| Edição sem `role = owner` → bloqueio 403 pelo RLS sem persistir nada                             | RF11 · RNF09 | <span class="badge badge--gray">Pendente</span>     |
+| Owner inativa membro → `active = false` + lista atualizada sem reload                            | RF13         | <span class="badge badge--gray">Pendente</span>     |
+| Owner tenta inativar a própria conta → operação bloqueada com mensagem de erro                   | RF13         | <span class="badge badge--gray">Pendente</span>     |
+| Owner remove membro → `deleteUser()` + remoção de `profiles` → lista atualizada sem reload       | RF14         | <span class="badge badge--gray">Pendente</span>     |
+| Owner tenta remover a própria conta → bloqueado (ao menos um owner ativo garantido)              | RF14         | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -246,8 +246,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                             |
 | ------------------ | ----- | --------- | -------------------------------------------------------------------------------------- |
-| Partial Validation | 26/05 | ✅        | CEO revisou as telas enviadas ("demais partes"); estrutura e fluxo do painel aprovados |
-| Formal Validation  | 03/06 | ✅        | —                                                                                      |
+| Partial Validation | 26/05 | <span class="badge badge--green">Atende</span>        | CEO revisou as telas enviadas ("demais partes"); estrutura e fluxo do painel aprovados |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | —                                                                                      |
 
 #### Observações
 
@@ -318,11 +318,11 @@ sequenceDiagram
 
 | Critério (BDD)                                                                 | RF / RNF        | Status |
 | ------------------------------------------------------------------------------ | --------------- | ------ |
-| Admin cadastra produto → persistido em transação ACID → apto para publicação   | RF21            | ⬜     |
-| Admin edita produto → dados substituídos no banco sem intervenção de dev       | RF22            | ⬜     |
-| Admin remove produto → excluído do catálogo e ausente na vitrine imediatamente | RF23            | ⬜     |
-| Requisição sem autorização → 401/403 sem executar operação no banco            | RF21–23 · RNF01 | ⬜     |
-| Vitrine pública renderiza via SSR → apenas `published = true` em ≤ 2s sem JS   | RNF02 · RNF21   | ⬜     |
+| Admin cadastra produto → persistido em transação ACID → apto para publicação   | RF21            | <span class="badge badge--gray">Pendente</span>     |
+| Admin edita produto → dados substituídos no banco sem intervenção de dev       | RF22            | <span class="badge badge--gray">Pendente</span>     |
+| Admin remove produto → excluído do catálogo e ausente na vitrine imediatamente | RF23            | <span class="badge badge--gray">Pendente</span>     |
+| Requisição sem autorização → 401/403 sem executar operação no banco            | RF21–23 · RNF01 | <span class="badge badge--gray">Pendente</span>     |
+| Vitrine pública renderiza via SSR → apenas `published = true` em ≤ 2s sem JS   | RNF02 · RNF21   | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -334,8 +334,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                           |
 | ------------------ | ----- | --------- | ------------------------------------------------------------------------------------ |
-| Partial Validation | 26/05 | ✅        | CEO elogiou a vitrine de produtos enviada; estrutura e apresentação visual aprovadas |
-| Formal Validation  | 03/06 | ✅        | —                                                                                    |
+| Partial Validation | 26/05 | <span class="badge badge--green">Atende</span>        | CEO elogiou a vitrine de produtos enviada; estrutura e apresentação visual aprovadas |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | —                                                                                    |
 
 #### Observações
 
@@ -395,9 +395,9 @@ sequenceDiagram
 
 | Critério (BDD)                                                                                 | RF / RNF     | Status |
 | ---------------------------------------------------------------------------------------------- | ------------ | ------ |
-| Admin aciona toggle para publicar → `published = true` + confirmação visual em ≤ 2s            | RF25 · RNF03 | ⬜     |
-| Admin aciona toggle para despublicar → produto ocultado da vitrine, dados preservados no banco | RF26 · RNF03 | ⬜     |
-| Credenciais inválidas no toggle → API rejeita → toggle revertido + mensagem de erro            | RF25 · RF26  | ⬜     |
+| Admin aciona toggle para publicar → `published = true` + confirmação visual em ≤ 2s            | RF25 · RNF03 | <span class="badge badge--gray">Pendente</span>     |
+| Admin aciona toggle para despublicar → produto ocultado da vitrine, dados preservados no banco | RF26 · RNF03 | <span class="badge badge--gray">Pendente</span>     |
+| Credenciais inválidas no toggle → API rejeita → toggle revertido + mensagem de erro            | RF25 · RF26  | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -409,8 +409,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                     |
 | ------------------ | ----- | --------- | ------------------------------------------------------------------------------ |
-| Partial Validation | 28/05 | ✅        | CEO revisou as telas enviadas ("demais partes"); controles do painel aprovados |
-| Formal Validation  | 03/06 | ✅        | —                                                                              |
+| Partial Validation | 28/05 | <span class="badge badge--green">Atende</span>        | CEO revisou as telas enviadas ("demais partes"); controles do painel aprovados |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | —                                                                              |
 
 #### Observações
 
@@ -470,8 +470,8 @@ sequenceDiagram
 
 | Critério (BDD)                                                               | RF / RNF     | Status |
 | ---------------------------------------------------------------------------- | ------------ | ------ |
-| Formulário válido → persistido em transação ACID → alerta de sucesso em ≤ 2s | RF27 · RNF02 | ⬜     |
-| Rate limit excedido (5 req/IP/10min) → 429 + "Tente novamente mais tarde"    | RNF10        | ⬜     |
+| Formulário válido → persistido em transação ACID → alerta de sucesso em ≤ 2s | RF27 · RNF02 | <span class="badge badge--gray">Pendente</span>     |
+| Rate limit excedido (5 req/IP/10min) → 429 + "Tente novamente mais tarde"    | RNF10        | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -483,8 +483,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                                                                                                               |
 | ------------------ | ----- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Partial Validation | 28/05 | ✅        | —                                                                                                                                                                        |
-| Formal Validation  | 03/06 | ✅        | Aprovado pelo CEO — formulário demonstrado com campo de aceite da política de privacidade (LGPD); funcionalidade de envio de e-mail confirmada como pronta para ativação |
+| Partial Validation | 28/05 | <span class="badge badge--green">Atende</span>        | —                                                                                                                                                                        |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | Aprovado pelo CEO — formulário demonstrado com campo de aceite da política de privacidade (LGPD); funcionalidade de envio de e-mail confirmada como pronta para ativação |
 
 #### Observações
 
@@ -532,10 +532,10 @@ sequenceDiagram
 
 | Critério (BDD)                                                                           | RF / RNF             | Status |
 | ---------------------------------------------------------------------------------------- | -------------------- | ------ |
-| Visitante acessa `/sobre` → SSR carrega i18n estático em ≤ 2s sem chamada a API ou banco | RF54 · RNF02 · RNF04 | ⬜     |
-| Visitante clica "EN" → textos trocam para `en/about.json` em ≤ 1 clique sem reload       | RNF13                | ⬜     |
-| Bot de indexação → HTML inicial com h1, textos e metadados Open Graph sem depender de JS | RNF04 · RNF21        | ⬜     |
-| Visitante sem autenticação → nenhum guard intercepta → conteúdo exibido normalmente      | RNF20                | ⬜     |
+| Visitante acessa `/sobre` → SSR carrega i18n estático em ≤ 2s sem chamada a API ou banco | RF54 · RNF02 · RNF04 | <span class="badge badge--gray">Pendente</span>     |
+| Visitante clica "EN" → textos trocam para `en/about.json` em ≤ 1 clique sem reload       | RNF13                | <span class="badge badge--gray">Pendente</span>     |
+| Bot de indexação → HTML inicial com h1, textos e metadados Open Graph sem depender de JS | RNF04 · RNF21        | <span class="badge badge--gray">Pendente</span>     |
+| Visitante sem autenticação → nenhum guard intercepta → conteúdo exibido normalmente      | RNF20                | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -547,8 +547,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                                                                                                         |
 | ------------------ | ----- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Partial Validation | 28/05 | ✅        | —                                                                                                                                                                  |
-| Formal Validation  | 03/06 | ✅        | Aprovado pelo CEO — seção "Sobre" com animações e perfis da equipe elogiada; sugestão de importar imagens de capa diretamente dos sites dos produtos (ação futura) |
+| Partial Validation | 28/05 | <span class="badge badge--green">Atende</span>        | —                                                                                                                                                                  |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | Aprovado pelo CEO — seção "Sobre" com animações e perfis da equipe elogiada; sugestão de importar imagens de capa diretamente dos sites dos produtos (ação futura) |
 
 #### Observações
 
@@ -615,12 +615,12 @@ sequenceDiagram
 
 | Critério (BDD)                                                                                   | RF / RNF      | Status |
 | ------------------------------------------------------------------------------------------------ | ------------- | ------ |
-| Admin cadastra artigo (título, conteúdo, produto, categoria) → persistido e apto para publicação | RF28 · RNF01  | ⬜     |
-| Admin edita artigo → dados substituídos, ID original preservado                                  | RF29          | ⬜     |
-| Admin remove artigo → excluído do banco e ausente na vitrine imediatamente                       | RF30          | ⬜     |
-| Admin categoriza artigo → vínculos `product_id` + `category_id` com integridade referencial      | RF31          | ⬜     |
-| Agente externo forja requisição sem token → RLS bloqueia com 403 sem alterar dados               | RNF01 · RNF09 | ⬜     |
-| Artigos publicados → conteúdo no SSR indexável; despublicados ausentes da resposta SSR           | RNF04 · RNF05 | ⬜     |
+| Admin cadastra artigo (título, conteúdo, produto, categoria) → persistido e apto para publicação | RF28 · RNF01  | <span class="badge badge--gray">Pendente</span>     |
+| Admin edita artigo → dados substituídos, ID original preservado                                  | RF29          | <span class="badge badge--gray">Pendente</span>     |
+| Admin remove artigo → excluído do banco e ausente na vitrine imediatamente                       | RF30          | <span class="badge badge--gray">Pendente</span>     |
+| Admin categoriza artigo → vínculos `product_id` + `category_id` com integridade referencial      | RF31          | <span class="badge badge--gray">Pendente</span>     |
+| Agente externo forja requisição sem token → RLS bloqueia com 403 sem alterar dados               | RNF01 · RNF09 | <span class="badge badge--gray">Pendente</span>     |
+| Artigos publicados → conteúdo no SSR indexável; despublicados ausentes da resposta SSR           | RNF04 · RNF05 | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -632,8 +632,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                                                     |
 | ------------------ | ----- | --------- | -------------------------------------------------------------------------------------------------------------- |
-| Partial Validation | 30/05 | ✅        | —                                                                                                              |
-| Formal Validation  | 03/06 | ✅        | Aprovado pelo CEO — gestão de categorias e artigos em PT/EN associados a produtos demonstrada e aprovada (CP6) |
+| Partial Validation | 30/05 | <span class="badge badge--green">Atende</span>        | —                                                                                                              |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | Aprovado pelo CEO — gestão de categorias e artigos em PT/EN associados a produtos demonstrada e aprovada (CP6) |
 
 #### Observações
 
@@ -692,10 +692,10 @@ sequenceDiagram
 
 | Critério (BDD)                                                                                  | RF / RNF      | Status |
 | ----------------------------------------------------------------------------------------------- | ------------- | ------ |
-| Admin publica artigo → `published = true` → visível na próxima requisição da vitrine sem reload | RF32 · RNF01  | ⬜     |
-| Admin despublica artigo → artigo ausente da vitrine imediatamente, conteúdo preservado no banco | RF33          | ⬜     |
-| Agente externo forja requisição sem token → RLS bloqueia com 403 sem alterar status             | RNF01 · RNF09 | ⬜     |
-| Artigo publicado → conteúdo e metadados SEO no HTML inicial sem depender de JS                  | RNF04 · RNF05 | ⬜     |
+| Admin publica artigo → `published = true` → visível na próxima requisição da vitrine sem reload | RF32 · RNF01  | <span class="badge badge--gray">Pendente</span>     |
+| Admin despublica artigo → artigo ausente da vitrine imediatamente, conteúdo preservado no banco | RF33          | <span class="badge badge--gray">Pendente</span>     |
+| Agente externo forja requisição sem token → RLS bloqueia com 403 sem alterar status             | RNF01 · RNF09 | <span class="badge badge--gray">Pendente</span>     |
+| Artigo publicado → conteúdo e metadados SEO no HTML inicial sem depender de JS                  | RNF04 · RNF05 | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -707,8 +707,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                                                                         |
 | ------------------ | ----- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Partial Validation | 30/05 | ✅        | —                                                                                                                                  |
-| Formal Validation  | 03/06 | ✅        | Aprovado pelo CEO — fluxo de publicação e despublicação demonstrado como parte integrante da gestão de FAQ (CP6 aprovado em bloco) |
+| Partial Validation | 30/05 | <span class="badge badge--green">Atende</span>        | —                                                                                                                                  |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | Aprovado pelo CEO — fluxo de publicação e despublicação demonstrado como parte integrante da gestão de FAQ (CP6 aprovado em bloco) |
 
 #### Observações
 
@@ -767,10 +767,10 @@ sequenceDiagram
 
 | Critério (BDD)                                                                                     | RF / RNF      | Status |
 | -------------------------------------------------------------------------------------------------- | ------------- | ------ |
-| Visitante clica "Útil" ou "Não Útil" → avaliação persistida anonimamente + feedback visual em ≤ 2s | RF34 · RNF02  | ⬜     |
-| Visitante já avaliou o artigo na sessão → interface bloqueia sem chamar a API                      | RF34          | ⬜     |
-| `session_hash` já existe no banco para o artigo → backend retorna 409 sem registrar duplicata      | RF34          | ⬜     |
-| Componente de avaliação presente → SSR não bloqueado nem degradado                                 | RNF04 · RNF05 | ⬜     |
+| Visitante clica "Útil" ou "Não Útil" → avaliação persistida anonimamente + feedback visual em ≤ 2s | RF34 · RNF02  | <span class="badge badge--gray">Pendente</span>     |
+| Visitante já avaliou o artigo na sessão → interface bloqueia sem chamar a API                      | RF34          | <span class="badge badge--gray">Pendente</span>     |
+| `session_hash` já existe no banco para o artigo → backend retorna 409 sem registrar duplicata      | RF34          | <span class="badge badge--gray">Pendente</span>     |
+| Componente de avaliação presente → SSR não bloqueado nem degradado                                 | RNF04 · RNF05 | <span class="badge badge--gray">Pendente</span>     |
 
 #### Evidências de Funcionamento
 
@@ -782,8 +782,8 @@ sequenceDiagram
 
 | Tipo               | Data  | Resultado | Observação                                                                                                                                         |
 | ------------------ | ----- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial Validation | 30/05 | ✅        | —                                                                                                                                                  |
-| Formal Validation  | 03/06 | ✅        | Aprovado pelo CEO — FAQ categorizado por produto com avaliação de utilidade pelo usuário citado explicitamente na ata como entregue (CP6 aprovado) |
+| Partial Validation | 30/05 | <span class="badge badge--green">Atende</span>        | —                                                                                                                                                  |
+| Formal Validation  | 03/06 | <span class="badge badge--green">Atende</span>        | Aprovado pelo CEO — FAQ categorizado por produto com avaliação de utilidade pelo usuário citado explicitamente na ata como entregue (CP6 aprovado) |
 
 #### Observações
 
