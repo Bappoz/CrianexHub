@@ -74,6 +74,7 @@ nav:
           - 'Features Entregues': iteracoes/iteracao-2/features-entregues.md
           - 'Evidências':
               - 'Design Técnico': iteracoes/iteracao-2/evidencias/design-tecnico.md
+              - 'Protótipo': iteracoes/iteracao-2/evidencias/prototipo.md
           - 'Validação':
               - 'Partial Client Validation': iteracoes/iteracao-2/validacao/partial.md
               - 'Formal Client Validation': iteracoes/iteracao-2/validacao/formal.md

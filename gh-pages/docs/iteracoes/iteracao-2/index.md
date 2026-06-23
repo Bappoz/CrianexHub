@@ -32,6 +32,7 @@ Ao fim da IT2: (1) um administrador autenticado cadastra, edita e inativa client
 | #   | Evidência      | Descrição                                                              | Link                                             |
 | --- | -------------- | ---------------------------------------------------------------------- | ------------------------------------------------ |
 | 1   | Design Técnico | Diagramas leves, feature cards, glossário de domínio produzidos na TDR | [Ver detalhes →](./evidencias/design-tecnico.md) |
+| 2   | Protótipo do CRM (CP1) | Vídeo da apresentação ao cliente + protótipo interativo embarcado    | [Ver detalhes →](./evidencias/prototipo.md)      |
 
 ---
 
