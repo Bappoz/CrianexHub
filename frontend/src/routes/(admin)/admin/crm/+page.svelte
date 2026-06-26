@@ -821,7 +821,8 @@
 <style>
   /* ── Layout ── */
   .crm-root {
-    position: absolute; inset: 0;
+    flex: 1;
+    min-height: 0;
     display: flex; flex-direction: column;
     background: var(--bg); color: var(--text); overflow: hidden;
   }

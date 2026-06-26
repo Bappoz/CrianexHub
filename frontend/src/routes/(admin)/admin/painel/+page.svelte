@@ -62,7 +62,7 @@
     {
       id: 'crm',
       label: 'CRM · Leads',
-      href: '/nao-implementado',
+      href: '/admin/crm',
       color: 'var(--purple)',
       icon: Users,
     },
