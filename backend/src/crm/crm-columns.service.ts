@@ -160,23 +160,22 @@ export async function deleteColumn(id: string): Promise<void> {
     );
   }
 
-  // Verify no cards remain in this column. Table may not exist yet (F19 not shipped).
-  // Uses a raw RPC-free count; silently skips check if table is absent.
-  try {
-    const { count: cardCount, error: cardErr } = await supabase
-      .from('crm_client_cards')
-      .select('*', { count: 'exact', head: true })
-      .eq('column_id', id);
+  // Verify no cards remain in this column before deleting.
+  // PostgREST error 42P01 ("relation does not exist") means F19 hasn't shipped the
+  // crm_client_cards table yet — only that specific case is safe to skip. Any other
+  // error must not be swallowed, or the HAS_CARDS guard would silently no-op.
+  const { count: cardCount, error: cardErr } = await supabase
+    .from('crm_client_cards')
+    .select('*', { count: 'exact', head: true })
+    .eq('column_id', id);
 
-    if (!cardErr && (cardCount ?? 0) > 0) {
-      throw new CrmColumnError(
-        'A coluna contém leads vinculados. Mova-os para outra coluna antes de remover.',
-        'HAS_CARDS'
-      );
-    }
-  } catch (e) {
-    // Re-throw only our own domain errors; table-not-found errors from Supabase are skipped
-    if (e instanceof CrmColumnError) throw e;
+  if (cardErr && cardErr.code !== '42P01') throw cardErr;
+
+  if (!cardErr && (cardCount ?? 0) > 0) {
+    throw new CrmColumnError(
+      'A coluna contém leads vinculados. Mova-os para outra coluna antes de remover.',
+      'HAS_CARDS'
+    );
   }
 
   const { error } = await supabase.from('crm_columns').delete().eq('id', id);

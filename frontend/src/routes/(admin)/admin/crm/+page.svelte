@@ -24,6 +24,12 @@
   let colDragId = $state<string | null>(null);
   let colDropTarget = $state<{ id: string; after: boolean } | null>(null);
   let colSaving = $state(false);
+  let invalidColIds = $state<Set<string>>(new Set());
+
+  // Single-column quick editor (opened from the card's gear button)
+  let quickCol = $state<CrmColumn | null>(null);
+  let quickSaving = $state(false);
+  let quickError = $state('');
 
   $effect(() => {
     if (data.columns?.length) {
@@ -63,7 +69,64 @@
     editCols = next; colDragId = null; colDropTarget = null;
   }
 
+  // ── Single-column quick editor (gear button on the card) ──
+  function openQuickEditor(col: CrmColumn) {
+    quickCol = { ...col };
+    quickError = '';
+  }
+  function closeQuickEditor() {
+    quickCol = null;
+    quickError = '';
+  }
+  async function saveQuickColumn() {
+    if (!quickCol) return;
+    if (!quickCol.title.trim()) {
+      quickError = 'Informe um nome para a coluna.';
+      return;
+    }
+    quickSaving = true; quickError = '';
+    try {
+      const updated = await apiFetch<CrmColumn>(`/admin/crm/columns/${quickCol.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          title: quickCol.title, color: quickCol.color,
+          entry_hint: quickCol.entry_hint, exit_hint: quickCol.exit_hint,
+        }),
+      });
+      columns = columns.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.position - b.position);
+      quickCol = null;
+    } catch (err) {
+      const e = err as { status?: number; message?: string };
+      quickError = e.message || 'Erro ao salvar coluna.';
+    } finally {
+      quickSaving = false;
+    }
+  }
+  async function deleteQuickColumn() {
+    if (!quickCol || quickCol.is_default) return;
+    quickSaving = true; quickError = '';
+    try {
+      await apiFetch<void>(`/admin/crm/columns/${quickCol.id}`, { method: 'DELETE' });
+      columns = columns.filter(c => c.id !== quickCol!.id);
+      quickCol = null;
+    } catch (err) {
+      const e = err as { status?: number; message?: string };
+      quickError = e.status === 409
+        ? (e.message || 'Não é possível remover esta coluna. Verifique se há leads vinculados ou se é a coluna padrão.')
+        : (e.message || 'Erro ao remover coluna.');
+    } finally {
+      quickSaving = false;
+    }
+  }
+
   async function saveColumns() {
+    const empty = editCols.filter(c => !c.title.trim());
+    if (empty.length) {
+      invalidColIds = new Set(empty.map(c => c.id));
+      colsError = 'Toda coluna precisa de um nome. Preencha os campos destacados.';
+      return;
+    }
+    invalidColIds = new Set();
     colSaving = true; colsError = '';
     try {
       const originalIds = new Set(columns.map(c => c.id));
@@ -160,7 +223,7 @@
               <span class="title">{col.title}</span>
               {#if col.is_default}<span class="default-badge">padrão</span>{/if}
               <span class="ct">0</span>
-              <button class="gear" title="Editar colunas" onclick={openEditor}>
+              <button class="gear" title="Editar coluna" onclick={() => openQuickEditor(col)}>
                 <Settings size={12}/>
               </button>
             </div>
@@ -190,10 +253,10 @@
         {#if colsError}
           <div class="crm-err-banner">{colsError}</div>
         {/if}
-        <div class="crm-coleditor">
+        <div class="crm-coleditor" ondragover={(e) => e.preventDefault()}>
           {#each editCols as c (c.id)}
             <div class="crm-colrow {colDragId === c.id ? 'dragging' : ''} {colDropTarget?.id === c.id ? (colDropTarget?.after ? 'drop-after' : 'drop-before') : ''}"
-              ondragover={(e) => { if (colDragId && colDragId !== c.id) { e.preventDefault(); const r = e.currentTarget.getBoundingClientRect(); colDropTarget = { id: c.id, after: e.clientY > r.top + r.height / 2 }; } }}
+              ondragover={(e) => { e.preventDefault(); if (colDragId && colDragId !== c.id) { const r = e.currentTarget.getBoundingClientRect(); colDropTarget = { id: c.id, after: e.clientY > r.top + r.height / 2 }; } }}
               ondrop={(e) => { e.preventDefault(); editorDrop(c.id); }}>
               <div class="r1">
                 <span class="handle" draggable="true"
@@ -202,7 +265,8 @@
                   title="arraste para reordenar">
                   <MoreVertical size={13}/><MoreVertical size={13} style="margin-left:-9px"/>
                 </span>
-                <input class="cname" bind:value={c.title}/>
+                <input class="cname {invalidColIds.has(c.id) ? 'invalid' : ''}" bind:value={c.title}
+                  oninput={() => { if (c.title.trim() && invalidColIds.has(c.id)) { invalidColIds = new Set([...invalidColIds].filter(id => id !== c.id)); } }}/>
                 <div class="crm-swatches">
                   {#each COL_COLORS as col}
                     <button type="button" class="crm-swatch {c.color === col ? 'on' : ''}" style="background:{col}" onclick={() => editorUpd(c.id, { color: col })}></button>
@@ -240,6 +304,56 @@
         <button class="btn ghost sm" onclick={() => editingCols = false} disabled={colSaving}>Cancelar</button>
         <button class="btn sm" onclick={saveColumns} disabled={colSaving}>
           {#if colSaving}Salvando…{:else}Salvar pipeline <Check size={12}/>{/if}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- ── Quick column editor (gear button on the card) ── -->
+{#if quickCol}
+  <div class="admin-overlay" role="presentation" onclick={closeQuickEditor}>
+    <div class="admin-modal" role="dialog" aria-modal="true" aria-label="Editar coluna" onclick={(e) => e.stopPropagation()}>
+      <div class="admin-modal-head">
+        <h3>Editar coluna</h3>
+        <span class="crumbs">/ crm / colunas / {quickCol.title}</span>
+        <button class="x" onclick={closeQuickEditor}><X size={13}/></button>
+      </div>
+      <div class="admin-modal-body">
+        {#if quickError}
+          <div class="crm-err-banner">{quickError}</div>
+        {/if}
+        <div class="crm-colrow">
+          <div class="r1">
+            <input class="cname {!quickCol.title.trim() ? 'invalid' : ''}" bind:value={quickCol.title}/>
+            <div class="crm-swatches">
+              {#each COL_COLORS as col}
+                <button type="button" class="crm-swatch {quickCol.color === col ? 'on' : ''}" style="background:{col}" onclick={() => quickCol = quickCol && { ...quickCol, color: col }}></button>
+              {/each}
+            </div>
+            {#if quickCol.is_default}
+              <span class="default-badge">padrão</span>
+            {/if}
+            <button class="del" onclick={deleteQuickColumn} title="Excluir coluna" disabled={quickCol.is_default || quickSaving}>
+              <X size={14}/>
+            </button>
+          </div>
+          <div class="crit">
+            <div class="f">
+              <label>Critério de entrada</label>
+              <textarea bind:value={quickCol.entry_hint} placeholder="Quando um lead entra nesta coluna?"></textarea>
+            </div>
+            <div class="f">
+              <label>Critério de saída</label>
+              <textarea bind:value={quickCol.exit_hint} placeholder="Quando um lead sai desta coluna?"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal-foot">
+        <button class="btn ghost sm" onclick={closeQuickEditor} disabled={quickSaving}>Cancelar</button>
+        <button class="btn sm" onclick={saveQuickColumn} disabled={quickSaving}>
+          {#if quickSaving}Salvando…{:else}Salvar <Check size={12}/>{/if}
         </button>
       </div>
     </div>
@@ -350,6 +464,7 @@
     font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text); outline: none;
   }
   .crm-colrow input.cname:focus { border-color: var(--purple); }
+  .crm-colrow input.cname.invalid { border-color: var(--pink); }
   .crm-colrow .del { background: transparent; border: 0; color: var(--text-faint); cursor: pointer; padding: 5px; border-radius: 6px; }
   .crm-colrow .del:hover:not(:disabled) { color: var(--pink); background: rgba(231,31,132,0.1); }
   .crm-colrow .del:disabled { opacity: 0.3; cursor: not-allowed; }
