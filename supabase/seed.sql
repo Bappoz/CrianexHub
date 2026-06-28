@@ -22,3 +22,8 @@
 --   ('Geral',     'General',  'geral'),
 --   ('Produtos',  'Products', 'produtos'),
 --   ('Suporte',   'Support',  'suporte');
+
+-- ── Notifications (F07 — sistema de notificações) ────────────────────────────
+-- INSERT INTO public.notifications (tipo, conteudo, status) VALUES
+--   ('novo_lead', 'Novo lead capturado: João Silva',    'unread'),
+--   ('novo_lead', 'Novo lead capturado: Maria Souza',   'read');
