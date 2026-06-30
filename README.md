@@ -15,9 +15,10 @@ Repositório da disciplina **Requisitos de Software** — REQ-T02, 2026.1 · UnB
 Produto: **Crianex Hub** — plataforma administrativa centralizada e vitrine digital bilíngue para a Software House Crianex.
 
 - **Cliente:** Crianex (CTO: Otávio Maya)
-- **Metodologia:** FDD + Kanban (WIP)
+- **Metodologia:** FDD + Kanban
 - **Docs (Unidade 2):** [/unidade2](https://mdsreq-fga-unb.github.io/REQ-2026.1-T02-Crianex-/)
 - **Docs (Unidade 3):** [/unidade3](https://mdsreq-fga-unb.github.io/REQ-2026.1-T02-Crianex-/unidade3/)
+
 
 <p align="center">
   <img 
