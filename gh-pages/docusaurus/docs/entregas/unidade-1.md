@@ -15,9 +15,9 @@ A Unidade 1 cobriu a fase de elicitação e definição do projeto: entender o c
 
 <div style={{width: '100%', maxWidth: '900px', margin: '1.5rem 0', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.15)'}}>
   <video controls style={{width: '100%', display: 'block'}}>
-    <source src="../../assets/apresentacao_unidade1.mp4" type="video/mp4" />
+    <source src="../../static/img/assets/apresentacao_unidade1.mp4" type="video/mp4" />
     <p>Seu navegador não suporta reprodução de vídeo.
-    <a href="../../assets/apresentacao_unidade1.mp4">Baixar o vídeo</a>.</p>
+    <a href="../../static/img/assets/apresentacao_unidade1.mp4">Baixar o vídeo</a>.</p>
   </video>
 </div>
 
