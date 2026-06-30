@@ -176,6 +176,30 @@ jobs:
 
           supabase db reset --local --yes
 
+      - name: Wait for PostgREST schema reload
+        run: |
+          set -euo pipefail
+
+          # `db reset` restarts the postgrest container; on slower CI runners
+          # the API can accept connections slightly before its schema cache is
+          # fully (re)loaded, so the first request after a reset can 400 with
+          # "column not found in schema cache". Poll a real table until the
+          # API actually serves it before letting the test suite run.
+          for attempt in $(seq 1 15); do
+            status=$(curl -s -o /dev/null -w '%{http_code}' \
+              -H "apikey: ${SUPABASE_SECRET_KEY}" \
+              "${SUPABASE_URL}/rest/v1/products?select=id&limit=1")
+            if [ "$status" = "200" ]; then
+              echo "PostgREST schema ready (attempt $attempt/15)"
+              exit 0
+            fi
+            echo "PostgREST not ready yet (status $status, attempt $attempt/15)..."
+            sleep 2
+          done
+
+          echo "::error::PostgREST did not become ready in time"
+          exit 1
+
       - name: Test — backend
         run: npm test
         working-directory: backend

@@ -59,7 +59,10 @@ crmColumnsRouter.post('/', ...ownerGuard, async (req, res) => {
 // PATCH /api/admin/crm/columns/reorder — reordena múltiplas colunas (RF40 · RNF22)
 crmColumnsRouter.patch('/reorder', ...ownerGuard, async (req, res) => {
   const order = req.body?.['order'];
-  if (!Array.isArray(order) || order.some((o) => typeof o.id !== 'string' || typeof o.position !== 'number')) {
+  if (
+    !Array.isArray(order) ||
+    order.some((o) => typeof o.id !== 'string' || typeof o.position !== 'number')
+  ) {
     res.status(400).json({ message: 'Body deve ser { order: [{id, position}] }.' });
     return;
   }
