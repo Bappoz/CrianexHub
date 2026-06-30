@@ -1,0 +1,72 @@
+{
+  "eyebrow": "Sobre a Crianex",
+  "h1": "Software house B2B baseada em Brasília.",
+  "heroBadge": "Software house B2B",
+  "heroH1": "Construímos plataforma.\nNão projeto.",
+  "heroSub": "Três SaaS verticais. Um time enxuto.",
+  "heroCta": "Fale com a gente",
+  "heroCtaEmail": "contato@crianex.com",
+  "lede": "Transformamos problemas complexos em software elegante. Operamos três SaaS verticais — Avali, Pontua e Notifly — sobre uma plataforma multi-tenant em Kubernetes, com IA aplicada e comunicação em tempo real.",
+  "missionEyebrow": "Missão, visão, valores",
+  "missionTitle": "O que mantém o time alinhado.",
+  "missionDesc": "Três princípios que guiam cada decisão — do design de produto ao deploy em produção.",
+  "values": [
+    {
+      "n": "01",
+      "title": "Engenharia primeiro",
+      "body": "Investimos em fundação técnica antes de feature. Stack escolhida para durar uma década, não um trimestre."
+    },
+    {
+      "n": "02",
+      "title": "Produto, não projeto",
+      "body": "Construímos plataformas reutilizáveis. Cada cliente herda o aprendizado de todos os anteriores."
+    },
+    {
+      "n": "03",
+      "title": "Decisão com dado",
+      "body": "Instrumentação desde o dia zero. Cada release tem hipótese mensurável e cutoff de rollback."
+    }
+  ],
+  "numbersEyebrow": "Em números",
+  "numbersTitle": "Três produtos. Uma plataforma. Zero compromisso.",
+  "numbersDesc": "Infraestrutura Kubernetes própria, isolamento multi-tenant e foco em performance — tudo compartilhado entre os três produtos.",
+  "stats": [
+    { "value": "3", "label": "produtos SaaS em produção" },
+    { "value": "K8s", "label": "infraestrutura própria" },
+    { "value": "99.94%", "label": "uptime nos últimos 12 meses" },
+    { "value": "2019", "label": "fundada em Brasília" }
+  ],
+  "peopleEyebrow": "Quem somos",
+  "peopleTitle": "As pessoas por trás da Crianex.",
+  "people": [
+    {
+      "n": "01",
+      "name": "Otávio Castelo",
+      "role": "CEO & Fundador — lidera a estratégia de produto e as parcerias B2B, com foco na expansão dos três SaaS verticais."
+    },
+    {
+      "n": "02",
+      "name": "Ana Melo",
+      "role": "CTO & Co-fundadora — responsável pela arquitetura da plataforma Kubernetes e pela evolução técnica dos produtos Avali, Pontua e Notifly."
+    },
+    {
+      "n": "03",
+      "name": "Lucas Ferreira",
+      "role": "Head of Product — define roadmap e priorização dos três SaaS verticais, conectando necessidades de mercado à execução de engenharia."
+    },
+    {
+      "n": "04",
+      "name": "Marina Santos",
+      "role": "Lead Engineer — lidera a squad de plataforma, responsável por CI/CD, observabilidade e evolução da infraestrutura Kubernetes."
+    }
+  ],
+  "cta": {
+    "title": "Trabalhar com a gente.",
+    "body": "Tanto como cliente quanto como parceiro. Estamos abertos para conversa nas duas frentes.",
+    "emailLabel": "Fale conosco"
+  },
+  "seo": {
+    "title": "Sobre a Crianex | Crianex Hub",
+    "ogTitle": "Sobre a Crianex | Crianex Hub"
+  }
+}

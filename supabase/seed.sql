@@ -1,0 +1,29 @@
+-- Seed inicial — dados para desenvolvimento local
+-- Execute após: supabase db reset
+--
+-- Descomente as inserções conforme as migrations de cada issue forem aplicadas.
+-- Ordem: respeitar dependências de FK (categories antes de articles, etc.)
+
+-- ── Auth owner profile template (issue #66) Feature 09 ─────────────────────────────────
+-- Use um id que já exista em auth.users.
+-- Exemplo:
+-- INSERT INTO public.profiles (id, name, email, role, status, avatar_url)
+-- VALUES (
+--   '00000000-0000-0000-0000-000000000000',
+--   'Owner',
+--   'owner@crianex.com',
+--   'owner',
+--   'active',
+--   NULL
+-- );
+
+-- ── FAQ categories (issue #94) ───────────────────────────────────────────────
+-- INSERT INTO faq_categories (name_pt, name_en, slug) VALUES
+--   ('Geral',     'General',  'geral'),
+--   ('Produtos',  'Products', 'produtos'),
+--   ('Suporte',   'Support',  'suporte');
+
+-- ── Notifications (F07 — sistema de notificações) ────────────────────────────
+-- INSERT INTO public.notifications (tipo, conteudo, status) VALUES
+--   ('novo_lead', 'Novo lead capturado: João Silva',    'unread'),
+--   ('novo_lead', 'Novo lead capturado: Maria Souza',   'read');

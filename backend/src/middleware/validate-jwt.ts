@@ -1,0 +1,67 @@
+import type { NextFunction, Request, Response } from 'express';
+import { getSupabaseClient } from '../config/supabase.js';
+import { parseBearerToken, parseCookieHeader, validateAccessToken } from '../auth/auth.service.js';
+
+export type ValidatedAuthContext = {
+  accessToken: string;
+  user: {
+    id: string;
+    name: string;
+    role: string;
+  };
+};
+
+function getAccessTokenFromRequest(request: Request): string | null {
+  const bearerToken = parseBearerToken(request.headers.authorization);
+
+  if (bearerToken) {
+    return bearerToken;
+  }
+
+  const cookies = parseCookieHeader(request.headers.cookie);
+
+  // Accept both cookie names:
+  // 'crianex_admin_access_token' — set by SvelteKit login flow (browser client calls)
+  // 'access_token'               — set by backend auth route (direct API access)
+  return cookies['crianex_admin_access_token'] ?? cookies['access_token'] ?? null;
+}
+
+const TEST_AUTH_BYPASS_CONTEXT: ValidatedAuthContext = {
+  accessToken: 'bypass',
+  user: { id: 'bypass', name: 'Bypass', role: 'owner' },
+};
+
+export async function validateJWT(
+  request: Request,
+  response: Response,
+  next: NextFunction
+): Promise<void> {
+  // Auth bypass is a TEST-ONLY escape hatch. It is hard-disabled in production so
+  // a stray env var can never grant unauthenticated 'owner' access to the panel.
+  if (process.env['ADMIN_AUTH_BYPASS'] === 'true' && process.env['NODE_ENV'] !== 'production') {
+    (response.locals as { auth?: ValidatedAuthContext }).auth = TEST_AUTH_BYPASS_CONTEXT;
+    next();
+    return;
+  }
+
+  const accessToken = getAccessTokenFromRequest(request);
+
+  if (!accessToken) {
+    response.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  try {
+    const supabase = getSupabaseClient();
+    const user = await validateAccessToken(supabase, accessToken);
+
+    (response.locals as { auth?: ValidatedAuthContext }).auth = {
+      accessToken,
+      user,
+    };
+
+    next();
+  } catch {
+    response.status(401).json({ error: 'Unauthorized' });
+  }
+}
