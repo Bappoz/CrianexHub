@@ -27,6 +27,15 @@ export const NOTIFICATION_EVENT_TYPES: readonly NotificationEventType[] = [
     descricao: 'Disparado quando um novo lead é capturado pelo formulário público.',
   },
   {
+    value: 'responsavel_atribuido',
+    label: 'Responsável atribuído',
+    grupo: 'Leads',
+    color: '#66df7a',
+    implemented: true,
+    descricao:
+      'Disparado para o membro escolhido quando ele é definido como responsável por um card do CRM.',
+  },
+  {
     value: 'seguranca_controle',
     label: 'Segurança e controle',
     grupo: 'Segurança e controle',

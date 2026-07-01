@@ -6,6 +6,7 @@
 
   type CrmColumn = { id: string; title: string };
   type PublishedProduct = { id: string; name_pt: string; color: string | null };
+  type CrmMember = { id: string; name: string | null; status: 'active' | 'inactive' };
 
   let { columns, initialColumnId, onClose, onSave } = $props<{
     columns: CrmColumn[];
@@ -24,6 +25,8 @@
   let errorMsg = $state('');
 
   let products = $state<PublishedProduct[]>([]);
+  let members = $state<CrmMember[]>([]);
+  const activeMembers = $derived(members.filter((m) => m.status === 'active'));
 
   onMount(async () => {
     try {
@@ -31,6 +34,11 @@
       products = await apiFetch<PublishedProduct[]>('/products');
     } catch {
       products = [];
+    }
+    try {
+      members = await apiFetch<CrmMember[]>('/admin/members');
+    } catch {
+      members = [];
     }
   });
 
@@ -127,12 +135,12 @@
 
         <div class="input-group">
           <label for="nl-responsible">Responsável</label>
-          <input
-            id="nl-responsible"
-            type="text"
-            placeholder="Nome do responsável"
-            bind:value={responsibleName}
-          />
+          <select id="nl-responsible" bind:value={responsibleName}>
+            <option value="">Não atribuído</option>
+            {#each activeMembers as m (m.id)}
+              <option value={m.name}>{m.name}</option>
+            {/each}
+          </select>
         </div>
 
         <div class="input-group">

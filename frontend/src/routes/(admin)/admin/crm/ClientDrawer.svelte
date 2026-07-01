@@ -17,6 +17,7 @@
   import { initials, mailLink, phoneDigits, waLink } from '$lib/utils/crm';
 
   type PublishedProduct = { id: string; name_pt: string; color: string | null };
+  type CrmMember = { id: string; name: string | null; status: 'active' | 'inactive' };
 
   let {
     client,
@@ -24,6 +25,7 @@
     columnTitle,
     columnColor,
     products = [],
+    members = [],
     onClose,
     onUpdate,
     onDelete,
@@ -33,6 +35,7 @@
     columnTitle: string;
     columnColor: string;
     products?: PublishedProduct[];
+    members?: CrmMember[];
     onClose: () => void;
     onUpdate: (updated: CrmClient) => void;
     onDelete: (id: string) => void;
@@ -292,12 +295,16 @@
             </div>
             <div class="input-group">
               <label for="drawer-responsible">RESPONSÁVEL</label>
-              <input
+              <select
                 id="drawer-responsible"
-                type="text"
                 bind:value={editForm.responsible_name}
                 class="dark-input"
-              />
+              >
+                <option value="">Não atribuído</option>
+                {#each members as m (m.id)}
+                  <option value={m.name}>{m.name}</option>
+                {/each}
+              </select>
             </div>
           </div>
           <button class="btn-save-edit" onclick={handleSaveEdit} disabled={isSaving}>

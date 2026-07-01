@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../config/supabase.js';
+import { createNotification } from '../notifications/notifications.service.js';
 
 export type CrmAdminClient = {
   id: string;
@@ -55,6 +56,34 @@ async function resolveProductId(productName: string): Promise<string | null> {
     .eq('name_pt', productName.trim())
     .maybeSingle();
   return data?.id ?? null;
+}
+
+// Resolve o id do membro ativo com este nome de exibição — usado para endereçar
+// a notificação de "responsável atribuído" (RF41/RNF24). Só membros ativos podem
+// ser selecionados no seletor do frontend, então um nome sem match aqui indica
+// dado legado (texto livre digitado antes deste seletor existir): a atribuição
+// segue normalmente, apenas sem disparo de notificação.
+async function resolveActiveMemberIdByName(name: string): Promise<string | null> {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  const supabase = getSupabaseClient();
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('name', trimmed)
+    .eq('status', 'active')
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+async function notifyResponsibleAssigned(responsibleName: string, leadName: string): Promise<void> {
+  const memberId = await resolveActiveMemberIdByName(responsibleName);
+  if (!memberId) return;
+  await createNotification({
+    tipo: 'responsavel_atribuido',
+    conteudo: `Você foi definido(a) como responsável pelo lead ${leadName} no CRM.`,
+    memberId,
+  });
 }
 
 async function buildClientView(clientId: string): Promise<CrmAdminClient | null> {
@@ -221,6 +250,10 @@ export async function createCrmAdminClient(input: CrmAdminClientCreate): Promise
 
   if (cardErr) throw cardErr;
 
+  if (input.responsible_name) {
+    await notifyResponsibleAssigned(input.responsible_name, name);
+  }
+
   const result = await buildClientView(client.id);
   if (!result) throw new CrmAdminClientError('Falha ao recuperar cliente criado.', 'NOT_FOUND');
   return result;
@@ -232,8 +265,22 @@ export async function patchCrmAdminClient(
 ): Promise<CrmAdminClient> {
   const supabase = getSupabaseClient();
 
-  const { data: existing } = await supabase.from('clients').select('id').eq('id', id).maybeSingle();
+  const { data: existing } = await supabase
+    .from('clients')
+    .select('id, nome')
+    .eq('id', id)
+    .maybeSingle();
   if (!existing) throw new CrmAdminClientError('Cliente não encontrado.', 'NOT_FOUND');
+
+  let previousResponsible: string | null = null;
+  if (patch.responsible_name !== undefined) {
+    const { data: existingCard } = await supabase
+      .from('client_cards')
+      .select('responsavel')
+      .eq('client_id', id)
+      .maybeSingle();
+    previousResponsible = existingCard?.responsavel ?? null;
+  }
 
   const clientUpdates: Record<string, unknown> = {};
   if (patch.name !== undefined) {
@@ -287,6 +334,14 @@ export async function patchCrmAdminClient(
         .insert({ client_id: id, ...cardUpdates });
       if (error) throw error;
     }
+  }
+
+  if (
+    patch.responsible_name &&
+    patch.responsible_name !== previousResponsible
+  ) {
+    const leadName = clientUpdates['nome'] as string | undefined ?? existing.nome;
+    await notifyResponsibleAssigned(patch.responsible_name, leadName);
   }
 
   const result = await buildClientView(id);

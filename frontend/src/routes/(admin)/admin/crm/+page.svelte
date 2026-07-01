@@ -19,6 +19,7 @@
   import { isStale, toCSV, downloadCSV } from '$lib/utils/crm';
 
   type PublishedProduct = { id: string; name_pt: string; color: string | null };
+  type CrmMember = { id: string; name: string | null; status: 'active' | 'inactive' };
 
   type CrmColumn = {
     id: string;
@@ -84,6 +85,8 @@
   let productFilter = $state('all');
   let respFilter = $state('all');
   let products = $state<PublishedProduct[]>([]);
+  let members = $state<CrmMember[]>([]);
+  const activeMembers = $derived(members.filter((m) => m.status === 'active'));
 
   const filteredClients = $derived(
     clients.filter((c) => {
@@ -367,14 +370,16 @@
   onMount(async () => {
     try {
       colsLoading = true;
-      const [freshCols, freshClients, freshProducts] = await Promise.all([
+      const [freshCols, freshClients, freshProducts, freshMembers] = await Promise.all([
         apiFetch<CrmColumn[]>('/admin/crm/columns'),
         apiFetch<CrmClient[]>('/admin/crm/clients'),
         apiFetch<PublishedProduct[]>('/products').catch(() => []),
+        apiFetch<CrmMember[]>('/admin/members').catch(() => []),
       ]);
       if (freshCols?.length) columns = freshCols.sort((a, b) => a.position - b.position);
       if (freshClients?.length) clients = freshClients;
       products = freshProducts ?? [];
+      members = freshMembers ?? [];
     } catch {
       /* keep server-loaded data */
     } finally {
@@ -785,6 +790,7 @@
     columnColor={activeCol?.color || '#9ca3af'}
     currentUser={data.adminUser?.name || 'Usuário'}
     {products}
+    members={activeMembers}
     onClose={() => (activeClient = null)}
     onUpdate={(updatedClient) => {
       clients = clients.map((c) => (c.id === updatedClient.id ? updatedClient : c));
