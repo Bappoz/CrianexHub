@@ -1,25 +1,35 @@
 <script lang="ts">
-  import { Bot } from 'lucide-svelte';
+  import { Bell, Mail, MessageCircle } from 'lucide-svelte';
   import type { CrmClient } from './+page.svelte';
+  import { initials, isStale, mailLink, relativeTime, waLink } from '$lib/utils/crm';
 
   let {
     client,
+    columnColor = '#7f3fe5',
     onclick,
     dragging = false,
     ondragstart,
     ondragend,
   } = $props<{
     client: CrmClient;
+    columnColor?: string;
     onclick: () => void;
     dragging?: boolean;
     ondragstart?: () => void;
     ondragend?: () => void;
   }>();
+
+  const stale = $derived(isStale(client.last_interaction));
+  const wa = $derived(waLink(client.name, client.phone));
+  const mail = $derived(mailLink(client.name, client.email));
 </script>
 
-<button
-  class="crm-lead-card {dragging ? 'dragging' : ''}"
+<div
+  class="crm-card {dragging ? 'dragging' : ''}"
+  role="button"
+  tabindex="0"
   {onclick}
+  onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onclick()}
   draggable={true}
   ondragstart={(e) => {
     e.dataTransfer?.setData('text/plain', client.id);
@@ -28,103 +38,193 @@
   }}
   ondragend={() => ondragend?.()}
 >
-  <div class="card-header">
-    <h4 class="company-name">{client.name}</h4>
-    <span class="contact-email">{client.email || 'Sem e-mail'}</span>
+  <div class="top">
+    <span class="crm-avatar" style="background:{columnColor}">{initials(client.name)}</span>
+    <div class="who">
+      <div class="name">{client.name}</div>
+      <div class="email">{client.email || 'Sem e-mail'}</div>
+    </div>
   </div>
 
-  <hr class="divider" />
+  {#if client.product_name}
+    <div class="crm-prods">
+      <span
+        class="crm-prodtag"
+        style="background:{(client.product_color || '#7f3fe5') +
+          '22'}; color:{client.product_color || '#7f3fe5'}"
+      >
+        <span class="d" style="background:{client.product_color || '#7f3fe5'}"></span>
+        {client.product_name}
+      </span>
+    </div>
+  {/if}
 
-  <div class="card-body">
-    <span class="product-badge">{client.product_name || 'Geral'}</span>
-    <span class="deal-value">{client.responsible_name || '-'}</span>
-  </div>
-
-  <div class="card-footer">
-    <Bot size={13} class="interaction-icon" />
-    <span class="interaction-text">
-      {client.interaction_count}
-      {client.interaction_count === 1 ? 'interação' : 'interações'}
+  <div class="meta-row">
+    <span class="respo">
+      {#if stale}
+        <span class="agewarn" title="Sem interação recente"><Bell size={10} /></span>
+      {/if}
+      {client.responsible_name || 'Sem responsável'} · {relativeTime(client.last_interaction)}
+    </span>
+    <span class="crm-actions" onclick={(e) => e.stopPropagation()} role="presentation">
+      {#if wa}
+        <a class="crm-iconbtn wa" href={wa} target="_blank" rel="noopener" title="WhatsApp">
+          <MessageCircle size={13} />
+        </a>
+      {/if}
+      {#if mail}
+        <a class="crm-iconbtn mail" href={mail} title="E-mail">
+          <Mail size={13} />
+        </a>
+      {/if}
     </span>
   </div>
-</button>
+</div>
 
 <style>
-  .crm-lead-card {
-    background-color: #16161a;
-    border: 1px solid #2d2d35;
-    border-radius: 8px;
-    padding: 14px;
-    width: 100%;
+  .crm-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    cursor: grab;
     text-align: left;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition:
-      border-color 0.15s ease,
-      background-color 0.15s ease;
-  }
-
-  .crm-lead-card:hover {
-    border-color: #4b4b5c;
-    background-color: #1a1a1f;
-  }
-
-  .crm-lead-card.dragging {
-    opacity: 0.4;
-  }
-
-  .card-header {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .company-name {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #f3f4f6;
-  }
-  .contact-email {
-    font-family: var(--font-mono, monospace);
-    font-size: 11px;
-    color: #9ca3af;
-  }
-
-  .divider {
-    border: 0;
-    border-top: 1px solid #2d2d35;
-    margin: 0;
     width: 100%;
+    transition:
+      transform 0.14s,
+      box-shadow 0.14s,
+      border-color 0.14s;
+  }
+  .crm-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2, 0 6px 16px rgba(0, 0, 0, 0.25));
+    border-color: var(--line-strong, var(--line));
+  }
+  .crm-card.dragging {
+    opacity: 0.35;
+    cursor: grabbing;
+  }
+  .crm-card .top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .crm-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .crm-card .who {
+    min-width: 0;
+    flex: 1;
+  }
+  .crm-card .name {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+  }
+  .crm-card .email {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .card-body {
+  .crm-prods {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
   }
-  .product-badge {
-    background-color: #232329;
-    color: #d1d5db;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+  .crm-prodtag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 5px;
     font-weight: 500;
   }
-  .deal-value {
-    font-size: 12px;
-    color: #9ca3af;
+  .crm-prodtag .d {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
   }
 
-  .card-footer {
+  .meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 9px;
+    border-top: 1px solid var(--line);
+    gap: 8px;
+  }
+  .respo {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .agewarn {
+    color: #f59e0b;
+    display: inline-flex;
+  }
+
+  .crm-actions {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #6b7280;
+    flex-shrink: 0;
   }
-  .interaction-text {
-    font-family: var(--font-mono, monospace);
-    font-size: 10px;
+  .crm-iconbtn {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.12s;
+    text-decoration: none;
+  }
+  .crm-iconbtn:hover {
+    color: var(--text);
+    border-color: var(--line-strong, var(--line));
+    transform: translateY(-1px);
+  }
+  .crm-iconbtn.wa:hover {
+    background: #25d366;
+    border-color: #25d366;
+    color: #fff;
+  }
+  .crm-iconbtn.mail:hover {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
   }
 </style>

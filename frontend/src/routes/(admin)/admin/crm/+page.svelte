@@ -1,10 +1,24 @@
 <script lang="ts">
-  import { Settings, X, Check, MoreVertical, Plus } from 'lucide-svelte';
+  import {
+    Settings,
+    X,
+    Check,
+    MoreVertical,
+    Plus,
+    Search,
+    Download,
+    LayoutGrid,
+    Rows3,
+  } from 'lucide-svelte';
   import { apiFetch } from '$lib/api/backend';
   import { onMount } from 'svelte';
   import ClientCard from './ClientCard.svelte';
   import ClientDrawer from './ClientDrawer.svelte';
   import NewLeadModal from './NewLeadModal.svelte';
+  import TableView from './TableView.svelte';
+  import { isStale, toCSV, downloadCSV } from '$lib/utils/crm';
+
+  type PublishedProduct = { id: string; name_pt: string; color: string | null };
 
   type CrmColumn = {
     id: string;
@@ -23,10 +37,12 @@
     card_id: string | null;
     name: string;
     email: string;
+    phone: string | null;
     status: 'ativo' | 'inativo';
     column_id: string | null;
     responsible_name: string | null;
     product_name: string | null;
+    product_color: string | null;
     interaction_count: number;
     last_interaction: string | null;
   };
@@ -61,6 +77,53 @@
   let activeClient = $state<CrmClient | null>(null);
   let showNewLeadModal = $state(false);
   let addLeadColumnId = $state('');
+
+  // ── Busca, filtros, dashboard e visualização ──
+  let view = $state<'kanban' | 'table'>('kanban');
+  let search = $state('');
+  let productFilter = $state('all');
+  let respFilter = $state('all');
+  let products = $state<PublishedProduct[]>([]);
+
+  const filteredClients = $derived(
+    clients.filter((c) => {
+      if (productFilter !== 'all' && c.product_name !== productFilter) return false;
+      if (respFilter !== 'all' && c.responsible_name !== respFilter) return false;
+      const q = search.trim().toLowerCase();
+      if (q && !`${c.name} ${c.email}`.toLowerCase().includes(q)) return false;
+      return true;
+    })
+  );
+
+  const responsibles = $derived(
+    [...new Set(clients.map((c) => c.responsible_name).filter((r): r is string => !!r))].sort()
+  );
+
+  const stats = $derived({
+    total: filteredClients.length,
+    stale: filteredClients.filter((c) => isStale(c.last_interaction)).length,
+    interactions: filteredClients.reduce((s, c) => s + c.interaction_count, 0),
+  });
+
+  function exportCSV() {
+    const rows = filteredClients.map((c) => ({
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      stageTitle: columns.find((col) => col.id === c.column_id)?.title || '—',
+      responsible_name: c.responsible_name,
+      product_name: c.product_name,
+      status: c.status,
+      last_interaction: c.last_interaction,
+    }));
+    const label = productFilter === 'all' ? 'geral' : productFilter;
+    downloadCSV(`crianex-crm-${label}-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(rows));
+  }
+
+  function handleDeleteLead(id: string) {
+    clients = clients.filter((c) => c.id !== id);
+    activeClient = null;
+  }
 
   // Column editor state
   let editCols = $state<(CrmColumn & { _new?: boolean })[]>([]);
@@ -304,12 +367,14 @@
   onMount(async () => {
     try {
       colsLoading = true;
-      const [freshCols, freshClients] = await Promise.all([
+      const [freshCols, freshClients, freshProducts] = await Promise.all([
         apiFetch<CrmColumn[]>('/admin/crm/columns'),
         apiFetch<CrmClient[]>('/admin/crm/clients'),
+        apiFetch<PublishedProduct[]>('/products').catch(() => []),
       ]);
       if (freshCols?.length) columns = freshCols.sort((a, b) => a.position - b.position);
       if (freshClients?.length) clients = freshClients;
+      products = freshProducts ?? [];
     } catch {
       /* keep server-loaded data */
     } finally {
@@ -324,9 +389,81 @@
     <span class="crm-title">Pipeline de Leads</span>
     <span class="crm-crumb">/ {columns.length} {columns.length === 1 ? 'coluna' : 'colunas'}</span>
     <span class="grow"></span>
-    <button class="btn sm" onclick={openEditor}>
+    <div class="crm-seg">
+      <button class={view === 'kanban' ? 'on' : ''} onclick={() => (view = 'kanban')}>
+        <LayoutGrid size={13} /> Pipeline
+      </button>
+      <button class={view === 'table' ? 'on' : ''} onclick={() => (view = 'table')}>
+        <Rows3 size={13} /> Tabela
+      </button>
+    </div>
+    <button class="btn ghost sm" onclick={openEditor}>
       <Settings size={13} /> Personalizar colunas
     </button>
+    <button class="btn ghost sm" onclick={exportCSV}>
+      <Download size={13} /> CSV
+    </button>
+    <button class="btn sm" onclick={() => openAddLead(columns[0]?.id || '')}>
+      <Plus size={13} /> Novo lead
+    </button>
+  </div>
+
+  <!-- ── Filter bar ── -->
+  <div class="crm-bar">
+    <span class="label-mono">Produto</span>
+    <button
+      class="crm-prodchip {productFilter === 'all' ? 'on' : ''}"
+      style={productFilter === 'all' ? 'background: var(--text); color: var(--bg);' : ''}
+      onclick={() => (productFilter = 'all')}
+    >
+      Geral <span class="ct">{clients.length}</span>
+    </button>
+    {#each products as p (p.id)}
+      {@const ct = clients.filter((c) => c.product_name === p.name_pt).length}
+      {@const on = productFilter === p.name_pt}
+      <button
+        class="crm-prodchip {on ? 'on' : ''}"
+        style={on
+          ? `background:${(p.color || '#7f3fe5') + '22'}; border-color:${p.color || '#7f3fe5'}; color:${p.color || '#7f3fe5'};`
+          : ''}
+        onclick={() => (productFilter = p.name_pt)}
+      >
+        <span class="swatch" style="background:{p.color || '#7f3fe5'}"></span>{p.name_pt}
+        <span class="ct">{ct}</span>
+      </button>
+    {/each}
+    <span class="vline"></span>
+    <select class="crm-select" bind:value={respFilter}>
+      <option value="all">Todos os responsáveis</option>
+      {#each responsibles as r}
+        <option value={r}>{r}</option>
+      {/each}
+    </select>
+    <span class="grow"></span>
+    <div class="crm-search">
+      <Search size={14} />
+      <input placeholder="Buscar por nome ou e-mail…" bind:value={search} />
+    </div>
+  </div>
+
+  <!-- ── Mini-dashboard ── -->
+  <div class="crm-stats">
+    <div class="stat">
+      <div class="k">Leads {productFilter !== 'all' ? '· ' + productFilter : 'no filtro'}</div>
+      <div class="v">{stats.total}</div>
+    </div>
+    <div class="stat">
+      <div class="k">Sem interação 7+ dias</div>
+      <div class="v" style="color:{stats.stale > 0 ? '#f59e0b' : 'inherit'}">{stats.stale}</div>
+    </div>
+    <div class="stat">
+      <div class="k">Interações registradas</div>
+      <div class="v">{stats.interactions}</div>
+    </div>
+    <div class="stat">
+      <div class="k">Colunas no pipeline</div>
+      <div class="v">{columns.length}</div>
+    </div>
   </div>
 
   <div class="crm-body">
@@ -345,13 +482,15 @@
           <Plus size={13} /> Configurar pipeline
         </button>
       </div>
+    {:else if view === 'table'}
+      <TableView {columns} clients={filteredClients} onOpen={(c) => (activeClient = c)} />
     {:else}
       {#if cardMoveError}
         <div class="crm-err-banner" style="margin-bottom:12px">{cardMoveError}</div>
       {/if}
       <div class="crm-kanban">
         {#each columns as col (col.id)}
-          {@const colClients = clients.filter((c) => c.column_id === col.id)}
+          {@const colClients = filteredClients.filter((c) => c.column_id === col.id)}
           <div
             class="crm-col {dropColId === col.id ? 'drop-active' : ''}"
             role="region"
@@ -396,6 +535,7 @@
                 {#each colClients as client (client.id)}
                   <ClientCard
                     {client}
+                    columnColor={col.color}
                     dragging={dragClientId === client.id}
                     onclick={() => (activeClient = client)}
                     ondragstart={() => (dragClientId = client.id)}
@@ -644,11 +784,13 @@
     columnTitle={activeCol?.title || 'Desconhecido'}
     columnColor={activeCol?.color || '#9ca3af'}
     currentUser={data.adminUser?.name || 'Usuário'}
+    {products}
     onClose={() => (activeClient = null)}
     onUpdate={(updatedClient) => {
       clients = clients.map((c) => (c.id === updatedClient.id ? updatedClient : c));
       activeClient = updatedClient;
     }}
+    onDelete={handleDeleteLead}
   />
 {/if}
 
@@ -991,6 +1133,158 @@
     border-color: var(--purple);
   }
 
+  /* ── View toggle ── */
+  .crm-seg {
+    display: inline-flex;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .crm-seg button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 13px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.12s,
+      color 0.12s;
+  }
+  .crm-seg button.on {
+    background: var(--bg-elev);
+    color: var(--text);
+  }
+
+  /* ── Filter bar ── */
+  .crm-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .crm-bar .label-mono {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-right: 2px;
+  }
+  .crm-bar .vline {
+    width: 1px;
+    height: 22px;
+    background: var(--line);
+  }
+
+  .crm-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 11px;
+    min-width: 220px;
+    color: var(--text-faint);
+  }
+  .crm-search input {
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text);
+    flex: 1;
+    width: 100%;
+  }
+
+  .crm-prodchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 11px;
+    border-radius: 100px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      border-color 0.12s,
+      color 0.12s,
+      background 0.12s;
+  }
+  .crm-prodchip:hover {
+    color: var(--text);
+    border-color: var(--line-strong, var(--line));
+  }
+  .crm-prodchip .swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .crm-prodchip.on {
+    color: var(--text);
+  }
+  .crm-prodchip .ct {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    opacity: 0.7;
+  }
+
+  .crm-select {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+  }
+  .crm-select:focus {
+    border-color: var(--purple);
+  }
+
+  /* ── Mini-dashboard ── */
+  .crm-stats {
+    display: flex;
+    gap: 22px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+    flex-shrink: 0;
+  }
+  .crm-stats .stat .k {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .crm-stats .stat .v {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-top: 2px;
+  }
+
   /* ── Error banner ── */
   .crm-err-banner {
     background: rgba(231, 31, 132, 0.1);
@@ -1004,6 +1298,9 @@
 
   /* ── Responsive ── */
   @media (max-width: 760px) {
+    .crm-stats {
+      display: none;
+    }
     .crm-kanban {
       flex-direction: column;
     }

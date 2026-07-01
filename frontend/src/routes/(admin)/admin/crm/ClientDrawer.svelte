@@ -1,16 +1,41 @@
 <script lang="ts">
   import { apiFetch } from '$lib/api/backend';
-  import { X, Headphones, Mail, ArrowRight, Bot, Edit2, Check, Trash2 } from 'lucide-svelte';
+  import {
+    X,
+    Headphones,
+    Mail,
+    MessageCircle,
+    Phone,
+    ArrowRight,
+    Bot,
+    Edit2,
+    Check,
+    Trash2,
+  } from 'lucide-svelte';
   import type { CrmClient } from './+page.svelte';
   import type { CrmInteraction, InteractionType } from '$lib/types/crm';
+  import { initials, mailLink, phoneDigits, waLink } from '$lib/utils/crm';
 
-  let { client, currentUser, columnTitle, columnColor, onClose, onUpdate } = $props<{
+  type PublishedProduct = { id: string; name_pt: string; color: string | null };
+
+  let {
+    client,
+    currentUser,
+    columnTitle,
+    columnColor,
+    products = [],
+    onClose,
+    onUpdate,
+    onDelete,
+  } = $props<{
     client: CrmClient;
     currentUser: string;
     columnTitle: string;
     columnColor: string;
+    products?: PublishedProduct[];
     onClose: () => void;
     onUpdate: (updated: CrmClient) => void;
+    onDelete: (id: string) => void;
   }>();
 
   let isEditing = $state(false);
@@ -20,10 +45,12 @@
     card_id: null,
     name: '',
     email: '',
+    phone: null,
     status: 'ativo',
     column_id: null,
     responsible_name: null,
     product_name: null,
+    product_color: null,
     interaction_count: 0,
     last_interaction: null,
   });
@@ -31,6 +58,31 @@
   $effect(() => {
     editForm = { ...client };
   });
+
+  const wa = $derived(waLink(client.name, client.phone));
+  const mail = $derived(mailLink(client.name, client.email));
+  const tel = $derived(phoneDigits(client.phone));
+
+  // ── Excluir lead (soft-delete, com confirmação — não existe no protótipo, mas é
+  // uma ação destrutiva importante o suficiente para exigir um passo extra) ──
+  let confirmDeleteLead = $state(false);
+  let deleteError = $state('');
+  let isDeleting = $state(false);
+
+  async function handleDeleteLead() {
+    isDeleting = true;
+    deleteError = '';
+    try {
+      await apiFetch(`/admin/crm/clients/${client.id}`, { method: 'DELETE' });
+      onDelete(client.id);
+    } catch (err) {
+      const e = err as { message?: string };
+      deleteError = e.message || 'Erro ao remover lead.';
+      confirmDeleteLead = false;
+    } finally {
+      isDeleting = false;
+    }
+  }
 
   let activeTab = $state<InteractionType>('nota');
   let inputText = $state('');
@@ -155,6 +207,7 @@
         body: JSON.stringify({
           name: editForm.name,
           email: editForm.email,
+          phone: editForm.phone,
           responsible_name: editForm.responsible_name,
           product_name: editForm.product_name,
         }),
@@ -189,6 +242,13 @@
           <button class="action-btn" onclick={() => (isEditing = !isEditing)} title="Editar Lead">
             <Edit2 size={14} color={isEditing ? '#c084fc' : '#9ca3af'} />
           </button>
+          <button
+            class="action-btn danger"
+            onclick={() => (confirmDeleteLead = true)}
+            title="Remover lead"
+          >
+            <Trash2 size={14} />
+          </button>
           <button class="close-btn" onclick={onClose}><X size={16} /></button>
         </div>
       </div>
@@ -196,21 +256,38 @@
       {#if isEditing}
         <div class="edit-mode-form">
           <div class="input-group">
-            <label for="drawer-name">NOME DA EMPRESA</label>
+            <label for="drawer-name">NOME</label>
             <input id="drawer-name" type="text" bind:value={editForm.name} class="dark-input" />
           </div>
-          <div class="input-group">
-            <label for="drawer-email">E-MAIL</label>
-            <input id="drawer-email" type="email" bind:value={editForm.email} class="dark-input" />
+          <div class="meta-grid" style="margin-top: 0; grid-template-columns: 1fr 1fr;">
+            <div class="input-group">
+              <label for="drawer-email">E-MAIL</label>
+              <input
+                id="drawer-email"
+                type="email"
+                bind:value={editForm.email}
+                class="dark-input"
+              />
+            </div>
+            <div class="input-group">
+              <label for="drawer-phone">TELEFONE</label>
+              <input
+                id="drawer-phone"
+                type="text"
+                placeholder="+55 11 90000-0000"
+                bind:value={editForm.phone}
+                class="dark-input"
+              />
+            </div>
           </div>
           <div class="meta-grid" style="margin-top: 0;">
             <div class="input-group">
               <label for="drawer-product">PRODUTO</label>
               <select id="drawer-product" bind:value={editForm.product_name} class="dark-input">
                 <option value="">Selecione...</option>
-                <option value="Avali">Avali</option>
-                <option value="Notify">Notify</option>
-                <option value="Pontua">Pontua</option>
+                {#each products as p (p.id)}
+                  <option value={p.name_pt}>{p.name_pt}</option>
+                {/each}
               </select>
             </div>
             <div class="input-group">
@@ -233,8 +310,29 @@
         </div>
       {:else}
         <div class="client-title">
-          <h2>{client.name}</h2>
-          <p class="email">{client.email || 'Sem e-mail cadastrado'}</p>
+          <span class="crm-avatar" style="background:{columnColor}">{initials(client.name)}</span>
+          <div>
+            <h2>{client.name}</h2>
+            <p class="email">{client.email || 'Sem e-mail cadastrado'}</p>
+          </div>
+        </div>
+
+        <div class="contact-actions">
+          <a
+            class="contact-btn wa"
+            class:disabled={!wa}
+            href={wa ?? undefined}
+            target="_blank"
+            rel="noopener"
+          >
+            <MessageCircle size={15} /> WhatsApp
+          </a>
+          <a class="contact-btn mail" class:disabled={!mail} href={mail ?? undefined}>
+            <Mail size={15} /> E-mail
+          </a>
+          <a class="contact-btn call" class:disabled={!tel} href={tel ? `tel:${tel}` : undefined}>
+            <Phone size={14} /> Ligar
+          </a>
         </div>
 
         <div class="meta-grid">
@@ -395,6 +493,39 @@
   </div>
 </div>
 
+<!-- ── Confirmação de remoção do lead ── -->
+{#if confirmDeleteLead}
+  <div class="admin-overlay" role="presentation" onclick={() => (confirmDeleteLead = false)}>
+    <div
+      class="confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Confirmar remoção do lead"
+      tabindex="-1"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.key === 'Escape' && (confirmDeleteLead = false)}
+    >
+      <div class="confirm-icon"><Trash2 size={20} /></div>
+      <h3>Remover lead?</h3>
+      <p>
+        <strong>{client.name}</strong> será removido do pipeline. O histórico de interações é preservado
+        para auditoria, mas o lead deixa de aparecer no board.
+      </p>
+      {#if deleteError}
+        <div class="crm-err-banner">{deleteError}</div>
+      {/if}
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick={() => (confirmDeleteLead = false)} disabled={isDeleting}
+          >Cancelar</button
+        >
+        <button class="btn-confirm-delete" onclick={handleDeleteLead} disabled={isDeleting}>
+          {isDeleting ? 'Removendo…' : 'Remover lead'}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
 <style>
   .drawer-overlay {
     position: fixed;
@@ -464,18 +595,78 @@
     place-items: center;
     cursor: pointer;
   }
+  .client-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .crm-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono, monospace);
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
   .client-title h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 600;
     color: #ffffff;
+    letter-spacing: -0.01em;
   }
   .client-title .email {
-    margin: 4px 0 0 0;
+    margin: 2px 0 0 0;
     font-family: var(--font-mono, monospace);
     font-size: 12px;
     color: #9ca3af;
   }
+
+  .contact-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .contact-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid #2d2d35;
+    background: #09090b;
+    color: #e4e4e7;
+    transition: all 0.12s;
+  }
+  .contact-btn.wa:hover {
+    background: #25d366;
+    border-color: #25d366;
+    color: #fff;
+  }
+  .contact-btn.mail:hover {
+    background: #7f3fe5;
+    border-color: #7f3fe5;
+    color: #fff;
+  }
+  .contact-btn.call:hover {
+    background: #1f1f24;
+    border-color: #4b4b5c;
+  }
+  .contact-btn.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
   .meta-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -773,6 +964,10 @@
     background: #1f1f24;
     color: #ffffff;
   }
+  .action-btn.danger:hover {
+    background: rgba(236, 72, 153, 0.12);
+    color: #f472b6;
+  }
 
   .dark-input {
     background: #09090b;
@@ -835,5 +1030,75 @@
     to {
       transform: translateX(0);
     }
+  }
+
+  /* ── Confirmação de remoção ── */
+  .admin-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.6);
+  }
+  .confirm-modal {
+    width: 380px;
+    max-width: 90vw;
+    background: #121215;
+    border: 1px solid #2d2d35;
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+  }
+  .confirm-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(236, 72, 153, 0.12);
+    color: #f472b6;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 14px;
+  }
+  .confirm-modal h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #ffffff;
+  }
+  .confirm-modal p {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.5;
+  }
+  .confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid #2d2d35;
+    border-radius: 100px;
+    color: #e4e4e7;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-confirm-delete {
+    background: #f472b6;
+    border: 1px solid #f472b6;
+    border-radius: 100px;
+    color: #09090b;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-confirm-delete:disabled,
+  .btn-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 </style>

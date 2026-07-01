@@ -5,6 +5,7 @@ import {
   listCrmAdminClients,
   createCrmAdminClient,
   patchCrmAdminClient,
+  removeCrmAdminClient,
   CrmAdminClientError,
 } from './crm-admin-clients.service.js';
 
@@ -26,6 +27,7 @@ crmAdminClientsRouter.get('/', ...ownerGuard, async (_req, res) => {
 crmAdminClientsRouter.post('/', ...ownerGuard, async (req, res) => {
   const name = typeof req.body?.['name'] === 'string' ? req.body['name'] : '';
   const email = typeof req.body?.['email'] === 'string' ? req.body['email'] : '';
+  const phone = typeof req.body?.['phone'] === 'string' ? req.body['phone'] : undefined;
   const column_id = typeof req.body?.['column_id'] === 'string' ? req.body['column_id'] : undefined;
   const responsible_name =
     typeof req.body?.['responsible_name'] === 'string' ? req.body['responsible_name'] : undefined;
@@ -36,10 +38,12 @@ crmAdminClientsRouter.post('/', ...ownerGuard, async (req, res) => {
     const createInput: {
       name: string;
       email: string;
+      phone?: string;
       column_id?: string;
       responsible_name?: string;
       product_name?: string;
     } = { name, email };
+    if (phone !== undefined) createInput.phone = phone;
     if (column_id !== undefined) createInput.column_id = column_id;
     if (responsible_name !== undefined) createInput.responsible_name = responsible_name;
     if (product_name !== undefined) createInput.product_name = product_name;
@@ -72,6 +76,7 @@ crmAdminClientsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
   const patch: {
     name?: string;
     email?: string;
+    phone?: string;
     column_id?: string;
     responsible_name?: string;
     product_name?: string;
@@ -79,6 +84,7 @@ crmAdminClientsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
 
   if (typeof req.body?.['name'] === 'string') patch.name = req.body['name'];
   if (typeof req.body?.['email'] === 'string') patch.email = req.body['email'];
+  if ('phone' in (req.body ?? {})) patch.phone = req.body['phone'] ?? '';
   if (typeof req.body?.['column_id'] === 'string') patch.column_id = req.body['column_id'];
   if ('responsible_name' in (req.body ?? {}))
     patch.responsible_name = req.body['responsible_name'] ?? '';
@@ -104,6 +110,27 @@ crmAdminClientsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
     }
     console.error('[crm-admin-clients] patch error:', err);
     res.status(500).json({ message: 'Falha ao atualizar cliente.' });
+  }
+});
+
+// DELETE /api/admin/crm/clients/:id — remove o lead do board (soft-delete: status=inativo)
+crmAdminClientsRouter.delete('/:id', ...ownerGuard, async (req, res) => {
+  const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
+  if (!id) {
+    res.status(400).json({ message: 'ID do cliente é obrigatório.' });
+    return;
+  }
+
+  try {
+    await removeCrmAdminClient(id);
+    res.status(204).send();
+  } catch (err) {
+    if (err instanceof CrmAdminClientError && err.code === 'NOT_FOUND') {
+      res.status(404).json({ message: err.message });
+      return;
+    }
+    console.error('[crm-admin-clients] remove error:', err);
+    res.status(500).json({ message: 'Falha ao remover cliente.' });
   }
 });
 

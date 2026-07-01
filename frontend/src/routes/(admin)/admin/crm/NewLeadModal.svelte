@@ -1,9 +1,11 @@
 <script lang="ts">
   import { X, Users, ArrowRight } from 'lucide-svelte';
+  import { onMount } from 'svelte';
   import { apiFetch } from '$lib/api/backend';
   import type { CrmClient } from './+page.svelte';
 
   type CrmColumn = { id: string; title: string };
+  type PublishedProduct = { id: string; name_pt: string; color: string | null };
 
   let { columns, initialColumnId, onClose, onSave } = $props<{
     columns: CrmColumn[];
@@ -14,11 +16,23 @@
 
   let name = $state('');
   let email = $state('');
+  let phone = $state('');
   let productName = $state('');
   let responsibleName = $state('');
   let columnId = $state('');
   let isSubmitting = $state(false);
   let errorMsg = $state('');
+
+  let products = $state<PublishedProduct[]>([]);
+
+  onMount(async () => {
+    try {
+      // Produtos reais, já cadastrados e publicados na vitrine — não uma lista fixa.
+      products = await apiFetch<PublishedProduct[]>('/products');
+    } catch {
+      products = [];
+    }
+  });
 
   $effect(() => {
     columnId = initialColumnId;
@@ -34,6 +48,7 @@
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
+          phone: phone.trim() || undefined,
           product_name: productName || undefined,
           responsible_name: responsibleName || undefined,
           column_id: columnId || undefined,
@@ -80,11 +95,11 @@
 
       <div class="form-grid">
         <div class="input-group">
-          <label for="nl-name">Nome da empresa / Lead</label>
+          <label for="nl-name">Nome do lead</label>
           <input
             id="nl-name"
             type="text"
-            placeholder="ex. Folha Sistemas"
+            placeholder="ex. Leandro Prado"
             bind:value={name}
             required
           />
@@ -96,12 +111,17 @@
         </div>
 
         <div class="input-group">
+          <label for="nl-phone">Telefone (com DDD)</label>
+          <input id="nl-phone" type="text" placeholder="+55 11 90000-0000" bind:value={phone} />
+        </div>
+
+        <div class="input-group">
           <label for="nl-product">Produto de interesse</label>
           <select id="nl-product" bind:value={productName}>
             <option value="">Selecione...</option>
-            <option value="Avali">Avali</option>
-            <option value="Notify">Notify</option>
-            <option value="Pontua">Pontua</option>
+            {#each products as p (p.id)}
+              <option value={p.name_pt}>{p.name_pt}</option>
+            {/each}
           </select>
         </div>
 

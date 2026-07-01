@@ -5,10 +5,12 @@ export type CrmAdminClient = {
   card_id: string | null;
   name: string;
   email: string;
+  phone: string | null;
   status: 'ativo' | 'inativo';
   column_id: string | null;
   responsible_name: string | null;
   product_name: string | null;
+  product_color: string | null;
   interaction_count: number;
   last_interaction: string | null;
 };
@@ -16,6 +18,7 @@ export type CrmAdminClient = {
 export type CrmAdminClientCreate = {
   name: string;
   email: string;
+  phone?: string;
   column_id?: string;
   responsible_name?: string;
   product_name?: string;
@@ -24,6 +27,7 @@ export type CrmAdminClientCreate = {
 export type CrmAdminClientPatch = {
   name?: string;
   email?: string;
+  phone?: string;
   column_id?: string;
   responsible_name?: string;
   product_name?: string;
@@ -58,7 +62,7 @@ async function buildClientView(clientId: string): Promise<CrmAdminClient | null>
 
   const { data: client, error: cErr } = await supabase
     .from('clients')
-    .select('id, nome, email, status')
+    .select('id, nome, email, telefone, status')
     .eq('id', clientId)
     .maybeSingle();
 
@@ -72,13 +76,15 @@ async function buildClientView(clientId: string): Promise<CrmAdminClient | null>
     .maybeSingle();
 
   let product_name: string | null = null;
+  let product_color: string | null = null;
   if (card?.produto_vinculado) {
     const { data: prod } = await supabase
       .from('products')
-      .select('name_pt')
+      .select('name_pt, color')
       .eq('id', card.produto_vinculado)
       .maybeSingle();
     product_name = prod?.name_pt ?? null;
+    product_color = prod?.color ?? null;
   }
 
   const { count } = await supabase
@@ -101,10 +107,12 @@ async function buildClientView(clientId: string): Promise<CrmAdminClient | null>
     card_id: card?.id ?? null,
     name: client.nome,
     email: client.email,
+    phone: client.telefone ?? null,
     status: client.status as 'ativo' | 'inativo',
     column_id: card?.column_id ?? null,
     responsible_name: card?.responsavel ?? null,
     product_name,
+    product_color,
     interaction_count: count ?? 0,
     last_interaction: lastInter?.data ?? null,
   };
@@ -115,7 +123,7 @@ export async function listCrmAdminClients(): Promise<CrmAdminClient[]> {
 
   const { data: clients, error } = await supabase
     .from('clients')
-    .select('id, nome, email, status')
+    .select('id, nome, email, telefone, status')
     .eq('status', 'ativo')
     .order('created_at', { ascending: false });
 
@@ -130,43 +138,48 @@ export async function listCrmAdminClients(): Promise<CrmAdminClient[]> {
     .in('client_id', clientIds);
 
   const productIds = [...new Set((cards ?? []).map((c) => c.produto_vinculado).filter(Boolean))];
-  const productMap = new Map<string, string>();
+  const productMap = new Map<string, { name: string; color: string | null }>();
   if (productIds.length) {
     const { data: products } = await supabase
       .from('products')
-      .select('id, name_pt')
+      .select('id, name_pt, color')
       .in('id', productIds);
-    for (const p of products ?? []) productMap.set(p.id, p.name_pt);
+    for (const p of products ?? []) productMap.set(p.id, { name: p.name_pt, color: p.color });
   }
 
-  const { data: interactionCounts } = await supabase
+  const { data: interactions } = await supabase
     .from('interactions')
-    .select('client_id')
+    .select('client_id, data')
     .in('client_id', clientIds)
-    .eq('removed', false);
+    .eq('removed', false)
+    .order('data', { ascending: false });
 
   const countMap = new Map<string, number>();
-  for (const i of interactionCounts ?? []) {
+  const lastInteractionMap = new Map<string, string>();
+  for (const i of interactions ?? []) {
     countMap.set(i.client_id, (countMap.get(i.client_id) ?? 0) + 1);
+    // Ordenado por data DESC — a primeira ocorrência de cada client_id já é a mais recente.
+    if (!lastInteractionMap.has(i.client_id)) lastInteractionMap.set(i.client_id, i.data);
   }
 
   const cardMap = new Map((cards ?? []).map((c) => [c.client_id, c]));
 
   return clients.map((client) => {
     const card = cardMap.get(client.id);
+    const product = card?.produto_vinculado ? productMap.get(card.produto_vinculado) : undefined;
     return {
       id: client.id,
       card_id: card?.id ?? null,
       name: client.nome,
       email: client.email,
+      phone: client.telefone ?? null,
       status: client.status as 'ativo' | 'inativo',
       column_id: card?.column_id ?? null,
       responsible_name: card?.responsavel ?? null,
-      product_name: card?.produto_vinculado
-        ? (productMap.get(card.produto_vinculado) ?? null)
-        : null,
+      product_name: product?.name ?? null,
+      product_color: product?.color ?? null,
       interaction_count: countMap.get(client.id) ?? 0,
-      last_interaction: null,
+      last_interaction: lastInteractionMap.get(client.id) ?? null,
     };
   });
 }
@@ -183,7 +196,11 @@ export async function createCrmAdminClient(input: CrmAdminClientCreate): Promise
 
   const { data: client, error: cErr } = await supabase
     .from('clients')
-    .insert({ nome: name, email: email || `sem-email-${Date.now()}@placeholder.local` })
+    .insert({
+      nome: name,
+      email: email || `sem-email-${Date.now()}@placeholder.local`,
+      telefone: input.phone?.trim() || null,
+    })
     .select('id')
     .single();
 
@@ -231,6 +248,9 @@ export async function patchCrmAdminClient(
       throw new CrmAdminClientError('E-mail inválido.', 'INVALID_EMAIL');
     clientUpdates['email'] = email;
   }
+  if (patch.phone !== undefined) {
+    clientUpdates['telefone'] = patch.phone.trim() || null;
+  }
 
   if (Object.keys(clientUpdates).length) {
     const { error } = await supabase.from('clients').update(clientUpdates).eq('id', id);
@@ -272,4 +292,23 @@ export async function patchCrmAdminClient(
   const result = await buildClientView(id);
   if (!result) throw new CrmAdminClientError('Falha ao recuperar cliente atualizado.', 'NOT_FOUND');
   return result;
+}
+
+// Remove um lead do board sem apagar o histórico (soft-delete): marca clients.status
+// como 'inativo', que já é filtrado por listCrmAdminClients/buildClientView-callers.
+// Preserva client_cards e interactions para auditoria, consistente com o padrão de
+// remoção lógica usado no resto do CRM (interações, colunas).
+export async function removeCrmAdminClient(id: string): Promise<void> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('clients')
+    .update({ status: 'inativo' })
+    .eq('id', id)
+    .eq('status', 'ativo')
+    .select('id')
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new CrmAdminClientError('Cliente não encontrado.', 'NOT_FOUND');
 }
