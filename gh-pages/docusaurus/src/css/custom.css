@@ -605,20 +605,88 @@ button[aria-label*="menu" i] {
   margin-top: 0.6rem;
 }
 
-/* ---------- Par de evidências (screenshot + variante do mesmo requisito) ---------- */
-.crianex-evidence-pair {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+/* ---------- Carrossel de evidências (uma screenshot por vez, navegação finita) ---------- */
+.crianex-evidence-carousel {
   margin: 1rem 0;
 }
-.crianex-evidence-pair img {
-  flex: 1 1 260px;
-  min-width: 0;
+.crianex-evidence-carousel--single img {
   max-width: 100%;
   border-radius: var(--crianex-radius);
   border: 1px solid var(--crianex-border);
   box-shadow: var(--crianex-shadow);
+}
+.crianex-evidence-carousel__viewport {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.crianex-evidence-carousel__viewport img {
+  max-width: 100%;
+  border-radius: var(--crianex-radius);
+  border: 1px solid var(--crianex-border);
+  box-shadow: var(--crianex-shadow);
+}
+.crianex-evidence-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--crianex-border);
+  background: var(--ifm-background-color);
+  color: var(--ifm-color-emphasis-700);
+  box-shadow: var(--crianex-shadow);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+.crianex-evidence-carousel__arrow:hover:not(:disabled) {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  transform: translateY(-50%) scale(1.08);
+}
+.crianex-evidence-carousel__arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.crianex-evidence-carousel__arrow--prev {
+  left: 0.75rem;
+}
+.crianex-evidence-carousel__arrow--next {
+  right: 0.75rem;
+}
+.crianex-evidence-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.crianex-evidence-carousel__dot {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--crianex-border);
+  background: var(--ifm-background-color);
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.crianex-evidence-carousel__dot.is-active {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border-color: var(--ifm-color-primary);
+}
+.crianex-evidence-carousel__dot:hover:not(.is-active) {
+  background: var(--crianex-surface-alt);
 }
 
 /* ---------- Revision history (collapsible) ---------- */

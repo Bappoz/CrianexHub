@@ -6,6 +6,13 @@ sidebar_label: "F21 · Registrar interações comerciais"
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import AccessCredentials from '@site/src/components/AccessCredentials';
+import EvidenceCarousel from '@site/src/components/EvidenceCarousel';
+import img_f21_rf42 from './img/f21-rf42.png';
+import img_f21_rf59 from './img/f21-rf59.png';
+import img_f21_rf53 from './img/f21-rf53.png';
+import img_f21_rnf01 from './img/f21-rnf01.png';
+import img_f21_rnf03 from './img/f21-rnf03.png';
+import img_f21_rnf09 from './img/f21-rnf09.png';
 
 # F21 — Registrar interações comerciais
 
@@ -23,8 +30,8 @@ Esta funcionalidade exige **login de administrador**.
 <AccessCredentials email="owner@crianex.com" password="Crianex@Owner1" />
 :::
 
-:::caution[Achado de auditoria — AC de RF53 desatualizado]
-O critério de aceite original de RF53 (e RN22) descrevia remoção de interação como **exclusão permanente (hard-delete)**. A implementação real é **remoção lógica (soft-delete, `removed=true`)**, que preserva o histórico — comportamento mais seguro, mas diferente do documentado originalmente. Pauta aberta para a reunião de refinamento: ver [Resultados V&V da IT2 — MR.01](/iteracoes/iteracao-2/vv#mr01).
+:::info[Achado de auditoria resolvido]
+O critério de aceite original de RF53 (e RN22) descrevia remoção de interação como exclusão permanente (hard-delete). A implementação real sempre foi remoção lógica (soft-delete, `removed=true`), que preserva o histórico — comportamento mais seguro. O texto abaixo foi corrigido para refletir o comportamento real, conforme decidido em [Resultados V&V da IT2 — MR.01](/iteracoes/iteracao-2/vv#mr01).
 :::
 
 ## Requisitos (evidências)
@@ -46,7 +53,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RF42 — F21](./img/f21-rf42.png)
+<EvidenceCarousel images={[{src: img_f21_rf42, alt: 'Evidência de RF42 — F21'}]} />
 
 **Deploy:** _link a definir_
 
@@ -65,7 +72,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RF59 — F21](./img/f21-rf59.png)
+<EvidenceCarousel images={[{src: img_f21_rf59, alt: 'Evidência de RF59 — F21'}]} />
 
 **Deploy:** _link a definir_
 
@@ -76,15 +83,15 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Critérios de aceite (BDD)**
 
-- **Dado** interação registrada, **quando** remover, **então** é excluída permanentemente do histórico do card.
-- **Dado** remoção, **quando** acionada, **então** exige confirmação antes de excluir.
+- **Dado** interação registrada, **quando** remover, **então** ela é removida logicamente (soft-delete, `removed=true`) e some da timeline do card, mas o registro permanece preservado no banco para auditoria.
+- **Dado** remoção, **quando** acionada, **então** exige confirmação antes de remover.
 - **Dado** requisição sem permissão, **quando** DELETE da interação, **então** o RLS bloqueia com 403.
 
-**Regras de negócio:** [RN22](/backlog/requisitos#rns) — Remoção definitiva de interação (hard-delete; excluída permanentemente do histórico do card)
+**Regras de negócio:** [RN22](/backlog/requisitos#rns) — Remoção lógica de interação (soft-delete; preservada no banco para auditoria, some apenas da timeline)
 
 **Evidência (screenshot):**
 
-![Evidência de RF53 — F21](./img/f21-rf53.png)
+<EvidenceCarousel images={[{src: img_f21_rf53, alt: 'Evidência de RF53 — F21'}]} />
 
 **Deploy:** _link a definir_
 
@@ -98,7 +105,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF01 — F21](./img/f21-rnf01.png)
+<EvidenceCarousel images={[{src: img_f21_rnf01, alt: 'Evidência de RNF01 — F21'}]} />
 
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
 
@@ -112,7 +119,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF03 — F21](./img/f21-rnf03.png)
+<EvidenceCarousel images={[{src: img_f21_rnf03, alt: 'Evidência de RNF03 — F21'}]} />
 
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
 
@@ -126,7 +133,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF09 — F21](./img/f21-rnf09.png)
+<EvidenceCarousel images={[{src: img_f21_rnf09, alt: 'Evidência de RNF09 — F21'}]} />
 
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
 

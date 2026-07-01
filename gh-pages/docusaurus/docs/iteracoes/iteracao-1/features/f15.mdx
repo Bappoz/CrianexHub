@@ -5,6 +5,14 @@ sidebar_label: "F15 · Disponibilizar informações insti"
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import EvidenceCarousel from '@site/src/components/EvidenceCarousel';
+import img_f15_rf50 from './img/f15-rf50.png';
+import img_f15_rf50_2 from './img/f15-rf50-2.png';
+import img_f15_rf50_3 from './img/f15-rf50-3.png';
+import img_f15_rf51 from './img/f15-rf51.png';
+import img_f15_rf51_2 from './img/f15-rf51-2.png';
+import img_f15_rnf02 from './img/f15-rnf02.png';
+import img_f15_rnf27 from './img/f15-rnf27.png';
 
 # F15 — Disponibilizar informações institucionais
 
@@ -31,13 +39,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<div className="crianex-evidence-pair">
-
-![Evidência de RF50 — F15](./img/f15-rf50.png)
-![Evidência de RF50.1 — F15](./img/f15-rf50-2.png)
-![Evidência de RF50.2 — F15](./img/f15-rf50-3.png)
-
-</div>
+<EvidenceCarousel images={[{src: img_f15_rf50, alt: 'Evidência de RF50 — F15'}, {src: img_f15_rf50_2, alt: 'Evidência de RF50.1 — F15'}, {src: img_f15_rf50_3, alt: 'Evidência de RF50.2 — F15'}]} />
 
 **Deploy:** _link a definir_
 
@@ -56,12 +58,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<div className="crianex-evidence-pair">
-
-![Evidência de RF51 — F15](./img/f15-rf51.png)
-![Evidência de RF51.1 — F15](./img/f15-rf51-2.png)
-
-</div>
+<EvidenceCarousel images={[{src: img_f15_rf51, alt: 'Evidência de RF51 — F15'}, {src: img_f15_rf51_2, alt: 'Evidência de RF51.1 — F15'}]} />
 
 **Deploy:** _link a definir_
 
@@ -75,7 +72,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF02 — F15](./img/f15-rnf02.png)
+<EvidenceCarousel images={[{src: img_f15_rnf02, alt: 'Evidência de RNF02 — F15'}]} />
 
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 
@@ -89,7 +86,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF27 — F15](./img/f15-rnf27.png)
+<EvidenceCarousel images={[{src: img_f15_rnf27, alt: 'Evidência de RNF27 — F15'}]} />
 
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 

@@ -6,6 +6,13 @@ sidebar_label: "F09 · Autenticar"
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import AccessCredentials from '@site/src/components/AccessCredentials';
+import EvidenceCarousel from '@site/src/components/EvidenceCarousel';
+import img_f09_rf08 from './img/f09-rf08.png';
+import img_f09_rf08_2 from './img/f09-rf08-2.png';
+import img_f09_rf09 from './img/f09-rf09.png';
+import img_f09_rnf01 from './img/f09-rnf01.png';
+import img_f09_rnf03 from './img/f09-rnf03.png';
+import img_f09_rnf08 from './img/f09-rnf08.png';
 
 # F09 — Autenticar para acesso seguro ao sistema
 
@@ -40,12 +47,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<div className="crianex-evidence-pair">
-
-![Evidência de RF08 — F09](./img/f09-rf08.png)
-![Evidência de RF08.1 — F09](./img/f09-rf08-2.png)
-
-</div>
+<EvidenceCarousel images={[{src: img_f09_rf08, alt: 'Evidência de RF08 — F09'}, {src: img_f09_rf08_2, alt: 'Evidência de RF08.1 — F09'}]} />
 
 **Deploy:** _link a definir_
 
@@ -63,7 +65,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RF09 — F09](./img/f09-rf09.png)
+<EvidenceCarousel images={[{src: img_f09_rf09, alt: 'Evidência de RF09 — F09'}]} />
 
 **Deploy:** _link a definir_
 
@@ -77,7 +79,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF01 — F09](./img/f09-rnf01.png)
+<EvidenceCarousel images={[{src: img_f09_rnf01, alt: 'Evidência de RNF01 — F09'}]} />
 
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 
@@ -91,7 +93,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF03 — F09](./img/f09-rnf03.png)
+<EvidenceCarousel images={[{src: img_f09_rnf03, alt: 'Evidência de RNF03 — F09'}]} />
 
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 
@@ -105,7 +107,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-![Evidência de RNF08 — F09](./img/f09-rnf08.png)
+<EvidenceCarousel images={[{src: img_f09_rnf08, alt: 'Evidência de RNF08 — F09'}]} />
 
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 

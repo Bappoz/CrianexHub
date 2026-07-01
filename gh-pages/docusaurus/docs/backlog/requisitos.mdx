@@ -86,7 +86,7 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
 | RF33 | Despublicar artigo de FAQ | F17 | togglePublish published=false |
 | RF34 | Avaliar artigo de FAQ | F18 | Botões útil/não útil na vitrine |
 | RF35 | Editar dados do cliente/lead | F19 | PATCH /admin/crm/clients/:id (IT2) |
-| RF36 | Inativar cliente/lead | F19 | Soft-delete (`status=inativo`); **reativação ainda não implementada** — item aberto, ver [V&V IT2 · MR.01](/iteracoes/iteracao-2/vv#mr01) (IT2) |
+| RF36 | Inativar/reativar cliente/lead | F19 | Soft-delete (`status=inativo`); reativação implementada em 01/07/2026 (achado fechado), ver [V&V IT2 · MR.01](/iteracoes/iteracao-2/vv#mr01) (IT2) |
 | RF37 | Cadastrar lead no CRM | F19 | NewLeadModal + POST /admin/crm/clients (IT2) |
 | RF38 | Adicionar colunas no CRM | F20 | POST /admin/crm/columns (IT2) |
 | RF39 | Remover colunas no CRM | F20 | DELETE protegido (invariante ≥1 coluna) (IT2) |
@@ -100,7 +100,7 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
 | RF50 | Consultar detalhes de produto na vitrine | F15 | Página /produtos/[slug] |
 | RF51 | Permitir utilização de cookies | F15 | Banner de consentimento |
 | RF52 | Filtrar artigos FAQ | F18 | — |
-| RF53 | Remover interação comercial | F21 | Soft-delete (`removed=true`) — **nota:** RN22/AC original descreviam hard-delete; código implementa remoção lógica, ver [V&V IT2 · MR.01](/iteracoes/iteracao-2/vv#mr01) (IT2) |
+| RF53 | Remover interação comercial | F21 | Soft-delete (`removed=true`) — texto corrigido em 01/07/2026 para refletir a remoção lógica já implementada, ver [V&V IT2 · MR.01](/iteracoes/iteracao-2/vv#mr01) (IT2) |
 | RF56 | Editar template de notificações | F08 | PATCH /admin/notification-templates/:id (IT2) |
 | RF57 | Remover template de notificações | F08 | Inativação lógica + fallback padrão (IT2) |
 | RF59 | Editar interação comercial | F21 | PATCH preserva autor/data originais (IT2) |
@@ -200,7 +200,7 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
 | RN19 | Entrada do lead no funil | Todo lead/cliente cadastrado no CRM entra na coluna inicial padrão do funil | F19 | RF37 |
 | RN20 | Inativação preserva o registro | Cliente/lead inativado sai do fluxo ativo do funil, mas é preservado no banco (soft-delete), nunca excluído fisicamente | F19 | RF36 |
 | RN21 | Integridade do funil | O funil mantém ao menos uma coluna; coluna padrão ou com cards não é removida sem realocação dos cards | F20 | RF39 |
-| RN22 | Remoção definitiva de interação | A remoção de uma interação comercial é permanente (hard-delete), excluindo-a do histórico do card | F21 | RF53 |
+| RN22 | Remoção lógica de interação | A remoção de uma interação comercial é lógica (soft-delete, `removed=true`): some da timeline do card, mas o registro é preservado no banco para auditoria | F21 | RF53 |
 | RN23 | Categorização vinculada a produto | Categorias de FAQ são vinculadas a produtos, organizando os artigos da base de conhecimento por produto | F16 | RF31 |
 | RN24 | Escopo de busca, filtros e exportação do CRM | Busca, filtros por produto/responsável, indicadores do funil e exportação em CSV operam exclusivamente sobre leads com status ativo (mesmo conjunto exibido no board Kanban); a exportação reflete somente os leads visíveis após os filtros aplicados no momento da ação | F19 | RF60, RF61, RF62 |
 | RN25 | Ativação exclusiva de template por tipo de evento | Ao salvar (criar ou editar) um template associando-o a um tipo de evento, qualquer outro template previamente ativo para esse mesmo tipo é desativado automaticamente, garantindo no máximo 1 template ativo por tipo sem exigir remoção manual prévia | F08 | RF15, RF63 |
