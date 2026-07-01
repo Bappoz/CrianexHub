@@ -2,6 +2,9 @@
   import { Settings, X, Check, MoreVertical, Plus } from 'lucide-svelte';
   import { apiFetch } from '$lib/api/backend';
   import { onMount } from 'svelte';
+  import ClientCard from './ClientCard.svelte';
+  import ClientDrawer from './ClientDrawer.svelte';
+  import NewLeadModal from './NewLeadModal.svelte';
 
   type CrmColumn = {
     id: string;
@@ -15,6 +18,18 @@
     updated_at: string;
   };
 
+  export type CrmClient = {
+    id: string;
+    name: string;
+    email: string;
+    status: 'ativo' | 'inativo';
+    column_id: string | null;
+    responsible_name: string | null;
+    product_name: string | null;
+    interaction_count: number;
+    last_interaction: string | null;
+  };
+
   const COL_COLORS = [
     '#7f3fe5',
     '#e71f84',
@@ -26,13 +41,25 @@
     '#9a968e',
   ];
 
-  let { data } = $props<{ data: { columns: CrmColumn[]; error?: string; forbidden?: boolean } }>();
+  let { data } = $props<{
+    data: {
+      columns: CrmColumn[];
+      error?: string;
+      forbidden?: boolean;
+      adminUser?: { name: string };
+    };
+  }>();
 
   // ── State ──
   let columns = $state<CrmColumn[]>([]);
   let colsLoading = $state(false);
   let colsError = $state('');
   let editingCols = $state(false);
+
+  let clients = $state<CrmClient[]>([]);
+  let activeClient = $state<CrmClient | null>(null);
+  let showNewLeadModal = $state(false);
+  let addLeadColumnId = $state('');
 
   // Column editor state
   let editCols = $state<(CrmColumn & { _new?: boolean })[]>([]);
@@ -233,11 +260,20 @@
     }
   }
 
+  function openAddLead(colId: string) {
+    addLeadColumnId = colId;
+    showNewLeadModal = true;
+  }
+
   onMount(async () => {
     try {
       colsLoading = true;
-      const fresh = await apiFetch<CrmColumn[]>('/admin/crm/columns');
-      if (fresh?.length) columns = fresh.sort((a, b) => a.position - b.position);
+      const [freshCols, freshClients] = await Promise.all([
+        apiFetch<CrmColumn[]>('/admin/crm/columns'),
+        apiFetch<CrmClient[]>('/admin/crm/clients'),
+      ]);
+      if (freshCols?.length) columns = freshCols.sort((a, b) => a.position - b.position);
+      if (freshClients?.length) clients = freshClients;
     } catch {
       /* keep server-loaded data */
     } finally {
@@ -257,7 +293,6 @@
     </button>
   </div>
 
-  <!-- ── Kanban board (colunas vazias — leads serão adicionados pela F19) ── -->
   <div class="crm-body">
     {#if colsLoading}
       <div class="crm-loading">Carregando colunas…</div>
@@ -277,19 +312,43 @@
     {:else}
       <div class="crm-kanban">
         {#each columns as col (col.id)}
+          {@const colClients = clients.filter((c) => c.column_id === col.id)}
           <div class="crm-col" role="region" aria-label={col.title}>
             <div class="crm-col-head">
               <span class="dot" style="background:{col.color}"></span>
               <span class="title">{col.title}</span>
               {#if col.is_default}<span class="default-badge">padrão</span>{/if}
-              <span class="ct">0</span>
+              <span class="ct">{colClients.length}</span>
               <button class="gear" title="Editar coluna" onclick={() => openQuickEditor(col)}>
                 <Settings size={12} />
               </button>
             </div>
-            <div class="crm-col-empty">
-              <span>Nenhum lead</span>
-            </div>
+
+            {#if colClients.length === 0}
+              <div class="crm-col-empty">
+                <span>Nenhum lead</span>
+                <button
+                  class="crm-addcard"
+                  style="margin-top: 12px; padding: 12px;"
+                  onclick={() => openAddLead(col.id)}
+                >
+                  + adicionar
+                </button>
+              </div>
+            {:else}
+              <div class="crm-col-body">
+                {#each colClients as client (client.id)}
+                  <ClientCard {client} onclick={() => (activeClient = client)} />
+                {/each}
+                <button
+                  class="crm-addcard"
+                  style="padding:12px; margin-top: 4px;"
+                  onclick={() => openAddLead(col.id)}
+                >
+                  + adicionar
+                </button>
+              </div>
+            {/if}
           </div>
         {/each}
         <button class="crm-addcol" onclick={openEditor} title="Adicionar coluna"> + COLUNA </button>
@@ -512,6 +571,35 @@
   </div>
 {/if}
 
+<!-- ── Client Drawer ── -->
+{#if activeClient}
+  {@const activeCol = columns.find((c) => c.id === activeClient?.column_id)}
+  <ClientDrawer
+    client={activeClient}
+    columnTitle={activeCol?.title || 'Desconhecido'}
+    columnColor={activeCol?.color || '#9ca3af'}
+    currentUser={data.adminUser?.name || 'Usuário'}
+    onClose={() => (activeClient = null)}
+    onUpdate={(updatedClient) => {
+      clients = clients.map((c) => (c.id === updatedClient.id ? updatedClient : c));
+      activeClient = updatedClient;
+    }}
+  />
+{/if}
+
+<!-- ── New Lead Modal ── -->
+{#if showNewLeadModal}
+  <NewLeadModal
+    {columns}
+    initialColumnId={addLeadColumnId}
+    onClose={() => (showNewLeadModal = false)}
+    onSave={(newLead) => {
+      clients = [...clients, newLead];
+      showNewLeadModal = false;
+    }}
+  />
+{/if}
+
 <style>
   /* ── Layout ── */
   .crm-root {
@@ -601,6 +689,12 @@
     flex-direction: column;
     gap: 8px;
     border: 1px solid var(--line);
+  }
+  .crm-col-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 4px;
   }
   .crm-col-head {
     display: flex;
