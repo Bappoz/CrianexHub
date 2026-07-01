@@ -414,7 +414,7 @@ sequenceDiagram
 
     Note over V,I18N: Acesso à página institucional — SSR (RF28, RNF04)
     V->>SK: GET /sobre
-    SK->>SK: nenhum guard intercepta (rota pública — RNF20)
+    SK->>SK: nenhum guard intercepta (rota pública — RN27)
     SK->>I18N: carrega src/lib/i18n/pt/about.json
     I18N-->>SK: { titulo, descricao, missao, valores, ... }
     SK-->>V: HTML completo com h1, OG tags e metadados SEO (≤ 2s — RNF02)
@@ -443,7 +443,7 @@ sequenceDiagram
 | Visitante acessa `/sobre` → SSR carrega i18n estático em ≤ 2s sem chamada a API ou banco | RF54 · RNF02 · RNF04 | ✅ |
 | Visitante clica "EN" → textos trocam para `en/about.json` em ≤ 1 clique sem reload | RNF13 | ✅ |
 | Bot de indexação → HTML inicial com h1, textos e metadados Open Graph sem depender de JS | RNF04 · RNF21 | ✅ |
-| Visitante sem autenticação → nenhum guard intercepta → conteúdo exibido normalmente | RNF20 | ✅ |
+| Visitante sem autenticação → nenhum guard intercepta → conteúdo exibido normalmente | RN27 | ✅ |
 
 </div>
 </div>

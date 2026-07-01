@@ -46,7 +46,7 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
 | <a id="f12"/>**F12** | <IT1/> ✅ | Gerenciar produtos SaaS da vitrine | CP4 | RF21, RF22, RF23, RF24 | RNF03, RNF04, RNF05, RNF13, RNF15, RNF19 | <NW>N-V-E-T</NW> |
 | <a id="f13"/>**F13** | <IT1/> ✅ | Controlar publicação de produto SaaS | CP4 | RF25, RF26 | RNF03 | <NW>N-V-E-S-T</NW> |
 | <a id="f14"/>**F14** | <IT1/> ✅ | Exibir canais de contato na vitrine | CP4 | RF27, RF49 | RNF02, RNF10, RNF11 | <NW>N-V-E-S-T</NW> |
-| <a id="f15"/>**F15** | <IT1/> ✅ | Disponibilizar informações institucionais | CP4 | RF50, RF51 | RNF02, RNF20, RNF21 | <NW>I-N-V-E-S-T</NW> |
+| <a id="f15"/>**F15** | <IT1/> ✅ | Disponibilizar informações institucionais | CP4 | RF50, RF51 | RNF02, RNF21, RNF27 | <NW>I-N-V-E-S-T</NW> |
 | <a id="f16"/>**F16** | <IT1/> ✅ | Gerenciar artigos de FAQ | CP6 | RF28, RF29, RF30, RF31 | RNF01, RNF04, RNF05 | <NW>N-V-E-S-T</NW> |
 | <a id="f17"/>**F17** | <IT1/> ✅ | Controlar publicação de artigos FAQ | CP6 | RF32, RF33 | RNF01 | <NW>N-V-E-S-T</NW> |
 | <a id="f18"/>**F18** | <IT1/> ✅ | Correspondência FAQ ↔ dúvidas dos leads | CP6 | RF34, RF52 | RNF02 | <NW>N-V-E-S-T</NW> |
@@ -160,12 +160,12 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
 | <a id="rnf17"/>**RNF17** | Cobertura mínima de testes | <Organizacional/> | Global | A suíte de testes automatizados (unitários + integração) cobre no mínimo 45% das linhas de código do backend e do frontend, medido por ferramenta de cobertura a cada execução de CI; PRs que reduzem a cobertura abaixo do limiar são bloqueados. |
 | <a id="rnf18"/>**RNF18** | Portabilidade de navegador | <Portabilidade/> | Global | O sistema funciona sem erros visuais ou funcionais nas 2 versões mais recentes de Chrome, Firefox, Safari e Edge, validado por smoke test manual das telas principais em cada navegador antes de cada entrega. |
 | <a id="rnf19"/>**RNF19** | Alcançabilidade de seções em até 3 cliques | <Usabilidade/> | F12 | Qualquer seção da vitrine pública é alcançável a partir da página inicial em no máximo 3 cliques/interações, validado por mapeamento do fluxo de navegação e teste de usuário sem instrução prévia sobre a estrutura do site. |
-| <a id="rnf20"/>**RNF20** | Disponibilidade institucional | <Confiabilidade/> | F15 | As páginas institucionais (Missão, Visão, Valores) ficam acessíveis publicamente 24/7 sem exigir autenticação, com disponibilidade mínima de 99% mensal (até ~7h de indisponibilidade/mês), monitorada por verificação periódica de uptime. |
 | <a id="rnf21"/>**RNF21** | Reorganização intuitiva (cards) | <Usabilidade/> | F15 | A reordenação de cards do CRM por arrastar-e-soltar reflete visualmente a nova posição em até 1,5s após soltar o card, sem recarregar a página; falha de rede reverte o card para a posição original (rollback visual). |
 | <a id="rnf22"/>**RNF22** | Reorganização intuitiva (colunas) | <Usabilidade/> | F20 | A reordenação de colunas do funil por arrastar-e-soltar reflete visualmente a nova ordem em até 1,5s após soltar a coluna, sem recarregar a página, com rollback visual para a ordem original em caso de falha ao persistir. |
 | <a id="rnf23"/>**RNF23** | Resumo expansível de tickets | <Usabilidade/> | F22 | Cada ticket de suporte exibe, em estado resumido (fechado), ao menos status, prioridade e responsável, sendo expansível para o detalhe completo sem sair da tela de listagem (sem redirecionamento de página). |
 | <a id="rnf24"/>**RNF24** | Cards do CRM resumidos/expansíveis | <Usabilidade/> | F19 | Cada card de lead/cliente no board Kanban exibe, em estado resumido, nome, produto vinculado e responsável, sendo expansível (clique) para o detalhe completo e o histórico de interações sem redirecionamento de página. |
 | <a id="rnf25"/>**RNF25** | Drag-and-drop dos cards do CRM | <Usabilidade/> | F19 | Mover um card entre colunas do funil por arrastar-e-soltar atualiza visualmente a coluna do card em até 1,5s após soltar, sem recarregar a página; falha ao persistir retorna o card à coluna de origem (rollback visual). |
+| <a id="rnf27"/>**RNF27** | Conformidade com a LGPD nas páginas institucionais | <Externo/> | F15 | As páginas institucionais não coletam, processam ou armazenam dado pessoal de visitante; qualquer cookie de analytics/rastreamento opcional permanece bloqueado até consentimento explícito (RN08) e a política de privacidade permanece acessível no rodapé (RN09), atendendo aos princípios de minimização e transparência da LGPD. |
 
 <div className="crianex-rnf-legend">
 
@@ -205,6 +205,7 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
 | RN24 | Escopo de busca, filtros e exportação do CRM | Busca, filtros por produto/responsável, indicadores do funil e exportação em CSV operam exclusivamente sobre leads com status ativo (mesmo conjunto exibido no board Kanban); a exportação reflete somente os leads visíveis após os filtros aplicados no momento da ação | F19 | RF60, RF61, RF62 |
 | RN25 | Ativação exclusiva de template por tipo de evento | Ao salvar (criar ou editar) um template associando-o a um tipo de evento, qualquer outro template previamente ativo para esse mesmo tipo é desativado automaticamente, garantindo no máximo 1 template ativo por tipo sem exigir remoção manual prévia | F08 | RF15, RF63 |
 | RN26 | Catálogo fixo de tipos de notificação | O tipo de evento de um template é restrito a um catálogo fixo pré-definido (não é texto livre); tipos do catálogo ainda sem nenhum ponto do sistema que dispare notificações reais aparecem desabilitados na interface até que a funcionalidade correspondente seja implementada | F08 | RF63 |
+| RN27 | Escopo informativo institucional | As páginas institucionais existem exclusivamente para disponibilizar publicamente as informações institucionais da Crianex (Missão, Visão, Valores); não há SLA de disponibilidade contínua nem uptime mínimo exigido — a operação segue o mesmo regime do restante da vitrine pública | F15 | RF50 |
 
 <RevisionHistory
   headers={['Versão', 'Data', 'Descrição', 'Autor(es)']}
@@ -214,5 +215,6 @@ Catálogo completo de **Features, Requisitos Funcionais (RF), Não Funcionais (R
     ['2.0', '26/06/2026', 'Página criada no Docusaurus: tabelas de RF/RNF/RN separadas da rastreabilidade, com tabs por iteração', 'Equipe Crianex'],
     ['2.1', '28/06/2026', 'Novas Regras de Negócio (RN13–RN23) cobrindo RFs sem RN; RN11 vinculada a RF50', 'Equipe Crianex'],
     ['2.2', '01/07/2026', 'F07/F08/F19/F20/F21 concluídas: RFs movidos para "Implementados"; RF60–RF63 novos (busca/filtros/exportação/dashboard do CRM; cor e catálogo de tipo dos templates); RF15 refinado (ativação automática); RN24–RN26. Ver detalhamento em [V&V IT2](/iteracoes/iteracao-2/vv#mr01)', 'Equipe Crianex'],
+    ['2.3', '01/07/2026', 'RNF20 (disponibilidade 24/7 institucional) removido por inviabilidade e convertido em RN27 (escopo informativo institucional, sem SLA de uptime); RNF27 (conformidade LGPD nas páginas institucionais) adicionado a F15; evidências de RF08, RF23, RF24, RF50, RF51 e diversas RNFs atualizadas/completadas', 'Equipe Crianex'],
   ]}
 />

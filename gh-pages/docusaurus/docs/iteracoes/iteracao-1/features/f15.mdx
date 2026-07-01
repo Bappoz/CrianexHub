@@ -27,11 +27,17 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 - **Dado** acesso sem autenticação, **quando** GET da página, **então** nenhum guard intercepta e o conteúdo é exibido.
 - **Dado** slug inexistente ou produto despublicado, **quando** acessar, **então** retorna 404.
 
-**Regras de negócio:** [RN11](/backlog/requisitos#rns) — Conteúdo institucional obrigatório (Missão, Visão, Valores)
+**Regras de negócio:** [RN11](/backlog/requisitos#rns) — Conteúdo institucional obrigatório (Missão, Visão, Valores) · [RN27](/backlog/requisitos#rns) — Escopo informativo institucional (sem SLA de disponibilidade contínua)
 
 **Evidência (screenshot):**
 
+<div className="crianex-evidence-pair">
+
 ![Evidência de RF50 — F15](./img/f15-rf50.png)
+![Evidência de RF50.1 — F15](./img/f15-rf50-2.png)
+![Evidência de RF50.2 — F15](./img/f15-rf50-3.png)
+
+</div>
 
 **Deploy:** _link a definir_
 
@@ -50,7 +56,12 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
+<div className="crianex-evidence-pair">
+
 ![Evidência de RF51 — F15](./img/f15-rf51.png)
+![Evidência de RF51.1 — F15](./img/f15-rf51-2.png)
+
+</div>
 
 **Deploy:** _link a definir_
 
@@ -69,16 +80,16 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 
 </TabItem>
-<TabItem value="rnf20" label="RNF20">
+<TabItem value="rnf27" label="RNF27">
 
-#### RNF20 — Disponibilidade das informações institucionais
+#### RNF27 — Conformidade com a LGPD nas páginas institucionais
 
-**Classificação:** Confiabilidade  
-**Descrição:** As páginas institucionais (Missão, Visão, Valores) ficam acessíveis publicamente 24/7 sem exigir autenticação, com disponibilidade mínima de 99% mensal (até ~7h de indisponibilidade/mês), monitorada por verificação periódica de uptime.
+**Classificação:** Externo  
+**Descrição:** As páginas institucionais (Missão, Visão, Valores) não coletam, processam ou armazenam dado pessoal de visitante; qualquer cookie de analytics/rastreamento opcional permanece bloqueado até consentimento explícito ([RN08](/backlog/requisitos#rns)) e a política de privacidade permanece acessível no rodapé ([RN09](/backlog/requisitos#rns)), atendendo aos princípios de minimização e transparência da LGPD.
 
 **Evidência (screenshot):**
 
-![Evidência de RNF20 — F15](./img/f15-rnf20.png)
+![Evidência de RNF27 — F15](./img/f15-rnf27.png)
 
 **Verificação:** [Resultados V&V da IT1](/iteracoes/iteracao-1/vv)
 
