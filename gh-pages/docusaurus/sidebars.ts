@@ -109,8 +109,6 @@ const sidebars: SidebarsConfig = {
                 'iteracoes/iteracao-2/features/f21',
                 'iteracoes/iteracao-2/features/f07',
                 'iteracoes/iteracao-2/features/f08',
-                'iteracoes/iteracao-2/features/f22',
-                'iteracoes/iteracao-2/features/f23',
               ],
             },
             'iteracoes/iteracao-2/evidencias/design-tecnico',

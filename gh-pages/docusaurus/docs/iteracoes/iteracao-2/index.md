@@ -37,8 +37,6 @@ Cada feature tem sua **própria página de evidências** — com mini-navbar por
   <a className="crianex-card" href="/REQ-2026.1-T02-Crianex-/iteracoes/iteracao-2/features/f21"><div className="crianex-card__eyebrow">F21 · CP1</div><div className="crianex-card__title">CRM — Interações</div></a>
   <a className="crianex-card" href="/REQ-2026.1-T02-Crianex-/iteracoes/iteracao-2/features/f07"><div className="crianex-card__eyebrow">F07 · CP9</div><div className="crianex-card__title">Histórico de notificações</div></a>
   <a className="crianex-card" href="/REQ-2026.1-T02-Crianex-/iteracoes/iteracao-2/features/f08"><div className="crianex-card__eyebrow">F08 · CP9</div><div className="crianex-card__title">Templates de notificações</div></a>
-  <a className="crianex-card" href="/REQ-2026.1-T02-Crianex-/iteracoes/iteracao-2/features/f22"><div className="crianex-card__eyebrow">F22 · CP8</div><div className="crianex-card__title">Tickets — Acesso</div></a>
-  <a className="crianex-card" href="/REQ-2026.1-T02-Crianex-/iteracoes/iteracao-2/features/f23"><div className="crianex-card__eyebrow">F23 · CP8</div><div className="crianex-card__title">Tickets — Gestão</div></a>
 </div>
 
 ---

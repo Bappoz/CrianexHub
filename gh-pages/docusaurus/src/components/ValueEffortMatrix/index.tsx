@@ -29,8 +29,6 @@ const URLS: Record<string, string> = {
   F19: `${BASE}/iteracoes/iteracao-2/features/f19`,
   F20: `${BASE}/iteracoes/iteracao-2/features/f20`,
   F21: `${BASE}/iteracoes/iteracao-2/features/f21`,
-  F22: `${BASE}/iteracoes/iteracao-2/features/f22`,
-  F23: `${BASE}/iteracoes/iteracao-2/features/f23`,
 };
 
 // displayVb/displayEs aplicam jitter visual nas features sobrepostas;
