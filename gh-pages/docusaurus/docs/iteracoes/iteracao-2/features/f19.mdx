@@ -15,11 +15,16 @@ import img_f19_rf41_2 from './img/f19-rf41-2.png';
 import img_f19_rf60 from './img/f19-rf60.png';
 import img_f19_rf61 from './img/f19-rf61.png';
 import img_f19_rf62 from './img/f19-rf62.png';
+import img_f19_rf36_2 from './img/f19-rf36-2.png';
+import img_f19_rf36_3 from './img/f19-rf36-3.png';
 import img_f19_rnf01 from './img/f19-rnf01.png';
 import img_f19_rnf03 from './img/f19-rnf03.png';
 import img_f19_rnf09 from './img/f19-rnf09.png';
+import img_f19_rnf11 from './img/f19-rnf11.png';
 import img_f19_rnf24 from './img/f19-rnf24.png';
-import img_f19_rnf25 from './img/f19-rnf25.png';
+import img_f19_rnf24_2 from './img/f19-rnf24-2.png';
+import img_f19_rnf25 from './img/f19-rnf25.jpeg';
+import img_f19_rnf25_2 from './img/f19-rnf25-2.jpeg';
 
 # F19 — Gerenciar clientes e leads no CRM
 
@@ -97,7 +102,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<EvidenceCarousel images={[{src: img_f19_rf36, alt: 'Evidência de RF36 — F19'}]} />
+<EvidenceCarousel images={[{src: img_f19_rf36, alt: 'Evidência de RF36 — F19'}, {src: img_f19_rf36_2, alt: 'Evidência de RF36.1 — F19'}, {src: img_f19_rf36_3, alt: 'Evidência de RF36.2 — F19'}]} />
 
 **Deploy:** _link a definir_
 
@@ -116,8 +121,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<EvidenceCarousel images={[{src: img_f19_rf41, alt: 'Evidência de RF41 — F19'}]} />
-<EvidenceCarousel images={[{src: img_f19_rf41_2, alt: 'Evidência de RF41 — F19'}]} />
+<EvidenceCarousel images={[{src: img_f19_rf41, alt: 'Evidência de RF41 — F19'}, {src: img_f19_rf41_2, alt: 'Evidência de RF41.1 — F19'}]} />
 
 **Deploy:** _link a definir_
 
@@ -228,6 +232,20 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
 
 </TabItem>
+<TabItem value="rnf11" label="RNF11">
+
+#### RNF11 — Conformidade parcial com LGPD
+
+**Classificação:** Externo  
+**Descrição:** A captação de dados de leads/clientes exige consentimento explícito registrado antes da persistência, informa a finalidade do tratamento, coleta apenas dados estritamente necessários (minimização) e permite exclusão mediante solicitação em até 5 dias úteis.
+
+**Evidência (screenshot):**
+
+<EvidenceCarousel images={[{src: img_f19_rnf11, alt: 'Evidência de RNF11 — F19'}]} />
+
+**Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
+
+</TabItem>
 <TabItem value="rnf24" label="RNF24">
 
 #### RNF24 — Cards do CRM resumidos e expansíveis
@@ -237,7 +255,7 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<EvidenceCarousel images={[{src: img_f19_rnf24, alt: 'Evidência de RNF24 — F19'}]} />
+<EvidenceCarousel images={[{src: img_f19_rnf24, alt: 'Evidência de RNF24 — F19'}, {src: img_f19_rnf24_2, alt: 'Evidência de RNF24.1 — F19'}]} />
 
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
 
@@ -251,9 +269,48 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 
 **Evidência (screenshot):**
 
-<EvidenceCarousel images={[{src: img_f19_rnf25, alt: 'Evidência de RNF25 — F19'}]} />
+<EvidenceCarousel images={[{src: img_f19_rnf25, alt: 'Evidência de RNF25 — F19'}, {src: img_f19_rnf25_2, alt: 'Evidência de RNF25.1 — F19'}]} />
 
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
+
+</TabItem>
+<TabItem value="dor" label="DoR">
+
+## Definition of Ready — Evidências
+
+Checklist do DoR aplicado à F19 antes de entrar em execução. Todos os itens foram atendidos conforme o critério definido em [DoR e DoD](/visao/dor-dod).
+
+| Critério DoR | Status | Evidência |
+| ------------ | ------ | --------- |
+| Título no padrão FDD `<ação> <resultado> <de/para/no/com> <objeto>` | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — título conforme o padrão |
+| Critérios de aceite escritos e verificáveis (Given/When/Then) | ✅ | Ver abas RF/RNF desta página — todos os cenários BDD documentados |
+| Estimativa registrada: VB, CX e IP calculados | ✅ | [Priorização do Backlog](/backlog/priorizacao) — coluna IP da tabela de features |
+| Dependências identificadas; bloqueantes resolvidos | ✅ | [Mapa de Dependências — IT2](/backlog/dependencias#it2) — bloqueantes verificados antes do início |
+| Class Owner designado e linkada à Feature parent e à CP de origem | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — assignees e labels de CP/Feature registrados |
+| Protótipo revisado pelo cliente | ✅ | [Protótipo CRM (IT2)](/iteracoes/iteracao-2/evidencias/prototipo) |
+| Technical Design Review (TDR) concluída | ✅ | [Design Técnico IT2](/iteracoes/iteracao-2/evidencias/design-tecnico) |
+| Ao menos um critério de segurança ou usabilidade identificado | ✅ | Ver aba RNF desta página |
+
+</TabItem>
+<TabItem value="dod" label="DoD">
+
+## Definition of Done — Evidências
+
+Checklist do DoD verificado ao encerrar a F19. Todos os itens foram atendidos antes de mover a issue para Done no Kanban.
+
+| Critério DoD | Status | Evidência |
+| ------------ | ------ | --------- |
+| Critérios de aceite validados (BDD cobertos) | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — evidências anexadas na descrição da issue |
+| Testes automatizados passando (unitários + integração) | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — evidências anexadas na descrição da issue |
+| Lint sem erros e formatação OK (ESLint + Prettier) | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — evidências anexadas na descrição da issue |
+| CI verde (build + testes + lint) | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — evidências anexadas na descrição da issue |
+| PR aprovado por Chief Programmer ou Project Manager | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — PR de resolução com approve registrado |
+| Migration de banco aplicada | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — evidências anexadas na descrição da issue |
+| Sem vulnerabilidades críticas (SAST/linting de segurança) | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — evidências anexadas na descrição da issue |
+| Validação parcial do cliente registrada | ✅ | [Validação Parcial IT2](/iteracoes/iteracao-2/validacao/partial) |
+| Validação Formal aprovada pelo cliente | ✅ | [Validação Formal IT2](/iteracoes/iteracao-2/validacao/formal) |
+| Rastreabilidade atualizada | ✅ | [Tabela de Requisitos](/backlog/requisitos) — RF/RNF vinculados |
+| Issue movida para Done no GitHub Projects | ✅ | [Issue #177](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/177) — fechada via merge do PR (`closes #N`) |
 
 </TabItem>
 </Tabs>

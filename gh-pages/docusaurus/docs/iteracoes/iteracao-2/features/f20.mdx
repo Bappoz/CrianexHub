@@ -134,4 +134,43 @@ Selecione um requisito na navegação abaixo. Cada um traz seus critérios de ac
 **Verificação:** [Resultados V&V da IT2](/iteracoes/iteracao-2/vv)
 
 </TabItem>
+<TabItem value="dor" label="DoR">
+
+## Definition of Ready — Evidências
+
+Checklist do DoR aplicado à F20 antes de entrar em execução. Todos os itens foram atendidos conforme o critério definido em [DoR e DoD](/visao/dor-dod).
+
+| Critério DoR | Status | Evidência |
+| ------------ | ------ | --------- |
+| Título no padrão FDD `<ação> <resultado> <de/para/no/com> <objeto>` | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — título conforme o padrão |
+| Critérios de aceite escritos e verificáveis (Given/When/Then) | ✅ | Ver abas RF/RNF desta página — todos os cenários BDD documentados |
+| Estimativa registrada: VB, CX e IP calculados | ✅ | [Priorização do Backlog](/backlog/priorizacao) — coluna IP da tabela de features |
+| Dependências identificadas; bloqueantes resolvidos | ✅ | [Mapa de Dependências — IT2](/backlog/dependencias#it2) — bloqueantes verificados antes do início |
+| Class Owner designado e linkada à Feature parent e à CP de origem | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — assignees e labels de CP/Feature registrados |
+| Protótipo revisado pelo cliente | ✅ | [Protótipo CRM (IT2)](/iteracoes/iteracao-2/evidencias/prototipo) |
+| Technical Design Review (TDR) concluída | ✅ | [Design Técnico IT2](/iteracoes/iteracao-2/evidencias/design-tecnico) |
+| Ao menos um critério de segurança ou usabilidade identificado | ✅ | Ver aba RNF desta página |
+
+</TabItem>
+<TabItem value="dod" label="DoD">
+
+## Definition of Done — Evidências
+
+Checklist do DoD verificado ao encerrar a F20. Todos os itens foram atendidos antes de mover a issue para Done no Kanban.
+
+| Critério DoD | Status | Evidência |
+| ------------ | ------ | --------- |
+| Critérios de aceite validados (BDD cobertos) | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — evidências anexadas na descrição da issue |
+| Testes automatizados passando (unitários + integração) | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — evidências anexadas na descrição da issue |
+| Lint sem erros e formatação OK (ESLint + Prettier) | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — evidências anexadas na descrição da issue |
+| CI verde (build + testes + lint) | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — evidências anexadas na descrição da issue |
+| PR aprovado por Chief Programmer ou Project Manager | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — PR de resolução com approve registrado |
+| Migration de banco aplicada | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — evidências anexadas na descrição da issue |
+| Sem vulnerabilidades críticas (SAST/linting de segurança) | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — evidências anexadas na descrição da issue |
+| Validação parcial do cliente registrada | ✅ | [Validação Parcial IT2](/iteracoes/iteracao-2/validacao/partial) |
+| Validação Formal aprovada pelo cliente | ✅ | [Validação Formal IT2](/iteracoes/iteracao-2/validacao/formal) |
+| Rastreabilidade atualizada | ✅ | [Tabela de Requisitos](/backlog/requisitos) — RF/RNF vinculados |
+| Issue movida para Done no GitHub Projects | ✅ | [Issue #176](https://github.com/mdsreq-fga-unb/REQ-2026.1-T02-Crianex-/issues/176) — fechada via merge do PR (`closes #N`) |
+
+</TabItem>
 </Tabs>
