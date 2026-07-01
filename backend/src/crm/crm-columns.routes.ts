@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validateJWT } from '../middleware/validate-jwt.js';
-import { requireRole } from '../middleware/require-role.js';
+import { requirePermission } from '../middleware/require-permission.js';
 import {
   listColumns,
   createColumn,
@@ -11,10 +11,12 @@ import {
 } from './crm-columns.service.js';
 
 const crmColumnsRouter = Router();
-const ownerGuard = [validateJWT, requireRole('owner')];
+const viewGuard = [validateJWT, requirePermission('crm', 'v')];
+const editGuard = [validateJWT, requirePermission('crm', 'e')];
+const deleteGuard = [validateJWT, requirePermission('crm', 'a')];
 
 // GET /api/admin/crm/columns — lista todas as colunas do funil (RF38, RF40)
-crmColumnsRouter.get('/', ...ownerGuard, async (_req, res) => {
+crmColumnsRouter.get('/', ...viewGuard, async (_req, res) => {
   try {
     const columns = await listColumns();
     res.status(200).json(columns);
@@ -25,7 +27,7 @@ crmColumnsRouter.get('/', ...ownerGuard, async (_req, res) => {
 });
 
 // POST /api/admin/crm/columns — cria nova coluna no funil (RF38)
-crmColumnsRouter.post('/', ...ownerGuard, async (req, res) => {
+crmColumnsRouter.post('/', ...editGuard, async (req, res) => {
   const title = typeof req.body?.['title'] === 'string' ? req.body['title'] : '';
 
   const input: {
@@ -57,7 +59,7 @@ crmColumnsRouter.post('/', ...ownerGuard, async (req, res) => {
 });
 
 // PATCH /api/admin/crm/columns/reorder — reordena múltiplas colunas (RF40 · RNF22)
-crmColumnsRouter.patch('/reorder', ...ownerGuard, async (req, res) => {
+crmColumnsRouter.patch('/reorder', ...editGuard, async (req, res) => {
   const order = req.body?.['order'];
   if (
     !Array.isArray(order) ||
@@ -77,7 +79,7 @@ crmColumnsRouter.patch('/reorder', ...ownerGuard, async (req, res) => {
 });
 
 // PATCH /api/admin/crm/columns/:id — renomeia/recolore/reposiciona coluna (RF38, RF40)
-crmColumnsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
+crmColumnsRouter.patch('/:id', ...editGuard, async (req, res) => {
   const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
   if (!id) {
     res.status(400).json({ message: 'ID da coluna é obrigatório.' });
@@ -119,7 +121,7 @@ crmColumnsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
 
 // DELETE /api/admin/crm/columns/:id — remoção protegida (RF39)
 // Retorna 409 se a coluna tem cards vinculados ou é a default
-crmColumnsRouter.delete('/:id', ...ownerGuard, async (req, res) => {
+crmColumnsRouter.delete('/:id', ...deleteGuard, async (req, res) => {
   const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
   if (!id) {
     res.status(400).json({ message: 'ID da coluna é obrigatório.' });

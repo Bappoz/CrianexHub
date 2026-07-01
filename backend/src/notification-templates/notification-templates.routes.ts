@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validateJWT } from '../middleware/validate-jwt.js';
-import { requireRole } from '../middleware/require-role.js';
+import { requirePermission } from '../middleware/require-permission.js';
 import {
   listActiveTemplates,
   createTemplate,
@@ -12,17 +12,23 @@ import {
 import { NOTIFICATION_EVENT_TYPES } from './notification-event-types.js';
 
 const notificationTemplatesRouter = Router();
-const ownerGuard = [validateJWT, requireRole('owner')];
+// RN03: member precisa de 'v' para ver, 'e' para editar/criar, 'a' para excluir.
+// A gestão de templates fica sob o módulo 'notifications' (mesmo módulo da
+// central de notificações), mas com ações distintas — quem só tem 'v' enxerga
+// a central, mas não a tela de configurar templates (que exige 'e').
+const viewGuard = [validateJWT, requirePermission('notifications', 'v')];
+const editGuard = [validateJWT, requirePermission('notifications', 'e')];
+const deleteGuard = [validateJWT, requirePermission('notifications', 'a')];
 
 // GET /api/admin/notification-templates/event-types — catálogo fixo de tipos de
 // evento (label, grupo, cor sugerida, se já está implementado), usado pelo select
 // de tipo no formulário de template. Rota fixa antes de '/:id' para não colidir.
-notificationTemplatesRouter.get('/event-types', ...ownerGuard, (_req, res) => {
+notificationTemplatesRouter.get('/event-types', ...viewGuard, (_req, res) => {
   res.status(200).json({ eventTypes: NOTIFICATION_EVENT_TYPES });
 });
 
 // GET /api/admin/notification-templates — lista templates ativos (F08 · #204).
-notificationTemplatesRouter.get('/', ...ownerGuard, async (_req, res) => {
+notificationTemplatesRouter.get('/', ...viewGuard, async (_req, res) => {
   try {
     const templates = await listActiveTemplates();
     res.status(200).json({ templates });
@@ -33,7 +39,7 @@ notificationTemplatesRouter.get('/', ...ownerGuard, async (_req, res) => {
 });
 
 // POST /api/admin/notification-templates — cria template (RF15 · #202).
-notificationTemplatesRouter.post('/', ...ownerGuard, async (req, res) => {
+notificationTemplatesRouter.post('/', ...editGuard, async (req, res) => {
   const { tipo_evento, nome, conteudo, color } = req.body ?? {};
 
   const validationError = validateTemplateInput({ tipo_evento, nome, conteudo, color });
@@ -56,7 +62,7 @@ notificationTemplatesRouter.post('/', ...ownerGuard, async (req, res) => {
 });
 
 // PATCH /api/admin/notification-templates/:id — edita template (RF56 · #202).
-notificationTemplatesRouter.patch('/:id', ...ownerGuard, async (req, res) => {
+notificationTemplatesRouter.patch('/:id', ...editGuard, async (req, res) => {
   const id = typeof req.params['id'] === 'string' ? req.params['id'].trim() : '';
   const { tipo_evento, nome, conteudo, color } = req.body ?? {};
 
@@ -92,7 +98,7 @@ notificationTemplatesRouter.patch('/:id', ...ownerGuard, async (req, res) => {
 
 // DELETE /api/admin/notification-templates/:id — inativação lógica (RF57 · #203).
 // Idempotente: id inexistente ou já inativo retorna 404.
-notificationTemplatesRouter.delete('/:id', ...ownerGuard, async (req, res) => {
+notificationTemplatesRouter.delete('/:id', ...deleteGuard, async (req, res) => {
   const id = typeof req.params['id'] === 'string' ? req.params['id'].trim() : '';
 
   if (!id) {

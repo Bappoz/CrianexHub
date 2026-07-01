@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validateJWT } from '../middleware/validate-jwt.js';
-import { requireRole } from '../middleware/require-role.js';
+import { requirePermission } from '../middleware/require-permission.js';
 import {
   listCrmAdminClients,
   createCrmAdminClient,
@@ -10,10 +10,13 @@ import {
 } from './crm-admin-clients.service.js';
 
 const crmAdminClientsRouter = Router();
-const ownerGuard = [validateJWT, requireRole('owner')];
+// RN03: member precisa de 'v' para ver, 'e' para editar/criar, 'a' para excluir.
+const viewGuard = [validateJWT, requirePermission('crm', 'v')];
+const editGuard = [validateJWT, requirePermission('crm', 'e')];
+const deleteGuard = [validateJWT, requirePermission('crm', 'a')];
 
 // GET /api/admin/crm/clients — lista clientes ativos com dados do card (RF35, RF36)
-crmAdminClientsRouter.get('/', ...ownerGuard, async (_req, res) => {
+crmAdminClientsRouter.get('/', ...viewGuard, async (_req, res) => {
   try {
     const clients = await listCrmAdminClients();
     res.status(200).json(clients);
@@ -24,7 +27,7 @@ crmAdminClientsRouter.get('/', ...ownerGuard, async (_req, res) => {
 });
 
 // POST /api/admin/crm/clients — cria cliente + card no CRM (RF37)
-crmAdminClientsRouter.post('/', ...ownerGuard, async (req, res) => {
+crmAdminClientsRouter.post('/', ...editGuard, async (req, res) => {
   const name = typeof req.body?.['name'] === 'string' ? req.body['name'] : '';
   const email = typeof req.body?.['email'] === 'string' ? req.body['email'] : '';
   const phone = typeof req.body?.['phone'] === 'string' ? req.body['phone'] : undefined;
@@ -66,7 +69,7 @@ crmAdminClientsRouter.post('/', ...ownerGuard, async (req, res) => {
 });
 
 // PATCH /api/admin/crm/clients/:id — atualiza cliente e card (RF39)
-crmAdminClientsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
+crmAdminClientsRouter.patch('/:id', ...editGuard, async (req, res) => {
   const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
   if (!id) {
     res.status(400).json({ message: 'ID do cliente é obrigatório.' });
@@ -114,7 +117,7 @@ crmAdminClientsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
 });
 
 // DELETE /api/admin/crm/clients/:id — remove o lead do board (soft-delete: status=inativo)
-crmAdminClientsRouter.delete('/:id', ...ownerGuard, async (req, res) => {
+crmAdminClientsRouter.delete('/:id', ...deleteGuard, async (req, res) => {
   const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
   if (!id) {
     res.status(400).json({ message: 'ID do cliente é obrigatório.' });

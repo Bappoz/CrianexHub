@@ -1,6 +1,6 @@
 import { Router, type Response } from 'express';
 import { validateJWT, type ValidatedAuthContext } from '../middleware/validate-jwt.js';
-import { requireRole } from '../middleware/require-role.js';
+import { requirePermission } from '../middleware/require-permission.js';
 import {
   createClientInteraction,
   CrmInteractionError,
@@ -10,7 +10,9 @@ import {
 } from './crm-interactions.service.js';
 
 const crmClientsRouter = Router();
-const ownerGuard = [validateJWT, requireRole('owner')];
+const viewGuard = [validateJWT, requirePermission('crm', 'v')];
+const editGuard = [validateJWT, requirePermission('crm', 'e')];
+const deleteGuard = [validateJWT, requirePermission('crm', 'a')];
 
 function handleInteractionError(err: unknown, res: Response): boolean {
   if (err instanceof CrmInteractionError) {
@@ -36,7 +38,7 @@ function handleInteractionError(err: unknown, res: Response): boolean {
 }
 
 // GET /api/crm/clients/:id/interactions - lista o histórico de interações em ordem cronológica (RF42)
-crmClientsRouter.get('/:id/interactions', ...ownerGuard, async (req, res) => {
+crmClientsRouter.get('/:id/interactions', ...viewGuard, async (req, res) => {
   const clientId = typeof req.params?.['id'] === 'string' ? req.params['id'] : '';
 
   try {
@@ -53,7 +55,7 @@ crmClientsRouter.get('/:id/interactions', ...ownerGuard, async (req, res) => {
 });
 
 // POST /api/crm/clients/:id/interactions - registra interação comercial (RF42)
-crmClientsRouter.post('/:id/interactions', ...ownerGuard, async (req, res) => {
+crmClientsRouter.post('/:id/interactions', ...editGuard, async (req, res) => {
   const clientId = typeof req.params?.['id'] === 'string' ? req.params['id'] : '';
   const tipo = typeof req.body?.['tipo'] === 'string' ? req.body['tipo'] : '';
   const conteudo = typeof req.body?.['conteudo'] === 'string' ? req.body['conteudo'] : '';
@@ -84,7 +86,7 @@ crmClientsRouter.post('/:id/interactions', ...ownerGuard, async (req, res) => {
 });
 
 // PATCH /api/crm/clients/:id/interactions/:iid - edita interação preservando auditoria (RF59)
-crmClientsRouter.patch('/:id/interactions/:iid', ...ownerGuard, async (req, res) => {
+crmClientsRouter.patch('/:id/interactions/:iid', ...editGuard, async (req, res) => {
   const clientId = typeof req.params?.['id'] === 'string' ? req.params['id'] : '';
   const interactionId = typeof req.params?.['iid'] === 'string' ? req.params['iid'] : '';
   const patch: { tipo?: string; conteudo?: string } = {};
@@ -110,7 +112,7 @@ crmClientsRouter.patch('/:id/interactions/:iid', ...ownerGuard, async (req, res)
 });
 
 // DELETE /api/crm/clients/:id/interactions/:iid - remoção lógica da interação (RF53)
-crmClientsRouter.delete('/:id/interactions/:iid', ...ownerGuard, async (req, res) => {
+crmClientsRouter.delete('/:id/interactions/:iid', ...deleteGuard, async (req, res) => {
   const clientId = typeof req.params?.['id'] === 'string' ? req.params['id'] : '';
   const interactionId = typeof req.params?.['iid'] === 'string' ? req.params['iid'] : '';
 

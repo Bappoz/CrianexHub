@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { validateJWT } from '../middleware/validate-jwt.js';
-import { requireRole } from '../middleware/require-role.js';
+import { requirePermission } from '../middleware/require-permission.js';
 import { updateCard, CrmServiceError } from './crm.service.js';
 
 const crmRouter = Router();
-const ownerGuard = [validateJWT, requireRole('owner')];
+const editGuard = [validateJWT, requirePermission('crm', 'e')];
 
-crmRouter.patch('/cards/:id', ...ownerGuard, async (req, res) => {
+crmRouter.patch('/cards/:id', ...editGuard, async (req, res) => {
   const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
 
   if (!id) {

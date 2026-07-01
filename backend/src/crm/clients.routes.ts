@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { validateJWT } from '../middleware/validate-jwt.js';
-import { requireRole } from '../middleware/require-role.js';
+import { requirePermission } from '../middleware/require-permission.js';
 import { updateClient, ClientError, type ClientPatch } from './clients.service.js';
 
 const clientsRouter = Router();
-const ownerGuard = [validateJWT, requireRole('owner')];
+const editGuard = [validateJWT, requirePermission('crm', 'e')];
 
-clientsRouter.patch('/:id', ...ownerGuard, async (req, res) => {
+clientsRouter.patch('/:id', ...editGuard, async (req, res) => {
   const id = typeof req.params?.['id'] === 'string' ? req.params['id'].trim() : '';
   if (!id) {
     res.status(400).json({ message: 'ID do cliente é obrigatório.' });
