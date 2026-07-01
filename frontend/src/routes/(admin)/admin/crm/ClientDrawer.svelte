@@ -14,7 +14,21 @@
 
   let isEditing = $state(false);
   let isSaving = $state(false);
-  let editForm = $state({ ...client });
+  let editForm = $state<CrmClient>({
+    id: '',
+    name: '',
+    email: '',
+    status: 'ativo',
+    column_id: null,
+    responsible_name: null,
+    product_name: null,
+    interaction_count: 0,
+    last_interaction: null,
+  });
+
+  $effect(() => {
+    editForm = { ...client };
+  });
 
   type InteractionType = 'nota' | 'call' | 'email';
 
@@ -107,17 +121,17 @@
       {#if isEditing}
         <div class="edit-mode-form">
           <div class="input-group">
-            <label>NOME DA EMPRESA</label>
-            <input type="text" bind:value={editForm.name} class="dark-input" />
+            <label for="drawer-name">NOME DA EMPRESA</label>
+            <input id="drawer-name" type="text" bind:value={editForm.name} class="dark-input" />
           </div>
           <div class="input-group">
-            <label>E-MAIL</label>
-            <input type="email" bind:value={editForm.email} class="dark-input" />
+            <label for="drawer-email">E-MAIL</label>
+            <input id="drawer-email" type="email" bind:value={editForm.email} class="dark-input" />
           </div>
           <div class="meta-grid" style="margin-top: 0;">
             <div class="input-group">
-              <label>PRODUTO</label>
-              <select bind:value={editForm.product_name} class="dark-input">
+              <label for="drawer-product">PRODUTO</label>
+              <select id="drawer-product" bind:value={editForm.product_name} class="dark-input">
                 <option value="">Selecione...</option>
                 <option value="Avali">Avali</option>
                 <option value="Notify">Notify</option>
@@ -125,8 +139,13 @@
               </select>
             </div>
             <div class="input-group">
-              <label>RESPONSÁVEL</label>
-              <input type="text" bind:value={editForm.responsible_name} class="dark-input" />
+              <label for="drawer-responsible">RESPONSÁVEL</label>
+              <input
+                id="drawer-responsible"
+                type="text"
+                bind:value={editForm.responsible_name}
+                class="dark-input"
+              />
             </div>
           </div>
           <button class="btn-save-edit" onclick={handleSaveEdit} disabled={isSaving}>
@@ -145,15 +164,15 @@
 
         <div class="meta-grid">
           <div class="meta-item">
-            <label>PRODUTO</label>
+            <span class="meta-label">PRODUTO</span>
             <div class="val">{client.product_name || '-'}</div>
           </div>
           <div class="meta-item">
-            <label>RESPONSÁVEL</label>
+            <span class="meta-label">RESPONSÁVEL</span>
             <div class="val">{client.responsible_name || 'Não atribuído'}</div>
           </div>
           <div class="meta-item">
-            <label>INTERAÇÕES</label>
+            <span class="meta-label">INTERAÇÕES</span>
             <div class="val">{client.interaction_count}</div>
           </div>
         </div>
@@ -328,7 +347,7 @@
     gap: 16px;
     margin-top: 8px;
   }
-  .meta-item label {
+  .meta-item .meta-label {
     font-family: var(--font-mono, monospace);
     font-size: 9px;
     letter-spacing: 0.1em;

@@ -33,13 +33,17 @@ crmAdminClientsRouter.post('/', ...ownerGuard, async (req, res) => {
     typeof req.body?.['product_name'] === 'string' ? req.body['product_name'] : undefined;
 
   try {
-    const client = await createCrmAdminClient({
-      name,
-      email,
-      column_id,
-      responsible_name,
-      product_name,
-    });
+    const createInput: {
+      name: string;
+      email: string;
+      column_id?: string;
+      responsible_name?: string;
+      product_name?: string;
+    } = { name, email };
+    if (column_id !== undefined) createInput.column_id = column_id;
+    if (responsible_name !== undefined) createInput.responsible_name = responsible_name;
+    if (product_name !== undefined) createInput.product_name = product_name;
+    const client = await createCrmAdminClient(createInput);
     res.status(201).json(client);
   } catch (err) {
     if (err instanceof CrmAdminClientError) {

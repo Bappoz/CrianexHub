@@ -16,9 +16,13 @@
   let email = $state('');
   let productName = $state('');
   let responsibleName = $state('');
-  let columnId = $state(initialColumnId);
+  let columnId = $state('');
   let isSubmitting = $state(false);
   let errorMsg = $state('');
+
+  $effect(() => {
+    columnId = initialColumnId;
+  });
 
   async function handleSubmit() {
     if (!name.trim()) return;
@@ -76,18 +80,18 @@
 
       <div class="form-grid">
         <div class="input-group">
-          <label>Nome da empresa / Lead</label>
-          <input type="text" placeholder="ex. Folha Sistemas" bind:value={name} required />
+          <label for="nl-name">Nome da empresa / Lead</label>
+          <input id="nl-name" type="text" placeholder="ex. Folha Sistemas" bind:value={name} required />
         </div>
 
         <div class="input-group">
-          <label>E-mail de contato</label>
-          <input type="email" placeholder="leandro@folha.io" bind:value={email} />
+          <label for="nl-email">E-mail de contato</label>
+          <input id="nl-email" type="email" placeholder="leandro@folha.io" bind:value={email} />
         </div>
 
         <div class="input-group">
-          <label>Produto de interesse</label>
-          <select bind:value={productName}>
+          <label for="nl-product">Produto de interesse</label>
+          <select id="nl-product" bind:value={productName}>
             <option value="">Selecione...</option>
             <option value="Avali">Avali</option>
             <option value="Notify">Notify</option>
@@ -96,13 +100,13 @@
         </div>
 
         <div class="input-group">
-          <label>Responsável</label>
-          <input type="text" placeholder="Nome do responsável" bind:value={responsibleName} />
+          <label for="nl-responsible">Responsável</label>
+          <input id="nl-responsible" type="text" placeholder="Nome do responsável" bind:value={responsibleName} />
         </div>
 
         <div class="input-group">
-          <label>Estágio inicial</label>
-          <select bind:value={columnId}>
+          <label for="nl-column">Estágio inicial</label>
+          <select id="nl-column" bind:value={columnId}>
             {#each columns as col}
               <option value={col.id}>{col.title}</option>
             {/each}
