@@ -30,6 +30,10 @@
 
   /* sidebar mais compacta (ocupa menos espaço) */
   --doc-sidebar-width: 200px;
+
+  /* Menu mobile (hamburger da navbar) — Infima usa 83vw por padrão, o que
+     deixa o drawer quase do tamanho da tela inteira em telas pequenas/médias. */
+  --ifm-navbar-sidebar-width: min(320px, 85vw);
 }
 
 /* ---------- SIDEBAR HAMBURGER EM TODAS AS RESOLUÇÕES ---------- */
@@ -1051,11 +1055,29 @@ button[aria-label*="menu" i] {
   }
 
   /* Conteúdo central expande para ocupar todo o espaço da linha — sem isso,
-     flex-grow:0 deixava a coluna do tamanho do conteúdo e encostada à
-     esquerda (TOC removido), impedindo o `margin: auto` do article abaixo
-     de centralizar de fato na página. */
-  .col--8 {
+     a coluna de conteúdo do DocItem (classe com hash, ex.: docItemCol_xxxx)
+     mantém max-width: 75% (calculado para a presença do TOC), deixando 25%
+     de espaço em branco à direita mesmo com o TOC oculto. `[class*=...]`
+     ignora o hash e escopa a regra só à área de conteúdo de página de docs,
+     sem afetar grids de outras seções do site (ex.: cards da home). */
+  [class*='docMainContainer'] .row > .col:not(.col--3) {
     flex: 1 1 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* `.container` do Infima tem max-width fixo (~1140px) — sem isso, a coluna
+     de conteúdo acima expande até o limite do .container, não até a largura
+     real da página, e o `max-width` do article abaixo nunca chega a valer. */
+  [class*='docMainContainer'] .container {
+    max-width: 1400px !important;
+  }
+
+  /* O tema reserva `calc(100% - var(--doc-sidebar-width))` no container de
+     conteúdo mesmo em páginas sem sidebar lateral (este site navega só por
+     dropdowns da navbar, nunca renderiza `.theme-doc-sidebar-container`) —
+     essa reserva sobrava como espaço em branco à direita, sem conteúdo
+     nenhum ocupando-a. */
+  [class*='docMainContainer'] {
     max-width: 100% !important;
   }
 }
@@ -1063,7 +1085,7 @@ button[aria-label*="menu" i] {
 /* Article é a única regra de largura/centralização (evita conflito entre
    múltiplas declarações de `max-width` espalhadas pelo arquivo). */
 article {
-  max-width: 1200px;
+  max-width: 1050px;
   margin: 0 auto !important;
 }
 @media (min-width: 1400px) {

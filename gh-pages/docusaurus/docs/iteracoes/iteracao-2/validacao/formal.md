@@ -104,11 +104,10 @@ Vitor validou positivamente a entrega, destacando que o CRM ficou muito bem orga
 
 | #   | Tarefa                                                                              | Responsável |
 | --- | ------------------------------------------------------------------------------------ | ----------- |
-| 1   | Adicionar representantes da Crianex ao repositório do projeto                        | Developer   |
-| 2   | Enviar dados da equipe (fotos, nomes, funções) para a página "Sobre"                  | Crianex     |
-| 3   | Preencher a seção institucional da vitrine com os dados recebidos                     | Developer   |
-| 4   | Realizar deploy inicial em domínio temporário para avaliação acadêmica               | Developer   |
-| 5   | Agendar workshop pós-disciplina para configurar o domínio definitivo da Crianex       | Ambos       |
+| 1   | Enviar dados da equipe (fotos, nomes, funções) para a página "Sobre"                  | Crianex     |
+| 2   | Preencher a seção institucional da vitrine com os dados recebidos                     | Developer   |
+| 3   | Realizar deploy inicial em domínio temporário para avaliação acadêmica               | Developer   |
+| 4   | Agendar workshop pós-disciplina para configurar o domínio definitivo da Crianex       | Ambos       |
 
 ---
 
