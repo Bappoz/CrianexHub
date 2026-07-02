@@ -13,11 +13,7 @@ A Unidade 1 cobriu a fase de elicitação e definição do projeto: entender o c
 
 ## Apresentação em Vídeo
 
-
-<div style={{width: '100%', maxWidth: '900px', margin: '1.5rem 0', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.15)'}}>
-  <iframe style={{width: '100%', aspectRatio: '16/9', display: 'block'}} src="https://youtu.be/w8GM-zWKZtY" title="Apresentação da Unidade 1" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-</div>
-
+<iframe width="1301" height="732" src="https://www.youtube.com/embed/w8GM-zWKZtY" title="apresentacao unidade1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 ---
 
 ## O Que Planejamos Entregar
