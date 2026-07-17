@@ -1,18 +1,16 @@
 <script lang="ts">
   import { apiFetch } from '$lib/api/backend';
-  import {
-    X,
-    Headphones,
-    Mail,
-    MessageCircle,
-    Phone,
-    ArrowRight,
-    Bot,
-    Edit2,
-    Check,
-    Trash2,
-    UserX,
-  } from 'lucide-svelte';
+  import X from 'lucide-svelte/icons/x';
+  import Headphones from 'lucide-svelte/icons/headphones';
+  import Mail from 'lucide-svelte/icons/mail';
+  import MessageCircle from 'lucide-svelte/icons/message-circle';
+  import Phone from 'lucide-svelte/icons/phone';
+  import ArrowRight from 'lucide-svelte/icons/arrow-right';
+  import Bot from 'lucide-svelte/icons/bot';
+  import Edit2 from 'lucide-svelte/icons/edit-2';
+  import Check from 'lucide-svelte/icons/check';
+  import Trash2 from 'lucide-svelte/icons/trash-2';
+  import UserX from 'lucide-svelte/icons/user-x';
   import type { CrmClient } from './+page.svelte';
   import type { CrmInteraction, InteractionType } from '$lib/types/crm';
   import { initials, mailLink, phoneDigits, waLink } from '$lib/utils/crm';

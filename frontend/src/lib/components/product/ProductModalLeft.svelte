@@ -2,7 +2,8 @@
   import { onDestroy } from 'svelte';
   import { env } from '$env/dynamic/public';
   import { supabase } from '$lib/api/supabase';
-  import { Plus, Check } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import Check from 'lucide-svelte/icons/check';
 
   export let formData: any;
   let fileInput: HTMLInputElement | null = null;

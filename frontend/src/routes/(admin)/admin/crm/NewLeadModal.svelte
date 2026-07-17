@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { X, Users, ArrowRight } from 'lucide-svelte';
+  import X from 'lucide-svelte/icons/x';
+  import Users from 'lucide-svelte/icons/users';
+  import ArrowRight from 'lucide-svelte/icons/arrow-right';
   import { onMount } from 'svelte';
   import { apiFetch } from '$lib/api/backend';
   import type { CrmClient } from './+page.svelte';

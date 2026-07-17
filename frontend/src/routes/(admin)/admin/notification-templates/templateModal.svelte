@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { X, Check } from 'lucide-svelte';
+  import X from 'lucide-svelte/icons/x';
+  import Check from 'lucide-svelte/icons/check';
   import {
     TEMPLATE_COLOR_PALETTE,
     type NotificationEventType,

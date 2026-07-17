@@ -1,7 +1,11 @@
 <script lang="ts">
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { PageData } from './$types';
-  import { EllipsisVertical, Pencil, EyeOff, Trash2, Eye } from 'lucide-svelte';
+  import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
+  import Pencil from 'lucide-svelte/icons/pencil';
+  import EyeOff from 'lucide-svelte/icons/eye-off';
+  import Trash2 from 'lucide-svelte/icons/trash-2';
+  import Eye from 'lucide-svelte/icons/eye';
   import { onMount, onDestroy } from 'svelte';
   import { topbarActions } from '$lib/stores/topbar';
   import { page } from '$app/stores';

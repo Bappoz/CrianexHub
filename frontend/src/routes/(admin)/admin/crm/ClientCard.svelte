@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { Bell, Mail, MessageCircle } from 'lucide-svelte';
+  import Bell from 'lucide-svelte/icons/bell';
+  import Mail from 'lucide-svelte/icons/mail';
+  import MessageCircle from 'lucide-svelte/icons/message-circle';
   import type { CrmClient } from './+page.svelte';
   import { initials, isStale, mailLink, relativeTime, waLink } from '$lib/utils/crm';
 

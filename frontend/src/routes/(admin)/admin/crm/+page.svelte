@@ -1,16 +1,14 @@
 <script lang="ts">
-  import {
-    Settings,
-    X,
-    Check,
-    MoreVertical,
-    Plus,
-    Search,
-    Download,
-    LayoutGrid,
-    Rows3,
-    UserCheck,
-  } from 'lucide-svelte';
+  import Settings from 'lucide-svelte/icons/settings';
+  import X from 'lucide-svelte/icons/x';
+  import Check from 'lucide-svelte/icons/check';
+  import MoreVertical from 'lucide-svelte/icons/more-vertical';
+  import Plus from 'lucide-svelte/icons/plus';
+  import Search from 'lucide-svelte/icons/search';
+  import Download from 'lucide-svelte/icons/download';
+  import LayoutGrid from 'lucide-svelte/icons/layout-grid';
+  import Rows3 from 'lucide-svelte/icons/rows-3';
+  import UserCheck from 'lucide-svelte/icons/user-check';
   import { apiFetch } from '$lib/api/backend';
   import { onMount } from 'svelte';
   import ClientCard from './ClientCard.svelte';

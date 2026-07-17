@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { Mail, MessageCircle, Users } from 'lucide-svelte';
+  import Mail from 'lucide-svelte/icons/mail';
+  import MessageCircle from 'lucide-svelte/icons/message-circle';
+  import Users from 'lucide-svelte/icons/users';
   import type { CrmClient } from './+page.svelte';
   import { mailLink, relativeTime, waLink } from '$lib/utils/crm';
 

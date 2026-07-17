@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { Bell, Users, Check, Shield, ShieldAlert, X } from 'lucide-svelte';
+  import Bell from 'lucide-svelte/icons/bell';
+  import Users from 'lucide-svelte/icons/users';
+  import Check from 'lucide-svelte/icons/check';
+  import Shield from 'lucide-svelte/icons/shield';
+  import ShieldAlert from 'lucide-svelte/icons/shield-alert';
+  import X from 'lucide-svelte/icons/x';
   import { apiFetch } from '$lib/api/backend';
   import { unreadCount } from '$lib/stores/notifications';
   import {

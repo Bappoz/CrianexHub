@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { ShieldAlert, Pencil, Trash2, Star, Bell } from 'lucide-svelte';
+  import ShieldAlert from 'lucide-svelte/icons/shield-alert';
+  import Pencil from 'lucide-svelte/icons/pencil';
+  import Trash2 from 'lucide-svelte/icons/trash-2';
+  import Star from 'lucide-svelte/icons/star';
+  import Bell from 'lucide-svelte/icons/bell';
   import { onMount } from 'svelte';
   import { topbarActions } from '$lib/stores/topbar';
   import { page } from '$app/stores';
