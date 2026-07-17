@@ -1,13 +1,11 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import {
-    Package,
-    CircleQuestionMark,
-    Users,
-    ChartBar,
-    LayoutDashboard,
-    Ticket,
-  } from 'lucide-svelte';
+  import Package from 'lucide-svelte/icons/package';
+  import CircleQuestionMark from 'lucide-svelte/icons/circle-question-mark';
+  import Users from 'lucide-svelte/icons/users';
+  import ChartBar from 'lucide-svelte/icons/chart-bar';
+  import LayoutDashboard from 'lucide-svelte/icons/layout-dashboard';
+  import Ticket from 'lucide-svelte/icons/ticket';
 
   function getGreeting() {
     const h = new Date().getHours();
@@ -55,7 +53,7 @@
     {
       id: 'dashboard',
       label: 'Dashboard',
-      href: '/nao-implementado',
+      href: '/admin/dashboard',
       color: 'var(--green)',
       icon: LayoutDashboard,
     },
@@ -69,14 +67,14 @@
     {
       id: 'finance',
       label: 'Financeiro',
-      href: '/nao-implementado',
+      href: '/admin/financeiro',
       color: 'var(--pink)',
       icon: ChartBar,
     },
     {
       id: 'tickets',
       label: 'Tickets',
-      href: '/nao-implementado',
+      href: '/admin/tickets',
       color: 'var(--purple)',
       icon: Ticket,
     },

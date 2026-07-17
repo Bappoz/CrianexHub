@@ -1,25 +1,23 @@
 <script lang="ts">
   import '../../app.css';
   import { page } from '$app/stores';
-  import {
-    Users,
-    Package,
-    CircleQuestionMark,
-    FileText,
-    ChartBar,
-    Ticket,
-    Bell,
-    Search,
-    Menu,
-    X,
-    LayoutDashboard,
-    ShieldCheck,
-    Shield,
-    Check,
-    SidebarClose,
-    SidebarOpen,
-    House,
-  } from 'lucide-svelte';
+  import Users from 'lucide-svelte/icons/users';
+  import Package from 'lucide-svelte/icons/package';
+  import CircleQuestionMark from 'lucide-svelte/icons/circle-question-mark';
+  import FileText from 'lucide-svelte/icons/file-text';
+  import ChartBar from 'lucide-svelte/icons/chart-bar';
+  import Ticket from 'lucide-svelte/icons/ticket';
+  import Bell from 'lucide-svelte/icons/bell';
+  import Search from 'lucide-svelte/icons/search';
+  import Menu from 'lucide-svelte/icons/menu';
+  import X from 'lucide-svelte/icons/x';
+  import LayoutDashboard from 'lucide-svelte/icons/layout-dashboard';
+  import ShieldCheck from 'lucide-svelte/icons/shield-check';
+  import Shield from 'lucide-svelte/icons/shield';
+  import Check from 'lucide-svelte/icons/check';
+  import SidebarClose from 'lucide-svelte/icons/sidebar-close';
+  import SidebarOpen from 'lucide-svelte/icons/sidebar-open';
+  import House from 'lucide-svelte/icons/house';
   import type { LayoutData } from './$types';
   import { topbarActions } from '$lib/stores/topbar';
   import { unreadCount } from '$lib/stores/notifications';
@@ -40,15 +38,18 @@
   // Mantém o badge global (topbar + sidebar) em sincronia com o contador do backend.
   $: unreadCount.set(data.unreadCount ?? 0);
 
-  const NAO_IMPL = '/nao-implementado';
-
   const navGroups = [
     {
       label: 'Geral',
       items: [
-        { href: NAO_IMPL, label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard' },
+        {
+          href: '/admin/dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          module: 'dashboard',
+        },
         { href: '/admin/crm', label: 'CRM · Leads', icon: Users, module: 'crm' },
-        { href: NAO_IMPL, label: 'Financeiro', icon: ChartBar, module: 'finance' },
+        { href: '/admin/financeiro', label: 'Financeiro', icon: ChartBar, module: 'finance' },
       ],
     },
     {
@@ -61,8 +62,8 @@
     {
       label: 'Operações',
       items: [
-        { href: NAO_IMPL, label: 'Tickets', icon: Ticket, module: 'tickets' },
-        { href: NAO_IMPL, label: 'Logs de Produtos', icon: FileText, module: 'productLogs' },
+        { href: '/admin/tickets', label: 'Tickets', icon: Ticket, module: 'tickets' },
+        { href: '/admin/logs-produtos', label: 'Logs de Produtos', icon: FileText, module: 'productLogs' },
         { href: '/admin/notificacoes', label: 'Notificações', icon: Bell, module: 'notifications' },
         {
           href: '/admin/notification-templates',
@@ -71,7 +72,7 @@
           module: 'notifications',
         },
         { href: '/admin/membros', label: 'Membros', icon: Users, module: 'members' },
-        { href: NAO_IMPL, label: 'Auditoria', icon: ShieldCheck, module: 'auditLogs' },
+        { href: '/admin/auditoria', label: 'Auditoria', icon: ShieldCheck, module: 'auditLogs' },
       ],
     },
   ];
@@ -103,11 +104,10 @@
   $: pathname = $page.url.pathname;
 
   $: activeLabel = (() => {
-    if (pathname === NAO_IMPL) return 'Em Desenvolvimento';
     if (pathname.startsWith('/admin/painel')) return 'Início';
     for (const group of navGroups) {
       for (const item of group.items) {
-        if (item.href !== NAO_IMPL && pathname.startsWith(item.href)) return item.label;
+        if (pathname.startsWith(item.href)) return item.label;
       }
     }
     return 'Painel';
@@ -123,7 +123,6 @@
     .toUpperCase();
 
   function isActive(href: string): boolean {
-    if (href === NAO_IMPL) return false;
     return pathname === href || pathname.startsWith(href + '/');
   }
 
