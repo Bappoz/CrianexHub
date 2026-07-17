@@ -10,6 +10,8 @@ export type HomeProduct = {
   category_en: string | null;
   image_url: string | null;
   product_url: string | null;
+  /** Cor de marca definida no admin. Fallback para a paleta posicional quando nula. */
+  color: string | null;
 };
 
 export const ACCENT_COLORS = ['#7f3fe5', '#e71f84', '#66df7a'] as const;

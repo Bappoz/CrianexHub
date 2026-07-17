@@ -20,7 +20,7 @@ export const load: PageServerLoad = async (event) => {
   const { data, error: fetchError } = await supabase
     .from('products')
     .select(
-      'slug, name_pt, name_en, tagline_pt, tagline_en, description_pt, description_en, image_url'
+      'slug, name_pt, name_en, tagline_pt, tagline_en, description_pt, description_en, image_url, color'
     )
     .eq('slug', slug)
     .eq('published', true)

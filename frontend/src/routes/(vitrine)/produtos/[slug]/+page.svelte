@@ -41,10 +41,35 @@
   <p class="text-lg text-zinc-500 mb-6">{tagline}</p>
 
   {#if product.image_url}
-    <img src={product.image_url} alt={name} class="w-full max-w-3xl rounded-lg mb-6" />
+    <div class="product-hero" style="background: {product.color || '#7f3fe5'};">
+      <img src={product.image_url} alt={name} class="product-hero-img" />
+    </div>
   {/if}
 
   <div class="content prose text-zinc-200">
     <p class="whitespace-pre-wrap">{description || 'Sem descrição disponível.'}</p>
   </div>
 </section>
+
+<style>
+  /* Hero do produto: usa a cor de marca como fundo e contém a imagem (sem
+     esticar/cortar), com proporção fixa — corrige o `w-full` que deformava
+     logos pequenos. */
+  .product-hero {
+    width: 100%;
+    max-width: 48rem;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .product-hero-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+</style>

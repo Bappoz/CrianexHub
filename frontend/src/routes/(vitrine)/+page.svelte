@@ -301,7 +301,7 @@
       <div class="chips-row">
         {#each products as p, i}
           <button class="product-chip {active === i ? 'on' : ''}" onclick={() => jumpTo(i)}>
-            <span class="dot" style="background: {accentColor(i)};"></span>
+            <span class="dot" style="background: {p.color || accentColor(i)};"></span>
             <span class="name">{resolveField(p.name_pt, p.name_en, $lang)}</span>
             <span class="cat">{resolveField(p.category_pt, p.category_en, $lang)}</span>
           </button>
@@ -350,7 +350,7 @@
             {@const name = resolveField(p.name_pt, p.name_en, $lang)}
             {@const tagline = resolveField(p.tagline_pt, p.tagline_en, $lang)}
             {@const category = resolveField(p.category_pt, p.category_en, $lang)}
-            {@const color = accentColor(i)}
+            {@const color = p.color || accentColor(i)}
             <div class="carousel-slide {i === active ? 'on' : ''}">
               <div class="cs-visual" style="background: {color};">
                 {#if p.image_url}
@@ -981,7 +981,11 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    /* contain (não cover): mostra o logo/ilustração inteiro sobre a cor de
+       marca, sem cortar. Padding dá respiro. */
+    object-fit: contain;
+    padding: 1.75rem;
+    box-sizing: border-box;
     z-index: 1;
   }
 

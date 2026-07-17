@@ -17,7 +17,8 @@
   const name = $derived(resolveField(product.name_pt, product.name_en, lang));
   const tagline = $derived(resolveField(product.tagline_pt, product.tagline_en, lang));
   const category = $derived(resolveField(product.category_pt, product.category_en, lang));
-  const accent = $derived(accentForIndex(index));
+  // Cor de marca definida no admin; fallback para a paleta posicional quando nula.
+  const accent = $derived(product.color || accentForIndex(index));
   const initials = $derived(
     name
       .split(' ')
@@ -110,7 +111,11 @@
   .card-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    /* contain (não cover) para nunca cortar logos/ilustrações; o fundo usa a
+       cor de marca do produto, então as bordas ficam intencionais/branded. */
+    object-fit: contain;
+    padding: 18px;
+    box-sizing: border-box;
   }
 
   .card-initials {

@@ -2,7 +2,9 @@
   import { onDestroy } from 'svelte';
   import { env } from '$env/dynamic/public';
   import { supabase } from '$lib/api/supabase';
-  import { X, Plus, Check } from 'lucide-svelte';
+  import X from 'lucide-svelte/icons/x';
+  import Plus from 'lucide-svelte/icons/plus';
+  import Check from 'lucide-svelte/icons/check';
 
   export let isOpen = false;
   export let isEditing = false;
@@ -60,6 +62,9 @@
   let objectUrl = '';
 
   const maxBytes = 2 * 1024 * 1024;
+  // Deve espelhar o fileFilter do backend (products.routes.ts). Validar aqui dá
+  // uma mensagem clara em vez de um erro genérico vindo do servidor.
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
   const prebuiltColors = [
     '#e71f84',
@@ -83,6 +88,10 @@
   }
 
   async function handleFile(file: File) {
+    if (!allowedTypes.includes(file.type)) {
+      imageError = 'Formato não suportado. Use PNG, JPG ou WEBP.';
+      return;
+    }
     if (file.size > maxBytes) {
       imageError = 'Imagem muito grande. Máx. 2MB';
       return;
@@ -215,7 +224,7 @@
 
             <input
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp"
               bind:this={fileInput}
               on:change={onFileChange}
               class="hidden-file"
