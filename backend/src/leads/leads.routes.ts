@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { hashIp } from './leads.service.js';
-import { contactController } from './leads.controller.js';
+import { contactController, contactTokenController } from './leads.controller.js';
 import { extractIp } from '../lib/extract-ip.js';
 
 const RAW_WINDOW = Number(process.env['RATE_LIMIT_WINDOW_MS']);
@@ -24,8 +24,20 @@ const contactRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
+// Emissão de token é barata e o usuário pode recarregar o formulário; o limite é
+// mais folgado que o de envio, mas ainda barra minting em massa por um mesmo IP.
+const tokenRateLimit = rateLimit({
+  windowMs,
+  max: Math.max(max * 6, 30),
+  keyGenerator: (req) => hashIp(extractIp(req)),
+  handler: (_req, res) => res.status(429).json({ error: 'Muitas solicitações.' }),
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const leadsRouter = Router();
 
+leadsRouter.get('/contact/token', tokenRateLimit, contactTokenController);
 leadsRouter.post('/contact', contactRateLimit, contactController);
 
 export default leadsRouter;

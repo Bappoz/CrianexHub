@@ -127,25 +127,6 @@ const createInMemorySupabase = () => {
               id: rowInput['id'] ?? crypto.randomUUID(),
             };
 
-            if (tableName === 'leads') {
-              if (
-                !rowInput['ip_hash'] ||
-                !rowInput['name'] ||
-                !rowInput['email'] ||
-                !rowInput['message']
-              ) {
-                return { data: null, error: { code: '23502' } };
-              }
-
-              const status = rowInput['status'] ?? 'new';
-              if (!['new', 'read', 'archived'].includes(String(status))) {
-                return { data: null, error: { code: '23514' } };
-              }
-
-              row.status = status;
-              row.created_at = rowInput['created_at'] ?? new Date().toISOString();
-            }
-
             table.push(row);
             state.insertedRows.push(row);
           }
@@ -283,6 +264,16 @@ const createInMemorySupabase = () => {
         const email = params['p_email'];
         const conteudo = params['p_conteudo'];
         const telefone = (params['p_telefone'] as string | undefined) ?? null;
+        const mensagem = (params['p_mensagem'] as string | undefined) ?? null;
+        const empresa = (params['p_empresa'] as string | undefined) ?? null;
+        const cargo = (params['p_cargo'] as string | undefined) ?? null;
+        const origem = (params['p_origem'] as string | undefined) ?? null;
+        const produtoSlug = (params['p_produto_slug'] as string | undefined) ?? null;
+        const qualificacao = params['p_qualificacao'] ?? {};
+        const score = (params['p_score'] as number | undefined) ?? 0;
+        const temperatura = (params['p_temperatura'] as string | undefined) ?? 'frio';
+        const spam = Boolean(params['p_spam']);
+        const spamMotivos = (params['p_spam_motivos'] as string[] | undefined) ?? [];
 
         if (!nome || !String(nome).trim()) {
           return { data: null, error: { code: '23514', message: 'clients_nome_check' } };
@@ -297,19 +288,37 @@ const createInMemorySupabase = () => {
         const clients = getTable('clients');
         const cards = getTable('client_cards');
         const notifications = getTable('notifications');
+        const interactions = getTable('interactions');
         const columns = getTable('crm_columns');
+        const products = getTable('products');
 
-        // Client deduplicado por e-mail.
+        // Client deduplicado por e-mail (COALESCE preserva dados; sobrescreve score/spam).
         let client = clients.find((c) => c['email'] === email);
         if (client) {
           client['nome'] = nome;
           if (telefone) client['telefone'] = telefone;
+          if (empresa) client['empresa'] = empresa;
+          if (cargo) client['cargo'] = cargo;
+          if (origem) client['origem'] = origem;
+          client['qualificacao'] = qualificacao;
+          client['score'] = score;
+          client['temperatura'] = temperatura;
+          client['spam'] = spam;
+          client['spam_motivos'] = spamMotivos;
         } else {
           client = {
             id: crypto.randomUUID(),
             nome,
             email,
             telefone,
+            empresa,
+            cargo,
+            origem,
+            qualificacao,
+            score,
+            temperatura,
+            spam,
+            spam_motivos: spamMotivos,
             status: 'ativo',
             created_at: new Date().toISOString(),
           };
@@ -329,26 +338,51 @@ const createInMemorySupabase = () => {
           columns.push(defaultCol);
         }
 
+        const produto = produtoSlug
+          ? products.find((p) => p['slug'] === produtoSlug && p['published'] === true)
+          : undefined;
+
         const card: Row = {
           id: crypto.randomUUID(),
           client_id: client['id'],
           column_id: defaultCol['id'],
+          produto_vinculado: produto?.['id'] ?? null,
           created_at: new Date().toISOString(),
         };
         cards.push(card);
 
         const notification: Row = {
           id: crypto.randomUUID(),
-          tipo: 'novo_lead',
+          tipo: spam ? 'seguranca_controle' : 'novo_lead',
           conteudo,
           status: 'unread',
           created_at: new Date().toISOString(),
         };
         notifications.push(notification);
 
+        let interactionId: string | null = null;
+        if (mensagem && String(mensagem).trim()) {
+          const interaction: Row = {
+            id: crypto.randomUUID(),
+            client_id: client['id'],
+            autor_id: null,
+            tipo: 'formulario',
+            conteudo: mensagem,
+            data: new Date().toISOString(),
+            removed: false,
+          };
+          interactions.push(interaction);
+          interactionId = interaction['id'] as string;
+        }
+
         return {
           data: [
-            { client_id: client['id'], card_id: card['id'], notification_id: notification['id'] },
+            {
+              client_id: client['id'],
+              card_id: card['id'],
+              notification_id: notification['id'],
+              interaction_id: interactionId,
+            },
           ],
           error: null,
         };
