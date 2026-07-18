@@ -3,7 +3,7 @@
   import Mail from 'lucide-svelte/icons/mail';
   import MessageCircle from 'lucide-svelte/icons/message-circle';
   import type { CrmClient } from './+page.svelte';
-  import { initials, isStale, mailLink, relativeTime, waLink } from '$lib/utils/crm';
+  import { initials, isStale, mailLink, relativeTime, waLink, tempMeta } from '$lib/utils/crm';
 
   let {
     client,
@@ -24,6 +24,7 @@
   const stale = $derived(isStale(client.last_interaction));
   const wa = $derived(waLink(client.name, client.phone));
   const mail = $derived(mailLink(client.name, client.email));
+  const temp = $derived(tempMeta(client.temperatura));
 </script>
 
 <div
@@ -44,8 +45,15 @@
     <span class="crm-avatar" style="background:{columnColor}">{initials(client.name)}</span>
     <div class="who">
       <div class="name">{client.name}</div>
-      <div class="email">{client.email || 'Sem e-mail'}</div>
+      <div class="email">{client.empresa || client.email || 'Sem e-mail'}</div>
     </div>
+    <span
+      class="temp-pill"
+      style="--tc:{temp.color}"
+      title="{temp.label} · score {client.score}"
+    >
+      <span class="td"></span>{client.score}
+    </span>
   </div>
 
   {#if client.product_name}
@@ -113,6 +121,27 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
+  }
+  .temp-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--tc);
+    background: color-mix(in srgb, var(--tc) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tc) 32%, transparent);
+    padding: 2px 7px;
+    border-radius: 20px;
+    line-height: 1.4;
+  }
+  .temp-pill .td {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tc);
   }
   .crm-avatar {
     width: 32px;

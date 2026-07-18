@@ -64,6 +64,54 @@ export function isStale(lastInteraction: string | null | undefined): boolean {
   return days >= 7;
 }
 
+export type Temperatura = 'quente' | 'morno' | 'frio';
+
+// Metadados visuais da temperatura do lead (score de qualificação da captação).
+// Cores contidas, alinhadas à paleta: pink=quente, amber=morno, slate=frio.
+export function tempMeta(t: Temperatura | string | null | undefined): {
+  label: string;
+  color: string;
+} {
+  switch (t) {
+    case 'quente':
+      return { label: 'Quente', color: '#e71f84' };
+    case 'morno':
+      return { label: 'Morno', color: '#f59e0b' };
+    default:
+      return { label: 'Frio', color: '#64748b' };
+  }
+}
+
+export function teamSizeLabel(v: string | null | undefined): string {
+  switch (v) {
+    case 'solo':
+      return 'Só a pessoa';
+    case 'small':
+      return '2–10 pessoas';
+    case 'medium':
+      return '11–50 pessoas';
+    case 'large':
+      return '50+ pessoas';
+    default:
+      return '';
+  }
+}
+
+export function timelineLabel(v: string | null | undefined): string {
+  switch (v) {
+    case 'now':
+      return 'Quer começar agora';
+    case 'month':
+      return 'Começar este mês';
+    case 'quarter':
+      return 'Começar este trimestre';
+    case 'exploring':
+      return 'Ainda explorando';
+    default:
+      return '';
+  }
+}
+
 export type CsvLead = {
   name: string;
   email: string;

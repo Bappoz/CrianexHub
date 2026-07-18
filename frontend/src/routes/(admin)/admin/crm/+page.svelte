@@ -9,13 +9,14 @@
   import LayoutGrid from 'lucide-svelte/icons/layout-grid';
   import Rows3 from 'lucide-svelte/icons/rows-3';
   import UserCheck from 'lucide-svelte/icons/user-check';
+  import ShieldAlert from 'lucide-svelte/icons/shield-alert';
   import { apiFetch } from '$lib/api/backend';
   import { onMount } from 'svelte';
   import ClientCard from './ClientCard.svelte';
   import ClientDrawer from './ClientDrawer.svelte';
   import NewLeadModal from './NewLeadModal.svelte';
   import TableView from './TableView.svelte';
-  import { isStale, toCSV, downloadCSV } from '$lib/utils/crm';
+  import { isStale, toCSV, downloadCSV, initials, relativeTime } from '$lib/utils/crm';
 
   type PublishedProduct = { id: string; name_pt: string; color: string | null };
   type CrmMember = { id: string; name: string | null; status: 'active' | 'inactive' };
@@ -32,6 +33,14 @@
     updated_at: string;
   };
 
+  export type LeadQualificacao = {
+    teamSize?: string;
+    timeline?: string;
+    budget?: string;
+    useCase?: string;
+    channel?: string;
+  };
+
   export type CrmClient = {
     id: string;
     card_id: string | null;
@@ -45,6 +54,14 @@
     product_color: string | null;
     interaction_count: number;
     last_interaction: string | null;
+    empresa: string | null;
+    cargo: string | null;
+    origem: string | null;
+    score: number;
+    temperatura: 'quente' | 'morno' | 'frio';
+    spam: boolean;
+    spam_motivos: string[];
+    qualificacao: LeadQualificacao;
   };
 
   const COL_COLORS = [
@@ -83,19 +100,64 @@
   let search = $state('');
   let productFilter = $state('all');
   let respFilter = $state('all');
+  let tempFilter = $state<'all' | 'quente' | 'morno' | 'frio'>('all');
   let products = $state<PublishedProduct[]>([]);
   let members = $state<CrmMember[]>([]);
   const activeMembers = $derived(members.filter((m) => m.status === 'active'));
+
+  // ── Board vs Quarentena (spam retido na captação, fora do funil) ──
+  let boardMode = $state<'board' | 'quarantine'>('board');
+  let quarantineClients = $state<CrmClient[]>([]);
+  let quarantineLoaded = $state(false);
+  let quarantineLoading = $state(false);
+  let quarantineError = $state('');
 
   const filteredClients = $derived(
     clients.filter((c) => {
       if (productFilter !== 'all' && c.product_name !== productFilter) return false;
       if (respFilter !== 'all' && c.responsible_name !== respFilter) return false;
+      if (tempFilter !== 'all' && c.temperatura !== tempFilter) return false;
       const q = search.trim().toLowerCase();
-      if (q && !`${c.name} ${c.email}`.toLowerCase().includes(q)) return false;
+      if (q && !`${c.name} ${c.email} ${c.empresa ?? ''}`.toLowerCase().includes(q)) return false;
       return true;
     })
   );
+
+  const filteredQuarantine = $derived(
+    quarantineClients.filter((c) => {
+      const q = search.trim().toLowerCase();
+      return !q || `${c.name} ${c.email} ${c.empresa ?? ''}`.toLowerCase().includes(q);
+    })
+  );
+
+  async function loadQuarantine() {
+    if (quarantineLoaded || quarantineLoading) return;
+    quarantineLoading = true;
+    quarantineError = '';
+    try {
+      quarantineClients = await apiFetch<CrmClient[]>('/admin/crm/clients/quarantine');
+      quarantineLoaded = true;
+    } catch (err) {
+      quarantineError = (err as { message?: string }).message || 'Erro ao carregar a quarentena.';
+    } finally {
+      quarantineLoading = false;
+    }
+  }
+
+  function setBoardMode(mode: 'board' | 'quarantine') {
+    boardMode = mode;
+    if (mode === 'quarantine') void loadQuarantine();
+  }
+
+  // Reconcilia board e quarentena por lead após um update do drawer (ex.: tirar da
+  // quarentena move de uma lista para a outra).
+  function applyClientUpdate(updated: CrmClient) {
+    quarantineClients = quarantineClients.filter((c) => c.id !== updated.id);
+    clients = clients.filter((c) => c.id !== updated.id);
+    if (updated.spam) quarantineClients = [updated, ...quarantineClients];
+    else clients = [updated, ...clients];
+    activeClient = updated.spam ? null : updated;
+  }
 
   const responsibles = $derived(
     [...new Set(clients.map((c) => c.responsible_name).filter((r): r is string => !!r))].sort()
@@ -103,6 +165,7 @@
 
   const stats = $derived({
     total: filteredClients.length,
+    hot: filteredClients.filter((c) => c.temperatura === 'quente').length,
     stale: filteredClients.filter((c) => isStale(c.last_interaction)).length,
     interactions: filteredClients.reduce((s, c) => s + c.interaction_count, 0),
   });
@@ -124,6 +187,7 @@
 
   function handleDeleteLead(id: string) {
     clients = clients.filter((c) => c.id !== id);
+    quarantineClients = quarantineClients.filter((c) => c.id !== id);
     activeClient = null;
   }
 
@@ -430,89 +494,153 @@
   <div class="crm-head">
     <span class="crm-title">Pipeline de Leads</span>
     <span class="crm-crumb">/ {columns.length} {columns.length === 1 ? 'coluna' : 'colunas'}</span>
-    <span class="grow"></span>
-    <div class="crm-seg">
-      <button class={view === 'kanban' ? 'on' : ''} onclick={() => (view = 'kanban')}>
-        <LayoutGrid size={13} /> Pipeline
+    <div class="crm-seg mode">
+      <button class={boardMode === 'board' ? 'on' : ''} onclick={() => setBoardMode('board')}>
+        Board
       </button>
-      <button class={view === 'table' ? 'on' : ''} onclick={() => (view = 'table')}>
-        <Rows3 size={13} /> Tabela
+      <button
+        class={boardMode === 'quarantine' ? 'on' : ''}
+        onclick={() => setBoardMode('quarantine')}
+      >
+        <ShieldAlert size={13} /> Quarentena
+        {#if quarantineLoaded && quarantineClients.length}
+          <span class="seg-ct">{quarantineClients.length}</span>
+        {/if}
       </button>
     </div>
-    <button class="btn ghost sm" onclick={openEditor}>
-      <Settings size={13} /> Personalizar colunas
-    </button>
-    <button class="btn ghost sm" onclick={exportCSV}>
-      <Download size={13} /> CSV
-    </button>
-    <button class="btn ghost sm" onclick={openInactiveModal}>
-      <UserCheck size={13} /> Leads inativos
-    </button>
-    <button class="btn sm" onclick={() => openAddLead(columns[0]?.id || '')}>
-      <Plus size={13} /> Novo lead
-    </button>
+    <span class="grow"></span>
+    {#if boardMode === 'board'}
+      <div class="crm-seg">
+        <button class={view === 'kanban' ? 'on' : ''} onclick={() => (view = 'kanban')}>
+          <LayoutGrid size={13} /> Pipeline
+        </button>
+        <button class={view === 'table' ? 'on' : ''} onclick={() => (view = 'table')}>
+          <Rows3 size={13} /> Tabela
+        </button>
+      </div>
+    {/if}
+    {#if boardMode === 'board'}
+      <button class="btn ghost sm" onclick={openEditor}>
+        <Settings size={13} /> Personalizar colunas
+      </button>
+      <button class="btn ghost sm" onclick={exportCSV}>
+        <Download size={13} /> CSV
+      </button>
+      <button class="btn ghost sm" onclick={openInactiveModal}>
+        <UserCheck size={13} /> Leads inativos
+      </button>
+      <button class="btn sm" onclick={() => openAddLead(columns[0]?.id || '')}>
+        <Plus size={13} /> Novo lead
+      </button>
+    {/if}
   </div>
 
   <!-- ── Filter bar ── -->
   <div class="crm-bar">
-    <span class="label-mono">Produto</span>
-    <button
-      class="crm-prodchip {productFilter === 'all' ? 'on' : ''}"
-      style={productFilter === 'all' ? 'background: var(--text); color: var(--bg);' : ''}
-      onclick={() => (productFilter = 'all')}
-    >
-      Geral <span class="ct">{clients.length}</span>
-    </button>
-    {#each products as p (p.id)}
-      {@const ct = clients.filter((c) => c.product_name === p.name_pt).length}
-      {@const on = productFilter === p.name_pt}
+    {#if boardMode === 'board'}
+      <span class="label-mono">Produto</span>
       <button
-        class="crm-prodchip {on ? 'on' : ''}"
-        style={on
-          ? `background:${(p.color || '#7f3fe5') + '22'}; border-color:${p.color || '#7f3fe5'}; color:${p.color || '#7f3fe5'};`
-          : ''}
-        onclick={() => (productFilter = p.name_pt)}
+        class="crm-prodchip {productFilter === 'all' ? 'on' : ''}"
+        style={productFilter === 'all' ? 'background: var(--text); color: var(--bg);' : ''}
+        onclick={() => (productFilter = 'all')}
       >
-        <span class="swatch" style="background:{p.color || '#7f3fe5'}"></span>{p.name_pt}
-        <span class="ct">{ct}</span>
+        Geral <span class="ct">{clients.length}</span>
       </button>
-    {/each}
-    <span class="vline"></span>
-    <select class="crm-select" bind:value={respFilter}>
-      <option value="all">Todos os responsáveis</option>
-      {#each responsibles as r}
-        <option value={r}>{r}</option>
+      {#each products as p (p.id)}
+        {@const ct = clients.filter((c) => c.product_name === p.name_pt).length}
+        {@const on = productFilter === p.name_pt}
+        <button
+          class="crm-prodchip {on ? 'on' : ''}"
+          style={on
+            ? `background:${(p.color || '#7f3fe5') + '22'}; border-color:${p.color || '#7f3fe5'}; color:${p.color || '#7f3fe5'};`
+            : ''}
+          onclick={() => (productFilter = p.name_pt)}
+        >
+          <span class="swatch" style="background:{p.color || '#7f3fe5'}"></span>{p.name_pt}
+          <span class="ct">{ct}</span>
+        </button>
       {/each}
-    </select>
+      <span class="vline"></span>
+      <select class="crm-select" bind:value={respFilter}>
+        <option value="all">Todos os responsáveis</option>
+        {#each responsibles as r}
+          <option value={r}>{r}</option>
+        {/each}
+      </select>
+      <span class="vline"></span>
+      <div class="temp-filter">
+        {#each [{ v: 'all', l: 'Todos', c: '' }, { v: 'quente', l: 'Quente', c: '#e71f84' }, { v: 'morno', l: 'Morno', c: '#f59e0b' }, { v: 'frio', l: 'Frio', c: '#64748b' }] as tf}
+          <button
+            class="crm-tempchip {tempFilter === tf.v ? 'on' : ''}"
+            style={tempFilter === tf.v && tf.c
+              ? `background:${tf.c}22; border-color:${tf.c}; color:${tf.c};`
+              : ''}
+            onclick={() => (tempFilter = tf.v as typeof tempFilter)}
+          >
+            {#if tf.c}<span class="swatch" style="background:{tf.c}"></span>{/if}{tf.l}
+          </button>
+        {/each}
+      </div>
+    {/if}
     <span class="grow"></span>
     <div class="crm-search">
       <Search size={14} />
-      <input placeholder="Buscar por nome ou e-mail…" bind:value={search} />
+      <input placeholder="Buscar por nome, e-mail ou empresa…" bind:value={search} />
     </div>
   </div>
 
   <!-- ── Mini-dashboard ── -->
-  <div class="crm-stats">
-    <div class="stat">
-      <div class="k">Leads {productFilter !== 'all' ? '· ' + productFilter : 'no filtro'}</div>
-      <div class="v">{stats.total}</div>
+  {#if boardMode === 'board'}
+    <div class="crm-stats">
+      <div class="stat">
+        <div class="k">Leads {productFilter !== 'all' ? '· ' + productFilter : 'no filtro'}</div>
+        <div class="v">{stats.total}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Leads quentes</div>
+        <div class="v" style="color:{stats.hot > 0 ? '#e71f84' : 'inherit'}">{stats.hot}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Sem interação 7+ dias</div>
+        <div class="v" style="color:{stats.stale > 0 ? '#f59e0b' : 'inherit'}">{stats.stale}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Interações registradas</div>
+        <div class="v">{stats.interactions}</div>
+      </div>
     </div>
-    <div class="stat">
-      <div class="k">Sem interação 7+ dias</div>
-      <div class="v" style="color:{stats.stale > 0 ? '#f59e0b' : 'inherit'}">{stats.stale}</div>
-    </div>
-    <div class="stat">
-      <div class="k">Interações registradas</div>
-      <div class="v">{stats.interactions}</div>
-    </div>
-    <div class="stat">
-      <div class="k">Colunas no pipeline</div>
-      <div class="v">{columns.length}</div>
-    </div>
-  </div>
+  {/if}
 
   <div class="crm-body">
-    {#if colsLoading}
+    {#if boardMode === 'quarantine'}
+      {#if quarantineLoading}
+        <div class="crm-loading">Carregando quarentena…</div>
+      {:else if quarantineError}
+        <div class="crm-err-banner">{quarantineError}</div>
+      {:else if filteredQuarantine.length === 0}
+        <div class="crm-empty-state">
+          <div class="ico"><ShieldAlert size={18} /></div>
+          Nenhum lead em quarentena. Envios classificados como spam na captação aparecem aqui para
+          revisão manual.
+        </div>
+      {:else}
+        <div class="quar-list">
+          {#each filteredQuarantine as c (c.id)}
+            <button class="quar-item" onclick={() => (activeClient = c)}>
+              <span class="crm-avatar qi-av">{initials(c.name)}</span>
+              <span class="qi-body">
+                <span class="qi-name">{c.name}</span>
+                <span class="qi-sub">{c.email}{c.empresa ? ' · ' + c.empresa : ''}</span>
+                {#if c.spam_motivos?.length}
+                  <span class="qi-reasons">{c.spam_motivos.join(' · ')}</span>
+                {/if}
+              </span>
+              <span class="qi-date">{relativeTime(c.last_interaction)}</span>
+            </button>
+          {/each}
+        </div>
+      {/if}
+    {:else if colsLoading}
       <div class="crm-loading">Carregando colunas…</div>
     {:else if data.forbidden}
       <div class="crm-empty-state">
@@ -832,10 +960,7 @@
     {products}
     members={activeMembers}
     onClose={() => (activeClient = null)}
-    onUpdate={(updatedClient) => {
-      clients = clients.map((c) => (c.id === updatedClient.id ? updatedClient : c));
-      activeClient = updatedClient;
-    }}
+    onUpdate={applyClientUpdate}
     onDelete={handleDeleteLead}
   />
 {/if}
@@ -1258,6 +1383,113 @@
   .crm-seg button.on {
     background: var(--bg-elev);
     color: var(--text);
+  }
+  .crm-seg .seg-ct {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 20px;
+  }
+
+  /* ── Filtro de temperatura ── */
+  .temp-filter {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .crm-tempchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--bg-elev);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .crm-tempchip:hover {
+    color: var(--text);
+  }
+  .crm-tempchip.on {
+    color: var(--text);
+  }
+  .crm-tempchip .swatch {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  /* ── Lista de quarentena ── */
+  .quar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 780px;
+  }
+  .quar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-left: 3px solid #f59e0b;
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition:
+      border-color 0.12s,
+      transform 0.1s;
+  }
+  .quar-item:hover {
+    transform: translateY(-1px);
+    border-color: rgba(245, 158, 11, 0.5);
+  }
+  .qi-av {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #f59e0b !important;
+    color: #1a1205;
+    flex-shrink: 0;
+  }
+  .qi-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+  .qi-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .qi-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .qi-reasons {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: #f59e0b;
+    margin-top: 2px;
+  }
+  .qi-date {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
+    flex-shrink: 0;
   }
 
   /* ── Filter bar ── */

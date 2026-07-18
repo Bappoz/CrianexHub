@@ -13,7 +13,16 @@
   import UserX from 'lucide-svelte/icons/user-x';
   import type { CrmClient } from './+page.svelte';
   import type { CrmInteraction, InteractionType } from '$lib/types/crm';
-  import { initials, mailLink, phoneDigits, waLink } from '$lib/utils/crm';
+  import {
+    initials,
+    mailLink,
+    phoneDigits,
+    waLink,
+    tempMeta,
+    teamSizeLabel,
+    timelineLabel,
+  } from '$lib/utils/crm';
+  import ShieldCheck from 'lucide-svelte/icons/shield-check';
 
   type PublishedProduct = { id: string; name_pt: string; color: string | null };
   type CrmMember = { id: string; name: string | null; status: 'active' | 'inactive' };
@@ -55,7 +64,41 @@
     product_color: null,
     interaction_count: 0,
     last_interaction: null,
+    empresa: null,
+    cargo: null,
+    origem: null,
+    score: 0,
+    temperatura: 'frio',
+    spam: false,
+    spam_motivos: [],
+    qualificacao: {},
   });
+
+  const temp = $derived(tempMeta(client.temperatura));
+  const qualiRows = $derived(
+    [
+      { label: 'Equipe', value: teamSizeLabel(client.qualificacao?.teamSize) },
+      { label: 'Prazo', value: timelineLabel(client.qualificacao?.timeline) },
+    ].filter((r) => r.value)
+  );
+
+  // Tirar da quarentena: admin confirma que o lead não é spam → volta ao board.
+  let unspamming = $state(false);
+  async function markNotSpam() {
+    unspamming = true;
+    try {
+      const updated = await apiFetch<CrmClient>(`/admin/crm/clients/${client.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ spam: false }),
+      });
+      onUpdate(updated);
+      onClose();
+    } catch (err) {
+      deleteError = (err as { message?: string }).message || 'Erro ao mover lead.';
+    } finally {
+      unspamming = false;
+    }
+  }
 
   $effect(() => {
     editForm = { ...client };
@@ -211,6 +254,8 @@
           name: editForm.name,
           email: editForm.email,
           phone: editForm.phone,
+          empresa: editForm.empresa,
+          cargo: editForm.cargo,
           responsible_name: editForm.responsible_name,
           product_name: editForm.product_name,
         }),
@@ -283,6 +328,28 @@
               />
             </div>
           </div>
+          <div class="meta-grid" style="margin-top: 0; grid-template-columns: 1fr 1fr;">
+            <div class="input-group">
+              <label for="drawer-empresa">EMPRESA</label>
+              <input
+                id="drawer-empresa"
+                type="text"
+                placeholder="Nome da empresa"
+                bind:value={editForm.empresa}
+                class="dark-input"
+              />
+            </div>
+            <div class="input-group">
+              <label for="drawer-cargo">CARGO</label>
+              <input
+                id="drawer-cargo"
+                type="text"
+                placeholder="ex. Gestora de Operações"
+                bind:value={editForm.cargo}
+                class="dark-input"
+              />
+            </div>
+          </div>
           <div class="meta-grid" style="margin-top: 0;">
             <div class="input-group">
               <label for="drawer-product">PRODUTO</label>
@@ -318,11 +385,33 @@
       {:else}
         <div class="client-title">
           <span class="crm-avatar" style="background:{columnColor}">{initials(client.name)}</span>
-          <div>
+          <div class="ct-body">
             <h2>{client.name}</h2>
             <p class="email">{client.email || 'Sem e-mail cadastrado'}</p>
           </div>
+          <span class="temp-badge" style="--tc:{temp.color}" title="Score de qualificação">
+            <span class="td"></span>{temp.label} · {client.score}
+          </span>
         </div>
+
+        {#if client.spam}
+          <div class="quarantine-box">
+            <div class="qb-head">
+              <span class="qb-tag">Quarentena · possível spam</span>
+              <button class="qb-action" onclick={markNotSpam} disabled={unspamming}>
+                <ShieldCheck size={13} />
+                {unspamming ? 'Movendo…' : 'Não é spam'}
+              </button>
+            </div>
+            {#if client.spam_motivos?.length}
+              <ul class="qb-reasons">
+                {#each client.spam_motivos as m}
+                  <li>{m}</li>
+                {/each}
+              </ul>
+            {/if}
+          </div>
+        {/if}
 
         <div class="contact-actions">
           <a
@@ -344,6 +433,14 @@
 
         <div class="meta-grid">
           <div class="meta-item">
+            <span class="meta-label">EMPRESA</span>
+            <div class="val">{client.empresa || '-'}</div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">CARGO</span>
+            <div class="val">{client.cargo || '-'}</div>
+          </div>
+          <div class="meta-item">
             <span class="meta-label">PRODUTO</span>
             <div class="val">{client.product_name || '-'}</div>
           </div>
@@ -356,6 +453,20 @@
             <div class="val">{client.interaction_count}</div>
           </div>
         </div>
+
+        {#if qualiRows.length}
+          <div class="quali">
+            <span class="quali-title">Qualificação da captação</span>
+            <div class="quali-rows">
+              {#each qualiRows as r}
+                <div class="quali-row">
+                  <span class="ql">{r.label}</span>
+                  <span class="qv">{r.value}</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       {/if}
 
       <hr class="divider" />
@@ -612,6 +723,128 @@
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+  .ct-body {
+    min-width: 0;
+    flex: 1;
+  }
+  .temp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--tc);
+    background: color-mix(in srgb, var(--tc) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tc) 34%, transparent);
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .temp-badge .td {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--tc);
+  }
+
+  .quarantine-box {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .qb-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .qb-tag {
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #f59e0b;
+  }
+  .qb-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f59e0b;
+    color: #1a1205;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .qb-action:hover:not(:disabled) {
+    background: #fbbf24;
+  }
+  .qb-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .qb-reasons {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .qb-reasons li {
+    font-size: 12px;
+    color: #d4d4d8;
+  }
+
+  .quali {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .quali-title {
+    font-family: var(--font-mono, monospace);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b7280;
+  }
+  .quali-rows {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #1f1f24;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .quali-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 12px;
+    padding: 9px 12px;
+    border-bottom: 1px solid #1f1f24;
+  }
+  .quali-row:last-child {
+    border-bottom: 0;
+  }
+  .ql {
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+  }
+  .qv {
+    font-size: 13px;
+    color: #e4e4e7;
   }
   .crm-avatar {
     width: 42px;
