@@ -38,6 +38,21 @@ services:
       - .env
     command: sh -c "npm install && npx tsx watch src/index.ts"
 
+  # Microserviço de notificações (Rust). Requer DATABASE_URL (Postgres do
+  # Supabase) e SUPABASE_URL/PUBLIC_SUPABASE_PUBLISHABLE_KEY no .env.
+  notify:
+    build:
+      context: ./notify
+    ports:
+      - '3100:3100'
+    environment:
+      - NOTIFY_AUTH_MODE=supabase
+      - NOTIFY_PORT=3100
+      - NOTIFY_CORS_ORIGIN=http://localhost:5173,http://localhost:5174
+    env_file:
+      - .env
+    restart: unless-stopped
+
 volumes:
   frontend_node_modules:
   backend_node_modules:
