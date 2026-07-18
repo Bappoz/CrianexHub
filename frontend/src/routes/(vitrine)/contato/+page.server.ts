@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ fetch, url: reqUrl }) => {
 
   const { data } = await supabase
     .from('products')
-    .select('id, slug, name_pt, name_en, category_pt, category_en')
+    .select('id, slug, name_pt, name_en, category_pt, category_en, color')
     .eq('published', true)
     .order('display_order');
 

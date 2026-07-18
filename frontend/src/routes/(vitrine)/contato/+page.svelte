@@ -1,7 +1,7 @@
 <script lang="ts">
   import { lang } from '$lib/stores/lang';
   import ContactInfo from './ContactInfo.svelte';
-  import ContactForm from './ContactForm.svelte';
+  import ContactWizard from './ContactWizard.svelte';
   import type { PageData } from './$types';
 
   export let data: PageData;
@@ -20,7 +20,7 @@
 
 <div class="contact-layout">
   <ContactInfo />
-  <ContactForm products={data.products} selectedProduct={data.selectedProduct} />
+  <ContactWizard products={data.products} selectedProduct={data.selectedProduct} />
 </div>
 
 <style>
