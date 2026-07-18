@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
-import { apiFetch } from '$lib/api/backend';
+import { notifyFetch } from '$lib/api/notify';
 import type { PageServerLoad } from './$types';
-import type { NotificationEventType } from '$lib/constants/notification-types';
+import { NOTIFICATION_EVENT_TYPES } from '$lib/constants/notification-types';
 
 export type NotificationTemplate = {
   id: string;
@@ -15,8 +15,8 @@ export type NotificationTemplate = {
   updated_at: string;
 };
 
-type TemplatesResponse = { templates: NotificationTemplate[] };
-type EventTypesResponse = { eventTypes: NotificationEventType[] };
+// O serviço notify devolve `color` anulável; a UI usa uma cor padrão como fallback.
+type NotifyTemplate = Omit<NotificationTemplate, 'color'> & { color: string | null };
 
 export const load: PageServerLoad = async ({ cookies, locals }) => {
   if (!locals.adminUser) throw redirect(303, '/admin/login');
@@ -25,13 +25,11 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
   if (!token) throw redirect(303, '/admin/login');
 
   try {
-    const [templatesData, eventTypesData] = await Promise.all([
-      apiFetch<TemplatesResponse>('/admin/notification-templates', { token }),
-      apiFetch<EventTypesResponse>('/admin/notification-templates/event-types', { token }),
-    ]);
+    const templates = await notifyFetch<NotifyTemplate[]>('/templates', { token });
     return {
-      templates: templatesData.templates ?? [],
-      eventTypes: eventTypesData.eventTypes ?? [],
+      templates: (templates ?? []).map((t) => ({ ...t, color: t.color ?? '#6b7280' })),
+      // Catálogo de tipos de evento vem do espelho no frontend (não precisa de rede).
+      eventTypes: NOTIFICATION_EVENT_TYPES,
     };
   } catch (err) {
     const apiError = err as { status?: number; message?: string };

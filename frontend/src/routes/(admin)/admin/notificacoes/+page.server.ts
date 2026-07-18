@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { apiFetch } from '$lib/api/backend';
+import { notifyFetch } from '$lib/api/notify';
 import type { Notification } from '$lib/utils/notifications';
 import type { PageServerLoad } from './$types';
 
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
   if (!token) throw redirect(303, '/admin/login');
 
   try {
-    const data = await apiFetch<NotificationsResponse>('/admin/notifications', { token });
+    const data = await notifyFetch<NotificationsResponse>('/notifications', { token });
     return { notifications: data.notifications ?? [], unreadCount: data.unreadCount ?? 0 };
   } catch (err) {
     const apiError = err as { status?: number; message?: string };

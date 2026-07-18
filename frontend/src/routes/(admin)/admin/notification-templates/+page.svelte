@@ -8,7 +8,7 @@
   import { topbarActions } from '$lib/stores/topbar';
   import { page } from '$app/stores';
   import { get } from 'svelte/store';
-  import { apiFetch, ApiError } from '$lib/api/backend';
+  import { notifyFetch } from '$lib/api/notify';
   import { tick } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import type { PageData } from './$types';
@@ -101,7 +101,7 @@
       processingMessage = isEditingMode ? 'Salvando alterações...' : 'Criando template...';
 
       if (isEditingMode) {
-        await apiFetch(`/admin/notification-templates/${currentTemplateId}`, {
+        await notifyFetch(`/templates/${currentTemplateId}`, {
           method: 'PATCH',
           body: JSON.stringify({
             nome: modalData.nome,
@@ -110,7 +110,7 @@
           }),
         });
       } else {
-        await apiFetch('/admin/notification-templates', {
+        await notifyFetch('/templates', {
           method: 'POST',
           body: JSON.stringify(modalData),
         });
@@ -124,7 +124,7 @@
       );
     } catch (err) {
       modalError =
-        err instanceof ApiError ? err.message : 'Falha ao salvar o template. Tente novamente.';
+        err instanceof Error ? err.message : 'Falha ao salvar o template. Tente novamente.';
     } finally {
       isProcessing = false;
     }
@@ -165,12 +165,12 @@
     processingMessage = 'Removendo template...';
 
     try {
-      await apiFetch(`/admin/notification-templates/${idToDelete}`, { method: 'DELETE' });
+      await notifyFetch(`/templates/${idToDelete}`, { method: 'DELETE' });
       await invalidateAll();
       showToast('Template removido com sucesso!');
     } catch (err) {
       const msg =
-        err instanceof ApiError
+        err instanceof Error
           ? err.message
           : 'Não foi possível remover o template. Tente novamente.';
       showToast(msg);

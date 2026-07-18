@@ -22,7 +22,8 @@
   import { topbarActions } from '$lib/stores/topbar';
   import { unreadCount } from '$lib/stores/notifications';
   import ProfileModal from '$lib/components/admin/ProfileModal.svelte';
-  import { apiFetch } from '$lib/api/backend';
+  import { onMount } from 'svelte';
+  import { notifyFetch, NOTIFY_BASE } from '$lib/api/notify';
   import {
     groupByDay,
     relativeTime,
@@ -161,7 +162,7 @@
       notifLoading = true;
       notifError = '';
       try {
-        const res = await apiFetch<{ notifications: Notification[] }>('/admin/notifications');
+        const res = await notifyFetch<{ notifications: Notification[] }>('/notifications');
         notifItems = res.notifications ?? [];
         notifLoaded = true;
       } catch {
@@ -184,7 +185,7 @@
     unreadCount.update((c) => Math.max(0, c - 1));
 
     try {
-      await apiFetch(`/admin/notifications/${n.id}`, {
+      await notifyFetch(`/notifications/${n.id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: 'read' }),
       });
@@ -202,6 +203,22 @@
     const s = tipo.replace(/_/g, ' ').trim();
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
+
+  // Push ao vivo via SSE do crianex-notify: incrementa o badge global e insere a
+  // notificação no topo do popover no instante em que o evento acontece.
+  onMount(() => {
+    const es = new EventSource(`${NOTIFY_BASE}/notifications/stream`, { withCredentials: true });
+    es.onmessage = (e) => {
+      try {
+        const n = JSON.parse(e.data) as Notification;
+        unreadCount.update((c) => c + 1);
+        if (notifLoaded) notifItems = [n, ...notifItems];
+      } catch {
+        /* payload malformado — ignora */
+      }
+    };
+    return () => es.close();
+  });
 </script>
 
 <div

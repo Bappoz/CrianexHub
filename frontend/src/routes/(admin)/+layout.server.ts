@@ -2,6 +2,7 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { getAuthenticatedAdminSession } from '$lib/server/admin-session';
 import { apiFetch } from '$lib/api/backend';
+import { notifyFetch } from '$lib/api/notify';
 
 type ProfileData = {
   id: string;
@@ -33,7 +34,7 @@ export const load: LayoutServerLoad = async ({ cookies, locals }) => {
     // carregamento do shell admin.
     const [profileResult, notifResult] = await Promise.allSettled([
       apiFetch<ProfileData>('/profile/me', { token }),
-      apiFetch<{ unreadCount: number }>('/admin/notifications', { token }),
+      notifyFetch<{ unreadCount: number }>('/notifications/unread-count', { token }),
     ]);
 
     if (profileResult.status === 'fulfilled') {

@@ -5,7 +5,7 @@
   import Shield from 'lucide-svelte/icons/shield';
   import ShieldAlert from 'lucide-svelte/icons/shield-alert';
   import X from 'lucide-svelte/icons/x';
-  import { apiFetch } from '$lib/api/backend';
+  import { notifyFetch } from '$lib/api/notify';
   import { unreadCount } from '$lib/stores/notifications';
   import {
     groupByDay,
@@ -61,7 +61,7 @@
     unreadCount.update((c) => Math.max(0, c - 1));
 
     try {
-      await apiFetch(`/admin/notifications/${n.id}`, {
+      await notifyFetch(`/notifications/${n.id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: 'read' }),
       });
