@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '../config/supabase.js';
-import { createNotification } from '../notifications/notifications.service.js';
+import { createNotification } from '../notifications/notify-client.js';
 
 export type CrmAdminClient = {
   id: string;

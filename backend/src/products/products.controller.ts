@@ -11,6 +11,7 @@ import {
   uploadProductImage,
   type ProductUploadFile,
 } from './products.service.js';
+import { createNotification } from '../notifications/notify-client.js';
 
 export async function getPublishedProductsController(_req: Request, res: Response) {
   try {
@@ -65,6 +66,10 @@ export async function createProductController(req: Request, res: Response) {
       return res.status(400).json({ error: error.message });
     }
 
+    void createNotification({
+      tipo: 'logs_monitoramento',
+      conteudo: `Produto "${req.body?.name_pt ?? 'novo'}" foi criado.`,
+    });
     return res.status(201).json(data);
   } catch {
     return res.status(500).json({ error: 'Erro interno ao salvar produto.' });
@@ -107,6 +112,16 @@ export async function updateProductController(req: Request, res: Response) {
       return res.status(400).json({ error: error.message });
     }
 
+    const acao =
+      alteredData.published === true
+        ? 'publicado na vitrine'
+        : alteredData.published === false
+          ? 'despublicado'
+          : 'atualizado';
+    void createNotification({
+      tipo: 'logs_monitoramento',
+      conteudo: `Produto "${(data as { name_pt?: string } | null)?.name_pt ?? 'sem nome'}" foi ${acao}.`,
+    });
     return res.status(200).json(data);
   } catch {
     return res.status(500).json({ error: 'Erro interno ao atualizar produto.' });
@@ -146,6 +161,10 @@ export async function deleteProductController(req: Request, res: Response) {
       return res.status(400).json({ error: deleteError.message });
     }
 
+    void createNotification({
+      tipo: 'logs_monitoramento',
+      conteudo: 'Um produto foi removido do catálogo.',
+    });
     return res.status(204).send();
   } catch {
     return res.status(500).json({ error: 'Erro interno ao deletar produto.' });

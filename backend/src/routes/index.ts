@@ -11,8 +11,8 @@ import { clientsRouter } from '../crm/clients.routes.js';
 import { crmRouter } from '../crm/crm.routes.js';
 import { crmClientsRouter } from '../crm/crm-clients.routes.js';
 import { crmAdminClientsRouter } from '../crm/crm-admin-clients.routes.js';
-import { notificationsRouter } from '../notifications/notifications.routes.js';
-import { notificationTemplatesRouter } from '../notification-templates/notification-templates.routes.js';
+// Notificações e templates migraram para o microserviço crianex-notify (Rust).
+// O frontend fala direto com o serviço; o backend só emite eventos via notify-client.
 
 export const router = Router();
 
@@ -30,5 +30,3 @@ router.use('/admin/crm/clients', crmAdminClientsRouter);
 router.use('/crm', crmRouter);
 router.use('/crm/clients', crmClientsRouter);
 router.use('/crm/clients', clientsRouter);
-router.use('/admin/notifications', notificationsRouter);
-router.use('/admin/notification-templates', notificationTemplatesRouter);
