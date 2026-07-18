@@ -16,14 +16,25 @@ const viewGuard = [validateJWT, requirePermission('crm', 'v')];
 const editGuard = [validateJWT, requirePermission('crm', 'e')];
 const deleteGuard = [validateJWT, requirePermission('crm', 'a')];
 
-// GET /api/admin/crm/clients — lista clientes ativos com dados do card (RF35, RF36)
+// GET /api/admin/crm/clients — lista o board (ativos, não-spam) com dados do card
 crmAdminClientsRouter.get('/', ...viewGuard, async (_req, res) => {
   try {
-    const clients = await listCrmAdminClients();
+    const clients = await listCrmAdminClients('ativo', false);
     res.status(200).json(clients);
   } catch (err) {
     console.error('[crm-admin-clients] list error:', err);
     res.status(500).json({ message: 'Falha ao listar clientes.' });
+  }
+});
+
+// GET /api/admin/crm/clients/quarantine — leads retidos como spam (fora do board)
+crmAdminClientsRouter.get('/quarantine', ...viewGuard, async (_req, res) => {
+  try {
+    const clients = await listCrmAdminClients('ativo', true);
+    res.status(200).json(clients);
+  } catch (err) {
+    console.error('[crm-admin-clients] quarantine list error:', err);
+    res.status(500).json({ message: 'Falha ao listar a quarentena.' });
   }
 });
 
@@ -48,6 +59,8 @@ crmAdminClientsRouter.post('/', ...editGuard, async (req, res) => {
     typeof req.body?.['responsible_name'] === 'string' ? req.body['responsible_name'] : undefined;
   const product_name =
     typeof req.body?.['product_name'] === 'string' ? req.body['product_name'] : undefined;
+  const empresa = typeof req.body?.['empresa'] === 'string' ? req.body['empresa'] : undefined;
+  const cargo = typeof req.body?.['cargo'] === 'string' ? req.body['cargo'] : undefined;
 
   try {
     const createInput: {
@@ -57,11 +70,15 @@ crmAdminClientsRouter.post('/', ...editGuard, async (req, res) => {
       column_id?: string;
       responsible_name?: string;
       product_name?: string;
+      empresa?: string;
+      cargo?: string;
     } = { name, email };
     if (phone !== undefined) createInput.phone = phone;
     if (column_id !== undefined) createInput.column_id = column_id;
     if (responsible_name !== undefined) createInput.responsible_name = responsible_name;
     if (product_name !== undefined) createInput.product_name = product_name;
+    if (empresa !== undefined) createInput.empresa = empresa;
+    if (cargo !== undefined) createInput.cargo = cargo;
     const client = await createCrmAdminClient(createInput);
     res.status(201).json(client);
   } catch (err) {
@@ -95,6 +112,9 @@ crmAdminClientsRouter.patch('/:id', ...editGuard, async (req, res) => {
     column_id?: string;
     responsible_name?: string;
     product_name?: string;
+    empresa?: string;
+    cargo?: string;
+    spam?: boolean;
   } = {};
 
   if (typeof req.body?.['name'] === 'string') patch.name = req.body['name'];
@@ -104,6 +124,9 @@ crmAdminClientsRouter.patch('/:id', ...editGuard, async (req, res) => {
   if ('responsible_name' in (req.body ?? {}))
     patch.responsible_name = req.body['responsible_name'] ?? '';
   if ('product_name' in (req.body ?? {})) patch.product_name = req.body['product_name'] ?? '';
+  if ('empresa' in (req.body ?? {})) patch.empresa = req.body['empresa'] ?? '';
+  if ('cargo' in (req.body ?? {})) patch.cargo = req.body['cargo'] ?? '';
+  if (typeof req.body?.['spam'] === 'boolean') patch.spam = req.body['spam'];
 
   try {
     const updated = await patchCrmAdminClient(id, patch);

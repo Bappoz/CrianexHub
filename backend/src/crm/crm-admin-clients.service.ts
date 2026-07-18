@@ -1,6 +1,14 @@
 import { getSupabaseClient } from '../config/supabase.js';
 import { createNotification } from '../notifications/notify-client.js';
 
+export type LeadQualificacao = {
+  teamSize?: string;
+  timeline?: string;
+  budget?: string;
+  useCase?: string;
+  channel?: string;
+};
+
 export type CrmAdminClient = {
   id: string;
   card_id: string | null;
@@ -14,6 +22,15 @@ export type CrmAdminClient = {
   product_color: string | null;
   interaction_count: number;
   last_interaction: string | null;
+  // Enriquecimento da captação (F19): dados que antes se perdiam no texto da notificação.
+  empresa: string | null;
+  cargo: string | null;
+  origem: string | null;
+  score: number;
+  temperatura: 'quente' | 'morno' | 'frio';
+  spam: boolean;
+  spam_motivos: string[];
+  qualificacao: LeadQualificacao;
 };
 
 export type CrmAdminClientCreate = {
@@ -23,6 +40,8 @@ export type CrmAdminClientCreate = {
   column_id?: string;
   responsible_name?: string;
   product_name?: string;
+  empresa?: string;
+  cargo?: string;
 };
 
 export type CrmAdminClientPatch = {
@@ -32,7 +51,26 @@ export type CrmAdminClientPatch = {
   column_id?: string;
   responsible_name?: string;
   product_name?: string;
+  empresa?: string;
+  cargo?: string;
+  spam?: boolean; // false = tirar da quarentena ("não é spam")
 };
+
+const CLIENT_COLUMNS =
+  'id, nome, email, telefone, status, empresa, cargo, origem, score, temperatura, spam, spam_motivos, qualificacao';
+
+function toClientFields(client: Record<string, unknown>) {
+  return {
+    empresa: (client['empresa'] as string | null) ?? null,
+    cargo: (client['cargo'] as string | null) ?? null,
+    origem: (client['origem'] as string | null) ?? null,
+    score: (client['score'] as number | null) ?? 0,
+    temperatura: (client['temperatura'] as 'quente' | 'morno' | 'frio' | null) ?? 'frio',
+    spam: Boolean(client['spam']),
+    spam_motivos: (client['spam_motivos'] as string[] | null) ?? [],
+    qualificacao: (client['qualificacao'] as LeadQualificacao | null) ?? {},
+  };
+}
 
 export class CrmAdminClientError extends Error {
   constructor(
@@ -91,7 +129,7 @@ async function buildClientView(clientId: string): Promise<CrmAdminClient | null>
 
   const { data: client, error: cErr } = await supabase
     .from('clients')
-    .select('id, nome, email, telefone, status')
+    .select(CLIENT_COLUMNS)
     .eq('id', clientId)
     .maybeSingle();
 
@@ -144,19 +182,22 @@ async function buildClientView(clientId: string): Promise<CrmAdminClient | null>
     product_color,
     interaction_count: count ?? 0,
     last_interaction: lastInter?.data ?? null,
+    ...toClientFields(client),
   };
 }
 
 export async function listCrmAdminClients(
-  status: 'ativo' | 'inativo' = 'ativo'
+  status: 'ativo' | 'inativo' = 'ativo',
+  spamFilter?: boolean
 ): Promise<CrmAdminClient[]> {
   const supabase = getSupabaseClient();
 
-  const { data: clients, error } = await supabase
-    .from('clients')
-    .select('id, nome, email, telefone, status')
-    .eq('status', status)
-    .order('created_at', { ascending: false });
+  let query = supabase.from('clients').select(CLIENT_COLUMNS).eq('status', status);
+  // Board mostra apenas leads legítimos (spam=false); quarentena, apenas spam=true;
+  // undefined (ex.: listagem de inativos) não filtra por spam.
+  if (spamFilter !== undefined) query = query.eq('spam', spamFilter);
+
+  const { data: clients, error } = await query.order('created_at', { ascending: false });
 
   if (error) throw error;
   if (!clients?.length) return [];
@@ -211,6 +252,7 @@ export async function listCrmAdminClients(
       product_color: product?.color ?? null,
       interaction_count: countMap.get(client.id) ?? 0,
       last_interaction: lastInteractionMap.get(client.id) ?? null,
+      ...toClientFields(client),
     };
   });
 }
@@ -231,6 +273,9 @@ export async function createCrmAdminClient(input: CrmAdminClientCreate): Promise
       nome: name,
       email: email || `sem-email-${Date.now()}@placeholder.local`,
       telefone: input.phone?.trim() || null,
+      empresa: input.empresa?.trim() || null,
+      cargo: input.cargo?.trim() || null,
+      origem: 'admin_manual',
     })
     .select('id')
     .single();
@@ -299,6 +344,17 @@ export async function patchCrmAdminClient(
   }
   if (patch.phone !== undefined) {
     clientUpdates['telefone'] = patch.phone.trim() || null;
+  }
+  if (patch.empresa !== undefined) {
+    clientUpdates['empresa'] = patch.empresa.trim() || null;
+  }
+  if (patch.cargo !== undefined) {
+    clientUpdates['cargo'] = patch.cargo.trim() || null;
+  }
+  // Tirar da quarentena: admin confirma que não é spam (RN — revisão manual).
+  if (patch.spam !== undefined) {
+    clientUpdates['spam'] = patch.spam;
+    if (patch.spam === false) clientUpdates['spam_motivos'] = [];
   }
 
   if (Object.keys(clientUpdates).length) {
